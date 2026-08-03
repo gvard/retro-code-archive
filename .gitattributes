@@ -1,0 +1,10 @@
+.gitattributes text eol=lf
+
+* text=auto
+
+*.py text eol=lf
+*.pas text eol=lf
+*.bas text eol=lf
+
+*.jpg -text
+*.png -text
