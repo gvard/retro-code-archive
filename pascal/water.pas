@@ -1,4 +1,4 @@
-{ Original code saved on 1999-02-28 }
+{ Original code by Petr Kalmykov, saved on 1999-02-28 }
 { Successfully compiles in Turbo Pascal 7.0 }
 program water;
 
