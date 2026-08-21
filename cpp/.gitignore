@@ -1,0 +1,14 @@
+**/Win32/
+**/Win64/
+*.obj
+*.tds
+*.pch
+*.dsk
+*.il*
+*.map
+
+*.local
+*.identcache
+*.stat
+
+*.~*
