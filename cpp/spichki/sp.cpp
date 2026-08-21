@@ -15,7 +15,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
         Application->MainFormOnTaskBar = true;
         #else
         // Set application title for legacy compilers like Borland C++ Builder 5/6
-        Application->Title = "Спички";
+        Application->Title = "Игра в спички";
         #endif
 
         Application->CreateForm(__classid(TForm1), &Form1);
