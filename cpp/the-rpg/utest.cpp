@@ -62,7 +62,7 @@ void __fastcall TfrmUTest::Button1Click(TObject *Sender)
 void __fastcall TfrmUTest::FormCreate(TObject *Sender)
 {
     qptr = 0;
-    test->LoadFromFile("test.txt", TEncoding::UTF8);
+    test->LoadFromFile(ExePath + L"data\\test.txt", TEncoding::UTF8);
 }
 
 void __fastcall TfrmUTest::FormShow(TObject *Sender)
@@ -139,4 +139,13 @@ void __fastcall TfrmUTest::ListBox1KeyDown(TObject *Sender, WORD &Key, TShiftSta
     {
         ProcessSelection();
     }
+}
+void __fastcall TfrmUTest::ListBox1DblClick(TObject *Sender)
+{
+    // При двойном клике по элементу списка запускаем ту же логику, что и при нажатии Enter/кнопки OK
+    ProcessSelection();
+}
+void __fastcall TfrmUTest::FormDestroy(TObject *Sender)
+{
+    frmUTest = nullptr;
 }

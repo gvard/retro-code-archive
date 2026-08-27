@@ -23,6 +23,7 @@ __published:    // IDE-managed Components
     void __fastcall Edit1KeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
     void __fastcall Edit2KeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
     void __fastcall frmUInfoClose(TObject *Sender, TCloseAction &Action);
+	void __fastcall FormDestroy(TObject *Sender);
 
 private:        // User declarations
 

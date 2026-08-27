@@ -983,7 +983,7 @@ object frmFirst: TfrmFirst
   object OpenDialog1: TOpenDialog
     FileName = '*.sav'
     Filter = #1042#1072#1096#1080' '#1089#1086#1093#1088#1072#1085#1077#1085#1080#1103'|*.sav'
-    Options = [ofHideReadOnly]
+    Options = [ofHideReadOnly, ofNoChangeDir]
     Title = #1047#1072#1075#1088#1091#1079#1080#1090#1100
     Left = 40
   end

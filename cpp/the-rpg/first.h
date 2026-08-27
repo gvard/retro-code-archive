@@ -47,6 +47,7 @@ class TUser
 public:
     void Clear();
     void Refresh();
+    bool LoadGame(const String& AFileName);
 
     String Name;
     String CrType;
@@ -62,6 +63,7 @@ public:
     int s;
 };
 
+extern String ExePath;
 extern TUser *User;
 extern PACKAGE TfrmFirst *frmFirst;
 

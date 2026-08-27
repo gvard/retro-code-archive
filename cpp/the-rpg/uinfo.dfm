@@ -418,6 +418,7 @@ object frmUInfo: TfrmUInfo
   OldCreateOrder = False
   Position = poScreenCenter
   OnClose = frmUInfoClose
+  OnDestroy = FormDestroy
   PixelsPerInch = 116
   TextHeight = 16
   object Label1: TLabel

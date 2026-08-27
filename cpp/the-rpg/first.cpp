@@ -11,6 +11,7 @@
 
 TfrmFirst *frmFirst;
 TUser *User;
+String ExePath;
 
 __fastcall TfrmFirst::TfrmFirst(TComponent* Owner)
     : TForm(Owner)
@@ -18,6 +19,7 @@ __fastcall TfrmFirst::TfrmFirst(TComponent* Owner)
     save = new TStringList;
     User = new TUser;
     User->Clear();
+	ExePath = ExtractFilePath(Application->ExeName);
 }
 
 // Добавлен деструктор для очистки глобальных объектов и предотвращения утечек памяти
@@ -92,44 +94,65 @@ void __fastcall TfrmFirst::frmFirstCreate(TObject *Sender)
 
 void __fastcall TfrmFirst::LoadClick(TObject *Sender)
 {
-    String FileName;
+    OpenDialog1->FileName = L"";
+    OpenDialog1->InitialDir = ExpandFileName(ExePath);
+	OpenDialog1->InitialDir = ExePath;
+
+	String FileName;
     if (OpenDialog1->Execute())
     {
-        save->LoadFromFile(OpenDialog1->FileName, TEncoding::UTF8);
+        User->LoadGame(OpenDialog1->FileName);
     }
     else
     {
         return;
     }
+    frmFirst->Hide();
+    frmChapt->Show();
+}
 
-    // Защита от поврежденных/пустых файлов сохранений
-    if (save->Count < 9)
-    {
-        Application->MessageBox(L"Извините, но сейв слишком короткий или пустой.", L"The RPG", MB_OK | MB_ICONERROR);
-        return;
-    }
-
-    int x;
-    User->Name = save->Strings[0];
-    User->CrType = save->Strings[1];
-    User->SexType = save->Strings[2];
+bool TUser::LoadGame(const String& AFileName)
+{
+    TStringList* saveList = new TStringList;
+    bool success = false;
 
     try
     {
-        User->age = StrToInt(save->Strings[3]);
-        User->str = StrToInt(save->Strings[4]);
-        User->dex = StrToInt(save->Strings[5]);
-        User->mag = StrToInt(save->Strings[6]);
-        User->hlth = StrToInt(save->Strings[7]);
-        x = StrToInt(save->Strings[8]);
+        saveList->LoadFromFile(AFileName, TEncoding::UTF8);
+
+        if (saveList->Count >= 10)
+        {
+            Name = saveList->Strings[0];
+            CrType = saveList->Strings[1];
+            SexType = saveList->Strings[2];
+
+            age = StrToInt(saveList->Strings[3]);
+            str = StrToInt(saveList->Strings[4]);
+            dex = StrToInt(saveList->Strings[5]);
+            mag = StrToInt(saveList->Strings[6]);
+            hlth = StrToInt(saveList->Strings[7]);
+            man = StrToInt(saveList->Strings[8]);
+
+            int nextChapter = StrToInt(saveList->Strings[9]);
+
+            // Загружаем главу в форму квестов
+            frmChapt->LoadNext(nextChapter);
+            success = true;
+        }
+        else
+        {
+            Application->MessageBox(L"Извините, но сейв слишком короткий или пустой.", L"The RPG", MB_OK | MB_ICONERROR);
+        }
     }
     catch (EConvertError&)
     {
         Application->MessageBox(L"Извините, но сейв глюченый.", L"The RPG", MB_OK | MB_ICONERROR);
-        return;
+    }
+    catch (...)
+    {
+        Application->MessageBox(L"Не удалось прочитать файл сохранения.", L"The RPG", MB_OK | MB_ICONERROR);
     }
 
-    frmChapt->LoadNext(x);
-    frmFirst->Hide();
-    frmChapt->Show();
+    delete saveList; // Чистим память локально, убираем утечки
+    return success;
 }

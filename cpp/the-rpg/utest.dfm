@@ -419,6 +419,7 @@ object frmUTest: TfrmUTest
   Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnShow = FormShow
   PixelsPerInch = 116
   TextHeight = 16
@@ -440,6 +441,7 @@ object frmUTest: TfrmUTest
     ParentShowHint = False
     ShowHint = False
     TabOrder = 0
+    OnDblClick = ListBox1DblClick
     OnKeyDown = ListBox1KeyDown
   end
   object Button1: TButton

@@ -29,7 +29,7 @@ __fastcall TfrmChapt::~TfrmChapt()
 
 void __fastcall TfrmChapt::FormCreate(TObject *Sender)
 {
-    chapter->LoadFromFile("chapt.txt", TEncoding::UTF8);
+    chapter->LoadFromFile(ExePath + L"data\\chapt.txt", TEncoding::UTF8);
 }
 
 void __fastcall TfrmChapt::ExitClick(TObject *Sender)
@@ -37,8 +37,14 @@ void __fastcall TfrmChapt::ExitClick(TObject *Sender)
     frmChapt->Close();
 }
 
+void __fastcall TfrmChapt::ListBox1DblClick(TObject *Sender)
+{
+    Button1Click(Sender);
+}
+
 void TfrmChapt::LoadNext(int qid)
 {
+    this->qid = qid;
     wchar_t ch = 0;
     int q = 0;
     int qptr = -1;
@@ -83,6 +89,7 @@ void TfrmChapt::LoadNext(int qid)
         frmFirst->Show();
         return;
     }
+    this->currentQid = qid;
 
     // Чтение заголовка/типа вопроса
     ch = 0;
@@ -122,7 +129,7 @@ void TfrmChapt::LoadNext(int qid)
         case L'f':
             Application->CreateForm(__classid(TfrmFight), &frmFight);
             frmFight->qptr = qptr;
-            PlaySound(L"fight.wav", NULL, SND_ASYNC);
+            PlaySound((ExePath + L"sound\\fight.wav").c_str(), NULL, SND_ASYNC);
             frmChapt->Hide();
             frmFight->Show();
             return;
@@ -168,6 +175,7 @@ void __fastcall TfrmChapt::Button1Click(TObject *Sender)
             swscanf(chapter->Strings[aptr + i].c_str(), L"%d ", &jump);
             User->Refresh();
             LoadNext(jump);
+			return;
         }
     }
 }
@@ -222,44 +230,44 @@ void __fastcall TfrmChapt::frmChaptCloseQuery(TObject *Sender, bool &CanClose)
 
 void __fastcall TfrmChapt::LoadClick(TObject *Sender)
 {
-    String FileName;
+    OpenDialog1->FileName = L"";
+    OpenDialog1->InitialDir = ExpandFileName(ExePath);
+    // OpenDialog1->Filter = L"Файлы сохранений (*.sav)|*.sav|Все файлы (*.*)|*.*";
+
     if (OpenDialog1->Execute())
     {
-        save->LoadFromFile(OpenDialog1->FileName);
+        User->LoadGame(OpenDialog1->FileName);
     }
     else
     {
         return;
     }
-
-    int x;
-    User->Name = save->Strings[0];
-    User->CrType = save->Strings[1];
-    User->SexType = save->Strings[2];
-
-    try
-    {
-        User->age = StrToInt(save->Strings[3]);
-        User->str = StrToInt(save->Strings[4]);
-        User->dex = StrToInt(save->Strings[5]);
-        User->mag = StrToInt(save->Strings[6]);
-        User->hlth = StrToInt(save->Strings[7]);
-        x = StrToInt(save->Strings[8]);
-    }
-    catch (EConvertError&)
-    {
-        Application->MessageBox(L"Извините, но сейв глюченый.", L"The RPG", MB_OK);
-        return;
-    }
-    frmChapt->LoadNext(x);
 }
 
 void __fastcall TfrmChapt::SaveClick(TObject *Sender)
 {
-    String FileName;
+
+    String CleanPath = ExpandFileName(ExePath);
+
+    SaveDialog1->InitialDir = CleanPath;
+    SaveDialog1->FileName = L"save1.sav";
+
     if (SaveDialog1->Execute())
     {
-        // User->SavetoFile(SaveDialog1->FileName);
+        save->Clear();
+        save->Add(User->Name);
+        save->Add(User->CrType);
+        save->Add(User->SexType);
+        save->Add(IntToStr(User->age));
+        save->Add(IntToStr(User->str));
+        save->Add(IntToStr(User->dex));
+        save->Add(IntToStr(User->mag));
+        save->Add(IntToStr(User->hlth));
+        save->Add(IntToStr(User->man));
+        save->Add(IntToStr(this->currentQid));
+
+        save->SaveToFile(SaveDialog1->FileName, TEncoding::UTF8);
+        Application->MessageBox(L"Игра успешно сохранена!", L"The RPG", MB_OK | MB_ICONINFORMATION);
     }
 }
 

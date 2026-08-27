@@ -41,12 +41,15 @@ __published:    // IDE-managed Components
     void __fastcall LoadClick(TObject *Sender);
     void __fastcall SaveClick(TObject *Sender);
     void __fastcall InvClick(TObject *Sender);
-    void __fastcall ustype1Click(TObject *Sender);
+	void __fastcall ustype1Click(TObject *Sender);
+	void __fastcall ListBox1DblClick(TObject *Sender);
 
 private:        // User declarations
     TStringList* chapter;
     TStringList* save;
     int aptr;
+    int qid;
+    int currentQid;
 
 public:         // User declarations
     __fastcall TfrmChapt(TComponent* Owner);

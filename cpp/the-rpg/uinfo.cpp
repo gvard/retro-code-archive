@@ -96,3 +96,7 @@ void __fastcall TfrmUInfo::frmUInfoClose(TObject *Sender, TCloseAction &Action)
         frmFirst->Show();
     }
 }
+void __fastcall TfrmUInfo::FormDestroy(TObject *Sender)
+{
+    frmUInfo = nullptr;
+}

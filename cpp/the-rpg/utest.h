@@ -18,6 +18,8 @@ __published:    // IDE-managed Components
     void __fastcall FormShow(TObject *Sender);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
     void __fastcall ListBox1KeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
+	void __fastcall ListBox1DblClick(TObject *Sender);
+	void __fastcall FormDestroy(TObject *Sender);
 
 private:        // User declarations
     TStringList* test;

@@ -1,4 +1,4 @@
-﻿#include <vcl.h>
+#include <vcl.h>
 #include <Winapi.Mmsystem.hpp>
 #pragma hdrstop
 
@@ -22,7 +22,7 @@ void __fastcall TfrmFight::FormCreate(TObject *Sender)
     int i;
     int hit, mana, apt;
     TStringList *lWeapon = new TStringList;
-    lWeapon->LoadFromFile("weap.txt", TEncoding::UTF8);
+    lWeapon->LoadFromFile(ExePath + L"data\\weap.txt", TEncoding::UTF8);
 
     grEnemy->Cells[1][0] = "Вид противника";
     grEnemy->Cells[2][0] = "Имя";
@@ -61,8 +61,8 @@ void __fastcall TfrmFight::FormShow(TObject *Sender)
 
     TStringList *lChapter = new TStringList;
     TStringList *lCrType = new TStringList;
-    lChapter->LoadFromFile("chapt.txt", TEncoding::UTF8);
-    lCrType->LoadFromFile("crt.txt", TEncoding::UTF8);
+    lChapter->LoadFromFile(ExePath + L"data\\chapt.txt", TEncoding::UTF8);
+    lCrType->LoadFromFile(ExePath + L"data\\crt.txt", TEncoding::UTF8);
 
     selEnemy = 0;
     selWeapon = 0;
@@ -225,7 +225,7 @@ bool TfrmFight::check()
     if (User->hlth <= 0)
     {
         Application->MessageBox(L"Вы потерпели поражение в бою!", frmFight->Caption.c_str(), MB_OK | MB_ICONHAND);
-        PlaySound(L"death.wav", NULL, SND_ASYNC);
+        PlaySound((ExePath + L"sound\\death.wav").c_str(), NULL, SND_ASYNC);
 
         frmFight->Hide();
         frmFirst->Show();

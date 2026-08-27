@@ -439,6 +439,7 @@ object frmChapt: TfrmChapt
     Height = 73
     ItemHeight = 13
     TabOrder = 0
+    OnDblClick = ListBox1DblClick
     OnKeyDown = ListBox1KeyDown
   end
   object Button1: TButton
@@ -493,14 +494,14 @@ object frmChapt: TfrmChapt
   object SaveDialog1: TSaveDialog
     FileName = '*.sav'
     Filter = #1042#1072#1096#1080' '#1089#1086#1093#1088#1072#1085#1077#1085#1080#1103'|*.sav'
-    Options = [ofHideReadOnly]
+    Options = [ofHideReadOnly, ofNoChangeDir]
     Left = 360
     Top = 220
   end
   object OpenDialog1: TOpenDialog
     FileName = '*.sav'
     Filter = #1042#1072#1096#1080' '#1089#1086#1093#1088#1072#1085#1077#1085#1080#1103'|*.sav'
-    Options = [ofHideReadOnly]
+    Options = [ofHideReadOnly, ofNoChangeDir]
     Left = 60
     Top = 220
   end
