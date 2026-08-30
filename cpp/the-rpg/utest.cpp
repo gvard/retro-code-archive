@@ -25,11 +25,10 @@ __fastcall TfrmUTest::~TfrmUTest()
 
 void TfrmUTest::ProcessSelection()
 {
-    int i;
     int istr = 0, idex = 0, imag = 0;
     wchar_t buf[255];
 
-    for (i = 0; i < ListBox1->Items->Count; i++)
+    for (int i = 0; i < ListBox1->Items->Count; i++)
     {
         if (ListBox1->Selected[i])
         {
@@ -38,13 +37,13 @@ void TfrmUTest::ProcessSelection()
             User->dex += idex;
             User->mag += imag;
 
-            if (qptr >= test->Count)
+            if (aptr + ListBox1->Items->Count >= test->Count)
             {
-                qptr = 0;
                 swprintf(buf, 255, L"Сила = %d\nЛовкость = %d\nМагия = %d", User->str, User->dex, User->mag);
                 Application->MessageBox(buf, L"Ваши умения", MB_OK);
-                frmUTest->Close();
+                frmChapt->LoadNext(1);
                 frmChapt->Show();
+                this->Close();
                 return;
             }
 
@@ -99,7 +98,6 @@ void __fastcall TfrmUTest::FormClose(TObject *Sender, TCloseAction &Action)
     User->maxWeight
     );
     OutputDebugString(debugBuf);
-    frmFirst->Show();
     Action = caFree;
 }
 

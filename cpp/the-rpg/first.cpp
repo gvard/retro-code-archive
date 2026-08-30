@@ -14,52 +14,10 @@
 TfrmFirst *frmFirst;
 TUser *User;
 String ExePath;
-bool isFirstInventoryLaunch = true;
 
-__fastcall TfrmFirst::TfrmFirst(TComponent* Owner)
-    : TForm(Owner)
-{
-    save = new TStringList;
-    User = new TUser;
-    User->UserItems = new TStringList;
-    User->GroundItems = new TStringList;
-    User->Clear();
-	ExePath = ExtractFilePath(Application->ExeName);
-}
-
-// Добавлен деструктор для очистки глобальных объектов и предотвращения утечек памяти
-__fastcall TfrmFirst::~TfrmFirst()
-{
-    delete save;
-    delete User;
-}
-
-void __fastcall TfrmFirst::NewClick(TObject *Sender)
-{
-    User->Clear();
-    frmChapt->LoadNext(1);
-    frmFirst->Hide();
-
-    // Безопасное пересоздание формы создания персонажа без утечек памяти
-    if (frmUInfo != nullptr)
-    {
-        delete frmUInfo;
-        frmUInfo = nullptr;
-    }
-
-    Application->CreateForm(__classid(TfrmUInfo), &frmUInfo);
-    frmUInfo->Show();
-}
-
-void __fastcall TfrmFirst::ExitClick(TObject *Sender)
-{
-    frmFirst->Close();
-}
-
-void __fastcall TfrmFirst::AboutClick(TObject *Sender)
-{
-    AboutBox->Show();
-}
+// =========================================================================
+// КЛАСС СУЩНОСТИ ИГРОКА (TUser)
+// =========================================================================
 
 void TUser::Clear()
 {
@@ -72,61 +30,52 @@ void TUser::Clear()
     mag = 5;
     hlth = 100;
     man = 100;
-    s = 100;
     maxWeight = 0;
 
+    // Безопасное выделение памяти под списки предметов, если они еще не созданы
     if (UserItems == nullptr)   UserItems = new TStringList;
     if (GroundItems == nullptr) GroundItems = new TStringList;
 
     UserItems->Clear();
     GroundItems->Clear();
 
+    // Запись стартового маркера инициализации
     UserItems->Add(L"__INIT_NEW_GAME__");
+
+    s = GetMaxStamina();
 }
 
 void TUser::Refresh()
 {
     hlth += 5;
-    s += 5;
     man += 5;
+    s += 5;
 
-    if (hlth > 100)
-    {
-        hlth = 100;
-    }
-    if (s > 100)
-    {
-        s = 100;
-    }
-    if (man > 100)
-    {
-        man = 100;
-    }
+    if (hlth > 100) hlth = 100;
+    if (man > 100)  man = 100;
+
+    int maxStamina = GetMaxStamina();
+    if (s > maxStamina) s = maxStamina;
 }
 
-
-void __fastcall TfrmFirst::frmFirstCreate(TObject *Sender)
+int TUser::GetMaxStamina()
 {
-    Label2->Caption = L"Version " + APP_VERSION;
+    // [Core Mechanic] Returns maximum stamina based on Strength and Dexterity
+    return 50 + (str * 4) + (dex * 2);
 }
 
-void __fastcall TfrmFirst::LoadClick(TObject *Sender)
+void TUser::RecalculateStamina(int totalWeight)
 {
-    OpenDialog1->FileName = L"";
-    OpenDialog1->InitialDir = ExpandFileName(ExePath);
-	OpenDialog1->InitialDir = ExePath;
+    int maxStamina = GetMaxStamina();
 
-	String FileName;
-    if (OpenDialog1->Execute())
+    if (totalWeight > maxWeight)
     {
-        User->LoadGame(OpenDialog1->FileName);
+        s = maxStamina - 20; // Штраф -20 единиц при перегрузе
     }
     else
     {
-        return;
+        s = maxStamina;
     }
-    frmFirst->Hide();
-    frmChapt->Show();
 }
 
 bool TUser::LoadGame(const String& AFileName)
@@ -183,7 +132,7 @@ bool TUser::LoadGame(const String& AFileName)
     }
     catch (EConvertError&)
     {
-        Application->MessageBox(L"Извините, но сейв глюченый.", L"The RPG", MB_OK | MB_ICONERROR);
+        Application->MessageBox(L"Извините, но сейв поврежден.", L"The RPG", MB_OK | MB_ICONERROR);
     }
     catch (...)
     {
@@ -225,21 +174,76 @@ bool TUser::SaveGame(const String& AFileName, int ACurrentQid)
     return success;
 }
 
-int TUser::GetMaxStamina()
+// =========================================================================
+// ГЛАВНОЕ МЕНЮ ИГРЫ (TfrmFirst)
+// =========================================================================
+
+__fastcall TfrmFirst::TfrmFirst(TComponent* Owner)
+    : TForm(Owner)
 {
-    return 50 + (str * 4) + (dex * 2);
+    save = new TStringList;
+
+    User = new TUser;
+    User->UserItems = new TStringList;
+    User->GroundItems = new TStringList;
+    User->Clear();
+
+    ExePath = ExtractFilePath(Application->ExeName);
 }
 
-void TUser::RecalculateStamina(int totalWeight)
+__fastcall TfrmFirst::~TfrmFirst()
 {
-    int maxStamina = GetMaxStamina();
+    if (User != nullptr)
+    {
+        delete User->UserItems;
+        delete User->GroundItems;
+    }
 
-    if (totalWeight > maxWeight)
+    delete save;
+    delete User;
+}
+
+void __fastcall TfrmFirst::NewClick(TObject *Sender)
+{
+    User->Clear();
+    frmFirst->Hide();
+
+    if (frmUInfo != nullptr)
     {
-        s = maxStamina - 20; // Штраф -20 единиц при перегрузе
+        delete frmUInfo;
+        frmUInfo = nullptr;
     }
-    else
+
+    Application->CreateForm(__classid(TfrmUInfo), &frmUInfo);
+    frmUInfo->Show();
+}
+
+void __fastcall TfrmFirst::LoadClick(TObject *Sender)
+{
+    OpenDialog1->FileName = L"";
+    OpenDialog1->InitialDir = ExePath;
+
+    if (OpenDialog1->Execute())
     {
-        s = maxStamina;
+        if (User->LoadGame(OpenDialog1->FileName))
+        {
+            frmFirst->Hide();
+            frmChapt->Show();
+        }
     }
+}
+
+void __fastcall TfrmFirst::frmFirstCreate(TObject *Sender)
+{
+    Label2->Caption = L"Version " + APP_VERSION;
+}
+
+void __fastcall TfrmFirst::ExitClick(TObject *Sender)
+{
+    this->Close();
+}
+
+void __fastcall TfrmFirst::AboutClick(TObject *Sender)
+{
+    AboutBox->Show();
 }
