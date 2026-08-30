@@ -56,7 +56,7 @@ void TfrmUTest::ProcessSelection()
 
 void __fastcall TfrmUTest::Button1Click(TObject *Sender)
 {
-    ProcessSelection(); // Вынесли дублирующийся код в отдельный метод
+    ProcessSelection();
 }
 
 void __fastcall TfrmUTest::FormCreate(TObject *Sender)
@@ -72,8 +72,35 @@ void __fastcall TfrmUTest::FormShow(TObject *Sender)
 
 void __fastcall TfrmUTest::FormClose(TObject *Sender, TCloseAction &Action)
 {
-    Action = caFree;
+    User->maxWeight = round(User->str * 7.5);
+    User->s = User->GetMaxStamina();
+
+    wchar_t debugBuf[1024];
+    swprintf(debugBuf, 1024,
+    L"--- ХАРАКТЕРИСТИКИ ПЕРСОНАЖА ---\n"
+    L"Раса: %s\n"
+    L"Пол: %s\n"
+    L"Сила (str): %d\n"
+    L"Ловкость (dex): %d\n"
+    L"Магия (mag): %d\n"
+    L"Здоровье (hlth): %d\n"
+    L"Мана (man): %d\n"
+    L"Выносливость (s): %d\n"
+    L"Макс. вес (maxWeight): %d\n"
+    L"--------------------------------",
+    User->CrType.c_str(),
+    User->SexType.c_str(),
+    User->str,
+    User->dex,
+    User->mag,
+    User->hlth,
+    User->man,
+    User->s,
+    User->maxWeight
+    );
+    OutputDebugString(debugBuf);
     frmFirst->Show();
+    Action = caFree;
 }
 
 void TfrmUTest::LoadNext()

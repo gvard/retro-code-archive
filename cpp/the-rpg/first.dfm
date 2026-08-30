@@ -437,9 +437,9 @@ object frmFirst: TfrmFirst
   object Label2: TLabel
     Left = 368
     Top = 96
-    Width = 62
+    Width = 53
     Height = 13
-    Caption = 'Version 0.1.2'
+    Caption = 'Version 0.1'
   end
   object Image1: TImage
     Left = 168

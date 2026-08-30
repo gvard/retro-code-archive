@@ -419,6 +419,7 @@ object frmUInfo: TfrmUInfo
   Position = poScreenCenter
   OnClose = frmUInfoClose
   OnDestroy = FormDestroy
+  OnShow = FormShow
   PixelsPerInch = 116
   TextHeight = 16
   object Label1: TLabel
@@ -455,6 +456,7 @@ object frmUInfo: TfrmUInfo
     Width = 90
     Height = 31
     Caption = 'OK'
+    ModalResult = 1
     TabOrder = 4
     OnClick = Button1Click
   end

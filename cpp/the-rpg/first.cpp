@@ -5,6 +5,8 @@
 #include "about.h"
 #include "uinfo.h"
 #include "chapt.h"
+#include "invent.h"
+#include "utype.h"
 
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -12,12 +14,15 @@
 TfrmFirst *frmFirst;
 TUser *User;
 String ExePath;
+bool isFirstInventoryLaunch = true;
 
 __fastcall TfrmFirst::TfrmFirst(TComponent* Owner)
     : TForm(Owner)
 {
     save = new TStringList;
     User = new TUser;
+    User->UserItems = new TStringList;
+    User->GroundItems = new TStringList;
     User->Clear();
 	ExePath = ExtractFilePath(Application->ExeName);
 }
@@ -58,13 +63,25 @@ void __fastcall TfrmFirst::AboutClick(TObject *Sender)
 
 void TUser::Clear()
 {
+    Name = L"";
+    CrType = L"";
+    SexType = L"";
+    age = 0;
     str = 5;
     dex = 5;
     mag = 5;
-
     hlth = 100;
     man = 100;
     s = 100;
+    maxWeight = 0;
+
+    if (UserItems == nullptr)   UserItems = new TStringList;
+    if (GroundItems == nullptr) GroundItems = new TStringList;
+
+    UserItems->Clear();
+    GroundItems->Clear();
+
+    UserItems->Add(L"__INIT_NEW_GAME__");
 }
 
 void TUser::Refresh()
@@ -86,6 +103,7 @@ void TUser::Refresh()
         man = 100;
     }
 }
+
 
 void __fastcall TfrmFirst::frmFirstCreate(TObject *Sender)
 {
@@ -120,23 +138,42 @@ bool TUser::LoadGame(const String& AFileName)
     {
         saveList->LoadFromFile(AFileName, TEncoding::UTF8);
 
-        if (saveList->Count >= 10)
+        if (saveList->Count >= 11)
         {
-            Name = saveList->Strings[0];
-            CrType = saveList->Strings[1];
+            if (UserItems != nullptr)   UserItems->Clear();
+            if (GroundItems != nullptr) GroundItems->Clear();
+
+            if (UserItems != nullptr)
+            {
+                UserItems->Add(L"__INIT_NEW_GAME__");
+            }
+
+            if (DualListDlg != nullptr)
+            {
+                DualListDlg->SrcList->Items->Clear();
+                DualListDlg->DstList->Items->Clear();
+            }
+
+            Name    = saveList->Strings[0];
+            CrType  = saveList->Strings[1];
             SexType = saveList->Strings[2];
+            age     = StrToInt(saveList->Strings[3]);
+            str     = StrToInt(saveList->Strings[4]);
+            dex     = StrToInt(saveList->Strings[5]);
+            mag     = StrToInt(saveList->Strings[6]);
+            hlth    = StrToInt(saveList->Strings[7]);
+            man     = StrToInt(saveList->Strings[8]);
+            s       = StrToInt(saveList->Strings[9]);
 
-            age = StrToInt(saveList->Strings[3]);
-            str = StrToInt(saveList->Strings[4]);
-            dex = StrToInt(saveList->Strings[5]);
-            mag = StrToInt(saveList->Strings[6]);
-            hlth = StrToInt(saveList->Strings[7]);
-            man = StrToInt(saveList->Strings[8]);
+            int nextChapter = StrToInt(saveList->Strings[10]);
 
-            int nextChapter = StrToInt(saveList->Strings[9]);
-
-            // Загружаем главу в форму квестов
             frmChapt->LoadNext(nextChapter);
+
+            if (frmUType != nullptr && frmUType->Visible)
+            {
+                frmUType->UpdateStaminaDisplay();
+            }
+
             success = true;
         }
         else
@@ -153,6 +190,56 @@ bool TUser::LoadGame(const String& AFileName)
         Application->MessageBox(L"Не удалось прочитать файл сохранения.", L"The RPG", MB_OK | MB_ICONERROR);
     }
 
-    delete saveList; // Чистим память локально, убираем утечки
+    delete saveList;
     return success;
+}
+
+bool TUser::SaveGame(const String& AFileName, int ACurrentQid)
+{
+    TStringList* saveList = new TStringList;
+    bool success = false;
+
+    try
+    {
+        saveList->Add(Name);
+        saveList->Add(CrType);
+        saveList->Add(SexType);
+        saveList->Add(IntToStr(age));
+        saveList->Add(IntToStr(str));
+        saveList->Add(IntToStr(dex));
+        saveList->Add(IntToStr(mag));
+        saveList->Add(IntToStr(hlth));
+        saveList->Add(IntToStr(man));
+        saveList->Add(IntToStr(s));
+        saveList->Add(IntToStr(ACurrentQid));
+
+        saveList->SaveToFile(AFileName, TEncoding::UTF8);
+        success = true;
+    }
+    catch (...)
+    {
+        Application->MessageBox(L"Не удалось записать файл сохранения.", L"The RPG", MB_OK | MB_ICONERROR);
+    }
+
+    delete saveList;
+    return success;
+}
+
+int TUser::GetMaxStamina()
+{
+    return 50 + (str * 4) + (dex * 2);
+}
+
+void TUser::RecalculateStamina(int totalWeight)
+{
+    int maxStamina = GetMaxStamina();
+
+    if (totalWeight > maxWeight)
+    {
+        s = maxStamina - 20; // Штраф -20 единиц при перегрузе
+    }
+    else
+    {
+        s = maxStamina;
+    }
 }

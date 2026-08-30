@@ -10,7 +10,7 @@
 #include <Vcl.Graphics.hpp>
 #include <Vcl.Dialogs.hpp>
 
-const String APP_VERSION = L"0.1.3";
+const String APP_VERSION = L"0.1.4";
 
 class TfrmFirst : public TForm
 {
@@ -41,13 +41,19 @@ public:         // User declarations
     __fastcall virtual ~TfrmFirst(); // Добавлен деструктор для очистки памяти
 };
 
-// Класс персонажа игрока
 class TUser
 {
 public:
     void Clear();
     void Refresh();
     bool LoadGame(const String& AFileName);
+    bool SaveGame(const String& AFileName, int ACurrentQid);
+
+    int GetMaxStamina();  // Returns maximum stamina based on Strength and Dexterity
+    void RecalculateStamina(int totalWeight);
+
+    TStringList* UserItems;
+    TStringList* GroundItems;
 
     String Name;
     String CrType;
@@ -57,10 +63,10 @@ public:
     int str;
     int dex;
     int mag;
-
     int hlth;
     int man;
     int s;
+	int maxWeight;
 };
 
 extern String ExePath;

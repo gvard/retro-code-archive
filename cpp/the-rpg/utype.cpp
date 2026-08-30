@@ -16,23 +16,39 @@ __fastcall TfrmUType::TfrmUType(TComponent* AOwner)
 
 void __fastcall TfrmUType::frmShow(TObject *Sender)
 {
-    Lbl1->Caption = Lbl1->Caption + User->Name;
-    Lbl2->Caption = Lbl2->Caption + User->CrType;
-    Lbl3->Caption = Lbl3->Caption + User->SexType;
-    Lbl4->Caption = Lbl4->Caption + IntToStr(User->age);
-    Lbl5->Caption = Lbl5->Caption + IntToStr(User->str);
-    Lbl6->Caption = Lbl6->Caption + IntToStr(User->dex);
-    Lbl7->Caption = Lbl7->Caption + IntToStr(User->mag);
-    Lbl8->Caption = Lbl8->Caption + IntToStr(User->hlth);
-    Lbl9->Caption = Lbl9->Caption + IntToStr(User->man);
+    Lbl1->Caption = L"Имя: " + User->Name;
+    Lbl2->Caption = L"Раса: " + User->CrType;
+    Lbl3->Caption = L"Пол: " + User->SexType;
+    Lbl4->Caption = L"Возраст: " + IntToStr(User->age);
+    Lbl5->Caption = L"Сила: " + IntToStr(User->str);
+    Lbl6->Caption = L"Ловкость: " + IntToStr(User->dex);
+    Lbl7->Caption = L"Магия: " + IntToStr(User->mag);
+    Lbl8->Caption = L"Здоровье: " + IntToStr(User->hlth);
+    Lbl9->Caption = L"Мана: " + IntToStr(User->man);
+    UpdateStaminaDisplay();
 }
 
 void __fastcall TfrmUType::OKBtnClick(TObject *Sender)
 {
-    frmUType->Close();
+    this->Close();
 }
 
 void __fastcall TfrmUType::frmDeactiv(TObject *Sender)
 {
-    frmUType->Close();
+    this->Hide();
+}
+
+void TfrmUType::UpdateStaminaDisplay()
+{
+    int maxStamina = User->GetMaxStamina();
+    lblStamina->Caption = L"Выносливость: " + IntToStr(User->s) + L" / " + IntToStr(maxStamina);
+
+    if (User->s < maxStamina)
+    {
+        lblStamina->Font->Color = clRed;
+    }
+    else
+    {
+        lblStamina->Font->Color = clWindowText;
+    }
 }

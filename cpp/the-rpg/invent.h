@@ -33,8 +33,11 @@ __published:    // IDE-managed Components
     void __fastcall SetItem(TListBox *List, int Index);
     int __fastcall GetFirstSelection(TCustomListBox *List);
     void __fastcall SetButtons();
+    void __fastcall FormShow(TObject *Sender);
+    void __fastcall OKBtnClick(TObject *Sender);
 
 private:        // User declarations
+    void UpdateWeightDisplay();
 
 public:         // User declarations
     __fastcall TDualListDlg(TComponent* AOwner) override;

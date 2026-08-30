@@ -6,6 +6,12 @@
 #include <Vcl.StdCtrls.hpp>
 #include <Vcl.Forms.hpp>
 
+struct TRaceData
+{
+    String Name;
+    int Modifier;
+};
+
 class TfrmUInfo : public TForm
 {
 __published:    // IDE-managed Components
@@ -24,8 +30,10 @@ __published:    // IDE-managed Components
     void __fastcall Edit2KeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
     void __fastcall frmUInfoClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall FormDestroy(TObject *Sender);
+    void __fastcall FormShow(TObject *Sender);
 
 private:        // User declarations
+    TRaceData ParseRaceLine(const String& ALine);
 
 public:         // User declarations
     __fastcall TfrmUInfo(TComponent* Owner);

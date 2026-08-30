@@ -7,6 +7,7 @@
 #include "about.h"
 #include "fight.h"
 #include "utype.h"
+#include "invent.h"
 
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -20,7 +21,6 @@ __fastcall TfrmChapt::TfrmChapt(TComponent* Owner)
     chapter = new TStringList;
 }
 
-// Добавлен деструктор для предотвращения утечки памяти
 __fastcall TfrmChapt::~TfrmChapt()
 {
     delete save;
@@ -44,7 +44,19 @@ void __fastcall TfrmChapt::ListBox1DblClick(TObject *Sender)
 
 void TfrmChapt::LoadNext(int qid)
 {
-    this->qid = qid;
+    this->currentQid = qid;
+
+    // Глава изменилась — сбрасываем состояние вещей на земле
+    if (User->GroundItems != nullptr)
+    {
+        User->GroundItems->Clear();
+    }
+
+    if (DualListDlg != nullptr)
+    {
+        DualListDlg->DstList->Items->Clear();
+    }
+
     wchar_t ch = 0;
     int q = 0;
     int qptr = -1;
@@ -70,7 +82,7 @@ void TfrmChapt::LoadNext(int qid)
         {
             while (++i < chapter->Count)
             {
-                if (chapter->Strings[i].Length() > 0)
+                if (!chapter->Strings[i].IsEmpty())
                 {
                     if (chapter->Strings[i][1] == L'}')
                     {
@@ -79,7 +91,7 @@ void TfrmChapt::LoadNext(int qid)
                 }
             }
         }
-        while ((++i < chapter->Count) && (chapter->Strings[i].Length() > 0));
+        while ((++i < chapter->Count) && (!chapter->Strings[i].IsEmpty()));
     }
 
     if (qptr < 0)
@@ -89,9 +101,8 @@ void TfrmChapt::LoadNext(int qid)
         frmFirst->Show();
         return;
     }
-    this->currentQid = qid;
 
-    // Чтение заголовка/типа вопроса
+    // Чтение заголовка и типа вопроса
     ch = 0;
     swscanf(chapter->Strings[qptr].c_str(), L"%d%c", &q, &ch);
 
@@ -100,7 +111,7 @@ void TfrmChapt::LoadNext(int qid)
         case L'{':
             while (++qptr < chapter->Count)
             {
-                if (chapter->Strings[qptr].Length() > 0)
+                if (!chapter->Strings[qptr].IsEmpty())
                 {
                     if (chapter->Strings[qptr][1] == L'}')
                     {
@@ -141,9 +152,9 @@ void TfrmChapt::LoadNext(int qid)
             return;
     }
 
-    // Заполнение вариантов ответов в ListBox1
+    // Заполнение вариантов ответов
     aptr = qptr + 1;
-    while ((++qptr < chapter->Count) && (chapter->Strings[qptr].Length() > 0))
+    while ((++qptr < chapter->Count) && (!chapter->Strings[qptr].IsEmpty()))
     {
         String str = chapter->Strings[qptr];
         int jump = 0;
@@ -166,16 +177,15 @@ void TfrmChapt::LoadNext(int qid)
 
 void __fastcall TfrmChapt::Button1Click(TObject *Sender)
 {
-    int i;
     int jump;
-    for (i = 0; i < ListBox1->Items->Count; i++)
+    for (int i = 0; i < ListBox1->Items->Count; i++)
     {
         if (ListBox1->Selected[i])
         {
             swscanf(chapter->Strings[aptr + i].c_str(), L"%d ", &jump);
             User->Refresh();
             LoadNext(jump);
-			return;
+            return;
         }
     }
 }
@@ -194,17 +204,7 @@ void __fastcall TfrmChapt::ListBox1KeyDown(TObject *Sender, WORD &Key, TShiftSta
 {
     if (Key == VK_RETURN)
     {
-        int i;
-        int jump;
-        for (i = 0; i < ListBox1->Items->Count; i++)
-        {
-            if (ListBox1->Selected[i])
-            {
-                swscanf(chapter->Strings[aptr + i].c_str(), L"%d ", &jump);
-                User->Refresh();
-                LoadNext(jump);
-            }
-        }
+        Button1Click(Sender); // Устранено дублирование кода переходов
     }
 }
 
@@ -215,13 +215,10 @@ void __fastcall TfrmChapt::frmChaptCloseQuery(TObject *Sender, bool &CanClose)
         case IDYES:
             frmFirst->Show();
             frmChapt->Hide();
-            CanClose = true; // Исправлено: без этого форма не закрывалась
+            CanClose = true;
             break;
 
         case IDCANCEL:
-            CanClose = false;
-            break;
-
         case IDNO:
             CanClose = false;
             break;
@@ -238,46 +235,42 @@ void __fastcall TfrmChapt::LoadClick(TObject *Sender)
     {
         User->LoadGame(OpenDialog1->FileName);
     }
-    else
-    {
-        return;
-    }
 }
 
 void __fastcall TfrmChapt::SaveClick(TObject *Sender)
 {
-
-    String CleanPath = ExpandFileName(ExePath);
-
-    SaveDialog1->InitialDir = CleanPath;
+    SaveDialog1->InitialDir = ExpandFileName(ExePath);
     SaveDialog1->FileName = L"save1.sav";
 
     if (SaveDialog1->Execute())
     {
-        save->Clear();
-        save->Add(User->Name);
-        save->Add(User->CrType);
-        save->Add(User->SexType);
-        save->Add(IntToStr(User->age));
-        save->Add(IntToStr(User->str));
-        save->Add(IntToStr(User->dex));
-        save->Add(IntToStr(User->mag));
-        save->Add(IntToStr(User->hlth));
-        save->Add(IntToStr(User->man));
-        save->Add(IntToStr(this->currentQid));
-
-        save->SaveToFile(SaveDialog1->FileName, TEncoding::UTF8);
-        Application->MessageBox(L"Игра успешно сохранена!", L"The RPG", MB_OK | MB_ICONINFORMATION);
+        if (User->SaveGame(SaveDialog1->FileName, this->currentQid))
+        {
+            Application->MessageBox(L"Игра успешно сохранена!", L"The RPG", MB_OK | MB_ICONINFORMATION);
+        }
     }
 }
 
 void __fastcall TfrmChapt::InvClick(TObject *Sender)
 {
-    ShowMessage(L"Еще не работает.");
+    if (DualListDlg == nullptr)
+    {
+        Application->CreateForm(__classid(TDualListDlg), &DualListDlg);
+    }
+
+    DualListDlg->ShowModal();
+
+    if (frmUType != nullptr && frmUType->Visible)
+    {
+        frmUType->UpdateStaminaDisplay();
+    }
 }
 
 void __fastcall TfrmChapt::ustype1Click(TObject *Sender)
 {
-    Application->CreateForm(__classid(TfrmUType), &frmUType);
+    if (frmUType == nullptr)
+    {
+        Application->CreateForm(__classid(TfrmUType), &frmUType);
+    }
     frmUType->Show();
 }

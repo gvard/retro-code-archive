@@ -25,6 +25,7 @@ __published:    // IDE-managed Components
     TLabel *Lbl7;
     TLabel *Lbl8;
     TLabel *Lbl9;
+	TLabel *lblStamina;
 
     void __fastcall frmShow(TObject *Sender);
     void __fastcall OKBtnClick(TObject *Sender);
@@ -35,6 +36,7 @@ private:        // User declarations
 public:         // User declarations
     __fastcall TfrmUType(TComponent* AOwner) override;
     __fastcall virtual ~TfrmUType() {} // Добавлен деструктор для соблюдения единого стиля проекта
+    void UpdateStaminaDisplay();
 };
 
 extern PACKAGE TfrmUType *frmUType;
