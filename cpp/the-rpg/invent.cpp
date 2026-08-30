@@ -144,6 +144,8 @@ void __fastcall TDualListDlg::FormShow(TObject *Sender)
     SrcList->Items->Clear();
     DstList->Items->Clear();
 
+    // Проверяем оперативную память игрока. Если там лежит стартовый маркер новой игры -
+    // это означает, что файл invent.txt еще ни разу не считывался в этой сессии.
     if (User->UserItems->Count == 1 && User->UserItems->Strings[0] == L"__INIT_NEW_GAME__")
     {
         // Маркер найден! Значит это самый первый запуск рюкзака в этой игре.
@@ -168,6 +170,7 @@ void __fastcall TDualListDlg::FormShow(TObject *Sender)
                     String itemWeightStr = currentLine.SubString(lastSpace + 1, currentLine.Length() - lastSpace).Trim();
                     int itemWeight = StrToIntDef(itemWeightStr, 1);
 
+                    // Загружаем в визуальный рюкзак на экране
                     SrcList->Items->AddObject(itemName, (TObject*)itemWeight);
                 }
             }
@@ -175,7 +178,6 @@ void __fastcall TDualListDlg::FormShow(TObject *Sender)
         else
         {
             SrcList->Items->AddObject(L"Старый кухонный нож", (TObject*)2);
-            SrcList->Items->AddObject(L"Тяжелый стальной щит", (TObject*)15);
         }
         delete lInvent;
 
@@ -187,13 +189,19 @@ void __fastcall TDualListDlg::FormShow(TObject *Sender)
     }
     else
     {
+        // Будь то переход на новую главу сюжета или загрузка из .sav файла в LoadGame.
+        // Мы берем чистые строки и независимые числовые веса предметов напрямую из TUser
+        // и заново отрисовываем их на экране.
         for (int i = 0; i < User->UserItems->Count; i++)
         {
-            SrcList->Items->AddObject(User->UserItems->Strings[i], User->UserItems->Objects[i]);
+            int itemWeight = (int)(User->UserItems->Objects[i]);
+            SrcList->Items->AddObject(User->UserItems->Strings[i], (TObject*)itemWeight);
         }
-        for (int i = 0; i < User->GroundItems->Count; i++)
+
+        for (int i = 0; i < User->EnvironmentItems->Count; i++)
         {
-            DstList->Items->AddObject(User->GroundItems->Strings[i], User->GroundItems->Objects[i]);
+            int itemWeight = (int)(User->EnvironmentItems->Objects[i]);
+            DstList->Items->AddObject(User->EnvironmentItems->Strings[i], (TObject*)itemWeight);
         }
     }
 
@@ -210,11 +218,11 @@ void __fastcall TDualListDlg::OKBtnClick(TObject *Sender)
         User->UserItems->AddObject(SrcList->Items->Strings[i], (TObject*)itemWeight);
     }
 
-    User->GroundItems->Clear();
+    User->EnvironmentItems->Clear();
     for (int i = 0; i < DstList->Items->Count; i++)
     {
         int itemWeight = (int)(DstList->Items->Objects[i]);
-        User->GroundItems->AddObject(DstList->Items->Strings[i], (TObject*)itemWeight);
+        User->EnvironmentItems->AddObject(DstList->Items->Strings[i], (TObject*)itemWeight);
     }
 
     ModalResult = mrOk;

@@ -53,7 +53,8 @@ public:
     void RecalculateStamina(int totalWeight);
 
     TStringList* UserItems;
-    TStringList* GroundItems;
+    TStringList* EnvironmentItems;
+    bool isInventoryLoaded;
 
     String Name;
     String CrType;

@@ -44,18 +44,21 @@ void __fastcall TfrmChapt::ListBox1DblClick(TObject *Sender)
 
 void TfrmChapt::LoadNext(int qid)
 {
-    this->currentQid = qid;
-
     // Глава изменилась — сбрасываем состояние вещей на земле
-    if (User->GroundItems != nullptr)
+    if (this->currentQid != qid && User->EnvironmentItems != nullptr)
     {
-        User->GroundItems->Clear();
+        User->EnvironmentItems->Clear();
     }
 
-    if (DualListDlg != nullptr)
+    // ИСПРАВЛЕНО: Визуальный список на экране тоже очищаем строго при реальной смене глав,
+    // чтобы этот вызов не затирал данные сохранения во время повторных загрузок файлов .sav
+    if (this->currentQid != qid && DualListDlg != nullptr)
     {
         DualListDlg->DstList->Items->Clear();
     }
+
+    // И только теперь безопасно обновляем ID текущей сюжетной главы
+    this->currentQid = qid;
 
     wchar_t ch = 0;
     int q = 0;

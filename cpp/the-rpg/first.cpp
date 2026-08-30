@@ -34,10 +34,10 @@ void TUser::Clear()
 
     // Безопасное выделение памяти под списки предметов, если они еще не созданы
     if (UserItems == nullptr)   UserItems = new TStringList;
-    if (GroundItems == nullptr) GroundItems = new TStringList;
+    if (EnvironmentItems == nullptr) EnvironmentItems = new TStringList;
 
     UserItems->Clear();
-    GroundItems->Clear();
+    EnvironmentItems->Clear();
 
     // Запись стартового маркера инициализации
     UserItems->Add(L"__INIT_NEW_GAME__");
@@ -89,19 +89,9 @@ bool TUser::LoadGame(const String& AFileName)
 
         if (saveList->Count >= 11)
         {
-            if (UserItems != nullptr)   UserItems->Clear();
-            if (GroundItems != nullptr) GroundItems->Clear();
-
-            if (UserItems != nullptr)
-            {
-                UserItems->Add(L"__INIT_NEW_GAME__");
-            }
-
-            if (DualListDlg != nullptr)
-            {
-                DualListDlg->SrcList->Items->Clear();
-                DualListDlg->DstList->Items->Clear();
-            }
+            // Создаем временные независимые списки для чтения вещей из файла.
+            TStringList* tempUserItems = new TStringList;
+            TStringList* tempEnvironmentItems = new TStringList;
 
             Name    = saveList->Strings[0];
             CrType  = saveList->Strings[1];
@@ -116,7 +106,64 @@ bool TUser::LoadGame(const String& AFileName)
 
             int nextChapter = StrToInt(saveList->Strings[10]);
 
+            TStringList* currentTargetList = nullptr;
+
+            for (int i = 11; i < saveList->Count; i++)
+            {
+                String currentLine = saveList->Strings[i].Trim();
+                if (currentLine.IsEmpty()) continue;
+
+                if (currentLine.UpperCase() == L"[INVENTORY]")
+                {
+                    currentTargetList = tempUserItems; // Переключаем на временный рюкзак
+                    continue;
+                }
+                if (currentLine.UpperCase() == L"[ENVIRONMENT]")
+                {
+                    currentTargetList = tempEnvironmentItems; // Переключаем на временное окружение
+                    continue;
+                }
+
+                if (currentTargetList != nullptr)
+                {
+                    int lastSpace = currentLine.LastDelimiter(L" ");
+                    if (lastSpace > 0)
+                    {
+                        String itemName = currentLine.SubString(1, lastSpace - 1).Trim();
+                        String itemWeightStr = currentLine.SubString(lastSpace + 1, currentLine.Length() - lastSpace).Trim();
+                        int itemWeight = StrToIntDef(itemWeightStr, 1);
+
+                        currentTargetList->AddObject(itemName, (TObject*)itemWeight);
+                    }
+                }
+            }
+
+            // Создаем форму квеста frmChapt, если игрок загружается самым первым действием со старта
+            if (frmChapt == nullptr)
+            {
+                Application->CreateForm(__classid(TfrmChapt), &frmChapt);
+            }
+
+            // Разворачиваем сюжет квеста.
+            // Если внутри LoadNext или сопутствующих VCL-методов сработает скрытый сброс Clear(),
+            // он сотрет только пустые дефолтные списки TUser, но не временные массивы
             frmChapt->LoadNext(nextChapter);
+
+            // Все скрытые формы инициализировались и затихли.
+            // Очищаем списки TUser от любого мусора (включая строку __INIT_NEW_GAME__)
+            if (UserItems != nullptr)        UserItems->Clear();
+            if (EnvironmentItems != nullptr) EnvironmentItems->Clear();
+
+            // Переносим вещи из временной безопасной памяти в постоянные структуры TUser
+            if (UserItems != nullptr)        UserItems->AddStrings(tempUserItems);
+            if (EnvironmentItems != nullptr) EnvironmentItems->AddStrings(tempEnvironmentItems);
+
+            // Удаляем временные контейнеры, закрывая утечки памяти Windows
+            delete tempUserItems;
+            delete tempEnvironmentItems;
+
+            // Инвентарь для текущей сессии официально и успешно восстановлен
+            this->isInventoryLoaded = true;
 
             if (frmUType != nullptr && frmUType->Visible)
             {
@@ -140,6 +187,12 @@ bool TUser::LoadGame(const String& AFileName)
     }
 
     delete saveList;
+
+    wchar_t finalLog[256];
+    swprintf(finalLog, 256, L"Загружено в рюкзак: %d | Загружено в окружение: %d",
+             UserItems->Count, EnvironmentItems->Count);
+    OutputDebugString(finalLog);
+
     return success;
 }
 
@@ -161,6 +214,20 @@ bool TUser::SaveGame(const String& AFileName, int ACurrentQid)
         saveList->Add(IntToStr(man));
         saveList->Add(IntToStr(s));
         saveList->Add(IntToStr(ACurrentQid));
+
+        saveList->Add(L"[INVENTORY]");
+        for (int i = 0; i < UserItems->Count; i++)
+        {
+            int itemWeight = (int)(UserItems->Objects[i]);
+            saveList->Add(UserItems->Strings[i] + L" " + IntToStr(itemWeight));
+        }
+
+        saveList->Add(L"[ENVIRONMENT]");
+        for (int i = 0; i < EnvironmentItems->Count; i++)
+        {
+            int itemWeight = (int)(EnvironmentItems->Objects[i]);
+            saveList->Add(EnvironmentItems->Strings[i] + L" " + IntToStr(itemWeight));
+        }
 
         saveList->SaveToFile(AFileName, TEncoding::UTF8);
         success = true;
@@ -185,7 +252,7 @@ __fastcall TfrmFirst::TfrmFirst(TComponent* Owner)
 
     User = new TUser;
     User->UserItems = new TStringList;
-    User->GroundItems = new TStringList;
+    User->EnvironmentItems = new TStringList;
     User->Clear();
 
     ExePath = ExtractFilePath(Application->ExeName);
@@ -196,7 +263,7 @@ __fastcall TfrmFirst::~TfrmFirst()
     if (User != nullptr)
     {
         delete User->UserItems;
-        delete User->GroundItems;
+        delete User->EnvironmentItems;
     }
 
     delete save;
