@@ -2,6 +2,7 @@
 #pragma hdrstop
 #include "gr.h"
 #include <math.h>
+#include <cmath>
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 
@@ -57,13 +58,15 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 	node->l = nullptr;
 	node->r = nullptr;
 
-	while (str == '(' && str[str.Length()] == ')')
+	// проверяем именно первый str[1] и последний str[str.Length()] символы
+	while (str.Length() > 0 && str[1] == '(' && str[str.Length()] == ')')
 	{
 		bracketCount = 1;
 		int i = 1;
-		while (bracketCount != 0)
+		while (bracketCount != 0 && i < str.Length())
 		{
-			if (str[++i] == '(')
+			i++;
+			if (str[i] == '(')
 			{
 				bracketCount++;
 			}
@@ -73,7 +76,8 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 			}
 		}
 
-		if (i == str.Length())
+		// Если первая скобка закрылась строго в самом конце строки - её можно безопасно удалить
+		if (i == str.Length() && bracketCount == 0)
 		{
 			str.Delete(1, 1);
 			str.Delete(str.Length(), 1);
@@ -129,6 +133,7 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 		}
 	}
 
+	// === Умножение ===
 	if (isOperatorFound == 1)
 	{
 		return;
@@ -160,7 +165,46 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 				{
 					values[j] = values[j] * (*((node->m) + j));
 				}
+				delete[] node->m;
+				break;
+			}
+		}
+	}
 
+	// === Деление ===
+	if (isOperatorFound == 1)
+	{
+		return;
+	}
+
+	for (int i = str.Length(); i >= 1; i--)
+	{
+		if (str[i] == '(')  bracketCount++;
+		if (str[i] == ')')  bracketCount--;
+
+		if (bracketCount == 0 && isOperatorFound == 0)
+		{
+			if (str[i] == '/')
+			{
+				isOperatorFound = 1;
+				AnsiString sub1 = str.SubString(1, i - 1);
+				f(sub1, values, node->l);
+
+				AnsiString sub2 = str.SubString(i + 1, str.Length() - i);
+				f(sub2, node->m, node->r);
+
+				for (int j = 0; j <= this->n; j++)
+				{
+					// Защита от деления на ноль для всей скобки
+					if (fabs(*(node->m + j)) <= 1e-10 || std::isnan(*(node->m + j)))
+					{
+						values[j] = 1e300; // Маркер ошибки деления на ноль
+					}
+					else
+					{
+						values[j] = values[j] / (*((node->m) + j));
+					}
+				}
 				delete[] node->m;
 				break;
 			}
@@ -249,9 +293,36 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 					{
 						case 1: values[j] = sin(*(node->m + j)); break;
 						case 2: values[j] = cos(*(node->m + j)); break;
-						case 3: values[j] = (fabs(tan(*(node->m + j))) <= 1e-10 ? 1e10 : 1 / tan(*(node->m + j))); break;
-						case 4: values[j] = tan(*(node->m + j)); break;
-						case 5: values[j] = log(*(node->m + j)); break;
+						case 3:
+							// Безопасный котангенс
+							if (fabs(sin(*(node->m + j))) <= 1e-10) {
+								values[j] = 1e300; // Помечаем как ошибку
+							} else {
+								values[j] = 1 / tan(*(node->m + j));
+							}
+							break;
+						case 4:
+							// Безопасный тангенс (пересечение асимптот cos(x) == 0)
+							if (fabs(cos(*(node->m + j))) <= 1e-10) {
+								values[j] = 1e300;
+							} else {
+								values[j] = tan(*(node->m + j));
+							}
+							break;
+						case 5:
+							// Безопасный логарифм (аргумент должен быть строго больше нуля)
+							if (*(node->m + j) <= 1e-10) {
+								values[j] = 1e300;
+							} else {
+							// Дополнительно страхуемся от системного вылета функции log
+							double arg = *(node->m + j);
+							if (arg > 0 && !std::isnan(arg) && !std::isinf(arg)) {
+								values[j] = log(arg);
+							} else {
+								values[j] = 1e300;
+							}
+						}
+						break;
 					}
 				}
 
@@ -266,13 +337,14 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 		return;
 	}
 
-	while (str == '(' && str[str.Length()] == ')')
+	while (str.Length() > 0 && str[1] == '(' && str[str.Length()] == ')')
 	{
 		bracketCount = 1;
 		int i = 1;
-		while (bracketCount != 0)
+		while (bracketCount != 0 && i < str.Length())
 		{
-			if (str[++i] == '(')
+			i++;
+			if (str[i] == '(')
 			{
 				bracketCount++;
 			}
@@ -281,10 +353,14 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 				bracketCount--;
 			}
 		}
-		if (i == str.Length())
+		if (i == str.Length() && bracketCount == 0)
 		{
 			str.Delete(1, 1);
 			str.Delete(str.Length(), 1);
+		}
+		else
+		{
+			break;
 		}
 	}
 
@@ -304,9 +380,19 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 	}
 	else if (str != "")
 	{
-		for (int j = 0; j <= this->n; j++)
+		try
 		{
-			values[j] = str.ToDouble();
+			double val = str.ToDouble();
+			for (int j = 0; j <= this->n; j++)
+			{
+				values[j] = val;
+			}
+		}
+		catch (const EConvertError&)
+		{
+			ShowMessage("Ошибка в записи формулы на элементе: " + str);
+			this->er = 1;
+			return;
 		}
 	}
 	else //(либо были пустые скобки
@@ -334,7 +420,7 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 
 	TPoint *v = new TPoint[this->n + 1];
 	TPoint *o1 = new TPoint[2];
-    TPoint *o2 = new TPoint[2];
+	TPoint *o2 = new TPoint[2];
 
 	this->s = AnsiString(ComboBox1->Text);
 	for (int i = 1; i <= this->s.Length(); i++)
@@ -360,18 +446,18 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 
 	try
 	{
-		if (Edit2->Text != "")
-		{
-			this->a = Edit2->Text.ToDouble();
-		}
-		if (Edit3->Text != "")
-		{
-			this->b = Edit3->Text.ToDouble();
-		}
+		UnicodeString strA = Edit2->Text;
+		UnicodeString strB = Edit3->Text;
+
+		strA = System::Sysutils::StringReplace(strA, L",", L".", TReplaceFlags() << rfReplaceAll);
+		strB = System::Sysutils::StringReplace(strB, L",", L".", TReplaceFlags() << rfReplaceAll);
+
+		if (strA != "") this->a = strA.ToDouble();
+		if (strB != "") this->b = strB.ToDouble();
 	}
-	catch (EConvertError&)
+	catch (const EConvertError&)
 	{
-		ShowMessage("Введите границы вывода в нормальном виде!");
+		ShowMessage("Введите границы вывода в числовом виде! Допускаются как точки, так и запятые.");
 		delete[] v;
 		delete[] o1;
 		delete[] o2;
@@ -382,20 +468,33 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 	this->Res = new double[this->n + 1];
 
 	f(this->s, this->Res, this->p);
-	mi = (ma = *(this->Res));
 
-	for (int i = 1; i <= this->n; i++)
+	bool firstValid = false;
+	for (int i = 0; i <= this->n; i++)
 	{
-		if (mi > *(this->Res + i))
+		// Проверяем, что точка валидна, не бесконечна и не NaN
+		if (this->Res[i] < 1e299 && !std::isinf(this->Res[i]) && !std::isnan(this->Res[i]))
 		{
-			mi = *(this->Res + i);
-		}
-		if (ma < *(this->Res + i))
-		{
-			ma = *(this->Res + i);
+			if (!firstValid)
+			{
+				mi = this->Res[i];
+				ma = this->Res[i];
+				firstValid = true;
+			}
+			else
+			{
+				if (mi > this->Res[i]) mi = this->Res[i];
+				if (ma < this->Res[i]) ma = this->Res[i];
+			}
 		}
 	}
 
+	// Если вообще все точки оказались ошибочными (например, ln(-5))
+	if (!firstValid)
+	{
+		mi = -1.0;
+		ma = 1.0;
+	}
 	mi = (mi > 0 ? 0 : mi);
 	ma = (ma < 0 ? 0 : ma);
 
@@ -420,7 +519,31 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 	}
 
 	PaintBox1->Canvas->Pen->Color = clBlack;
-	PaintBox1->Canvas->Polyline(v, this->n);
+	bool drawing = false; // Флаг: ведем ли мы сейчас линию
+
+	for (int i = 0; i <= this->n; i++)
+	{
+		// Проверяем точку на валидность
+		if (this->Res[i] < 1e299 && !std::isinf(this->Res[i]) && !std::isnan(this->Res[i]))
+		{
+			if (!drawing)
+			{
+				// Начинаем новую линию с этой корректной точки
+				PaintBox1->Canvas->MoveTo(v[i].X, v[i].Y);
+				drawing = true;
+			}
+			else
+			{
+				// Продолжаем существующую линию
+				PaintBox1->Canvas->LineTo(v[i].X, v[i].Y);
+			}
+		}
+		else
+		{
+			// Встретили ошибку (деление на ноль) - прерываем линию
+			drawing = false;
+		}
+	}
 
 	PaintBox1->Canvas->Pen->Color = clRed;
 	PaintBox1->Canvas->Brush->Color = clRed;
@@ -489,15 +612,37 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 		}
 	}
 
-	// Вертикальные засечки на оси Y
-	double startY = ceil(mi * 2.0) / 2.0;
-	double endY = floor(ma * 2.0) / 2.0;
+	// Отрисовка засечек на оси Y
+	// Вычисляем общую высоту диапазона по Y
+	double deltaY = ma - mi;
 
-	for (double valY = startY; valY <= endY; valY += 0.5)
+	// Выбираем адекватный шаг в зависимости от масштаба графика
+	double stepY = 0.5; // Шаг по умолчанию
+
+	if (deltaY > 15.0)  {
+		// Динамический шаг: делим весь диапазон на ~10-15 удобных отрезков
+		// Округляем шаг до ближайшего целого числа для красивого вывода
+		stepY = ceil(deltaY / 15.0);
+	}
+	else if (deltaY < 1.0 && deltaY > 0) {
+		stepY = 0.1; // Если график совсем плоский, уменьшаем шаг
+	}
+
+	// Рассчитываем стартовую точку кратно выбранному шагу stepY
+	double startY = ceil(mi / stepY) * stepY;
+	double endY = floor(ma / stepY) * stepY;
+
+	// Вводим жесткий предохранитель: не более 50 итераций в цикле в любом случае
+	int iterationsCount = 0;
+
+	for (double valY = startY; valY <= endY && iterationsCount < 50; valY += stepY)
 	{
+		iterationsCount++;
+
 		if (fabs(valY) < 1e-9) continue; // Пропускаем сам ноль
 
 		int markY = padTop + floor(workHeight * (ma - valY) / (ma - mi)) + (mi * ma == 0 ? corr : 0);
+
 		// Ограничиваем риску, чтобы она не уходила за стрелку оси Y
 		if (markY >= 15 && markY <= PaintBox1->Height - padBottom)
 		{
@@ -530,6 +675,26 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 
 void __fastcall TForm1::FormCreate(TObject *Sender)
 {
+	System::Sysutils::FormatSettings.DecimalSeparator = '.';
+
+	ComboBox1->Items->Clear();
+	ComboBox1->Items->Add("x^2+2*x+1");
+	ComboBox1->Items->Add("x^3-x");
+	ComboBox1->Items->Add("0.1*x^3-x^2+x");
+	ComboBox1->Items->Add("x^4-4*x^2");
+	ComboBox1->Items->Add("x*sin(1/x)");
+	ComboBox1->Items->Add("1/x");
+	ComboBox1->Items->Add("1/x^2");
+	ComboBox1->Items->Add("1/(1+x^2)");
+	ComboBox1->Items->Add("1/(1+25*x^2)");
+	ComboBox1->Items->Add("sin(x)");
+	ComboBox1->Items->Add("cos(x)");
+	ComboBox1->Items->Add("sin(x)*cos(x)");
+	ComboBox1->Items->Add("tg(x)*ctg(x)");
+	ComboBox1->Items->Add("sin(x^2)");
+	ComboBox1->DropDownCount = ComboBox1->Items->Count;
+
+	ComboBox1->ItemIndex = 0;
 	ComboBox1->Focused();
 }
 
