@@ -142,9 +142,17 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
                 f(sub2, node->m, node->r);
 
                 for (int j = 0; j <= this->n; j++)
+            {
+                // Если левый или правый операнд - это маркер ошибки
+                if (values[j] >= 1e299 || *(node->m + j) >= 1e299)
+                {
+                    values[j] = 1e300; // Пробрасываем ошибку дальше
+                }
+                else
                 {
                     values[j] = values[j] * (*((node->m) + j));
                 }
+            }
                 delete[] node->m;
                 break;
             }
