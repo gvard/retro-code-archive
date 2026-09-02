@@ -217,10 +217,10 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
         }
     }
 
-    // Математические функции: sin, cos, ctg, tg, In
+    // Математические функции: sin, cos, ctg, tg, ln
     if (isOperatorFound == 1) return;
 
-    // Приведение строки к нижнему регистру для нечувствительности разбора (In(x) vs ln(x))
+    // Приведение строки к нижнему регистру
     AnsiString lowerStr = str.LowerCase();
 
     for (int i = 1; i <= lowerStr.Length(); i++)
@@ -264,7 +264,11 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
                             }
                             else
                             {
-                                values[j] = log(arg);
+                                if (arg > 0.0) {
+                                    values[j] = log(arg);
+                                } else {
+                                    values[j] = 1e300;
+                                }
                             }
                             break;
                     }
@@ -593,6 +597,8 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 
 void __fastcall TForm1::FormCreate(TObject *Sender)
 {
+    _control87(MCW_EM, MCW_EM);
+
     System::Sysutils::FormatSettings.DecimalSeparator = '.';
 
     ComboBox1->Items->Clear();
@@ -610,6 +616,8 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     ComboBox1->Items->Add("sin(x)*cos(x)");
     ComboBox1->Items->Add("tg(x)*ctg(x)");
     ComboBox1->Items->Add("sin(x^2)");
+	ComboBox1->Items->Add("ln(x)");
+	ComboBox1->Items->Add("x*ln(x)");
 
     ComboBox1->DropDownCount = ComboBox1->Items->Count;
     ComboBox1->ItemIndex = 0;
