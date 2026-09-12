@@ -15,6 +15,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
     er = 0;
     a = 0;
     b = 0;
+    is_first_graph = true;
     Mas = nullptr;
     Res = nullptr;
     p = nullptr;
@@ -75,6 +76,52 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
         {
             str.Delete(1, 1);
             str.Delete(str.Length(), 1);
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    // Модуль
+    while (str.Length() > 0 && str[1] == '|' && str[str.Length()] == '|')
+    {
+        int barCount = 1;
+        int i = 1;
+        // знаки модуля закрывают именно друг друга,
+        // а не являются независимыми модулями
+        while (barCount != 0 && i < str.Length())
+        {
+            i++;
+            // В отличие от скобок, знак модуля одинаковый с обеих сторон.
+            // Считаем её за признак изменения вложенности.
+            if (str[i] == '|')
+            {
+                barCount = (barCount == 1 ? 0 : 1);
+            }
+        }
+
+        // Если нашли парный закрывающий модуль на самом конце строки
+        if (i == str.Length() && barCount == 0)
+        {
+            // Удаляем крайние символы '|'
+            str.Delete(1, 1);
+            str.Delete(str.Length(), 1);
+
+            // Рекурсивно вычисляем то, что было внутри модуля
+            f(str, values, node->l);
+
+            // Применяем математическую функцию модуля ко всем вычисленным точкам
+            for (int j = 0; j <= this->n; j++)
+            {
+                // Проверяем на маркер ошибки, чтобы не сломать логику разрывов
+                if (values[j] < 1e299 && !std::isnan(values[j]) && !std::isinf(values[j]))
+                {
+                    values[j] = std::abs(values[j]);
+                }
+            }
+            // Так как модуль обработан и строка полностью разобрана, выходим из функции
+            return;
         }
         else
         {
@@ -356,12 +403,31 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     int bracketCount = 0;
     double mi = 0, ma = 0;
 
+    if (CheckBox1->Checked && !is_first_graph)
+    {
+        Edit2->Text = FloatToStr(saved_a);
+        Edit3->Text = FloatToStr(saved_b);
+    }
+
     if (this->er == 1)
     {
         this->er = 0;
     }
 
-    PaintBox1->Repaint();
+    if (!CheckBox1->Checked)
+    {
+        PaintBox1->Repaint();
+
+        // Очищаем старое дерево формулы, если оно существовало
+        if (this->p != nullptr) {
+            this->p = nullptr;
+        }
+    }
+    else
+    {
+        this->p = nullptr;
+    }
+
     this->n = PaintBox1->Width - 1;
 
     TPoint *v = new TPoint[this->n + 1];
@@ -404,6 +470,9 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
         return;
     }
 
+    if (this->Mas != nullptr) {
+        delete[] this->Mas;
+    }
     this->Mas = initMas(this->a, this->b, this->n);
     this->Res = new double[this->n + 1];
 
@@ -447,15 +516,32 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     mi = (mi > 0 ? 0 : mi);
     ma = (ma < 0 ? 0 : ma);
 
+    if (!CheckBox1->Checked || is_first_graph)
+    {
+        saved_mi = mi;
+        saved_ma = ma;
+        saved_a = this->a;
+        saved_b = this->b;
+        is_first_graph = false;
+    }
+    else
+    {
+        // Для всех последующих графиков берем сохраненный масштаб осей
+        mi = saved_mi;
+        ma = saved_ma;
+        this->a = saved_a;
+        this->b = saved_b;
+    }
+
     if (ma == 0)
     {
         corr = 1;
     }
 
-    int padTop = 25;
-    int padBottom = 30;
+    int padTop = 20;
+    int padBottom = 8;
     int padLeft = 20;
-    int padRight = 25;
+    int padRight = 20;
 
     int workHeight = PaintBox1->Height - padTop - padBottom;
     int workWidth = PaintBox1->Width - padLeft - padRight;
@@ -467,7 +553,13 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
         v[i] = Point(screenX, screenY);
     }
 
-    PaintBox1->Canvas->Pen->Color = clBlack;
+    if (CheckBox1->Checked) {
+        // Генерирует случайный цвет, исключая слишком светлые
+        PaintBox1->Canvas->Pen->Color = (TColor)RGB(rand()%200, rand()%200, rand()%200);
+    } else {
+        PaintBox1->Canvas->Pen->Color = clBlack;
+        PaintBox1->Canvas->Pen->Width = 1;
+    }
     bool drawing = false; // Флаг: ведем ли мы сейчас линию
 
     for (int i = 0; i <= this->n; i++)
@@ -495,6 +587,7 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 
     PaintBox1->Canvas->Pen->Color = clRed;
     PaintBox1->Canvas->Brush->Color = clRed;
+    PaintBox1->Canvas->Pen->Width = 2;
 
     // Ось X
     int posY = padTop + floor(workHeight * ma / (ma - mi) + (mi * ma == 0 ? corr : 0));
@@ -615,6 +708,8 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     ComboBox1->Items->Add("0.1*x^3-x^2+x");
     ComboBox1->Items->Add("x^4-4*x^2");
     ComboBox1->Items->Add("x*sin(1/x)");
+    ComboBox1->Items->Add("|x|");
+    ComboBox1->Items->Add("-x");
     ComboBox1->Items->Add("1/x");
     ComboBox1->Items->Add("1/x^2");
     ComboBox1->Items->Add("1/(1+x^2)");
@@ -626,6 +721,7 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     ComboBox1->Items->Add("sin(x^2)");
 	ComboBox1->Items->Add("ln(x)");
 	ComboBox1->Items->Add("x*ln(x)");
+    ComboBox1->Items->Add("x^3/(x^2-0.5)");
 
     ComboBox1->DropDownCount = ComboBox1->Items->Count;
     ComboBox1->ItemIndex = 0;
@@ -645,4 +741,17 @@ void __fastcall TForm1::E2KeyPress(TObject *Sender, char &Key)
 void __fastcall TForm1::E3KeyPress(TObject *Sender, char &Key)
 {
     if (Key == VK_RETURN)  Button1->SetFocus();
+}
+
+void __fastcall TForm1::CheckBox1Click(TObject *Sender)
+{
+    if (!CheckBox1->Checked) {
+        is_first_graph = true;
+    }
+    else
+    {
+        if (this->Res != nullptr) {
+            is_first_graph = false;
+        }
+    }
 }

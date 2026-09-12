@@ -27,11 +27,13 @@ __published:
     TLabel *Label1;
     TLabel *Label2;
     TLabel *Label3;
+	TCheckBox *CheckBox1;
     void __fastcall Button1Click(TObject *Sender);
     void __fastcall FormCreate(TObject *Sender);
     void __fastcall ComboKeyPress(TObject *Sender, char &Key);
     void __fastcall E2KeyPress(TObject *Sender, char &Key);
     void __fastcall E3KeyPress(TObject *Sender, char &Key);
+    void __fastcall CheckBox1Click(TObject *Sender);
 
 private:
 
@@ -46,6 +48,12 @@ public:
     double *Mas;
     double *Res;
     uzel *p;
+
+    double saved_mi;
+    double saved_ma;
+    double saved_a;
+    double saved_b;
+    bool is_first_graph;
 
     void f(AnsiString &str, double *values, uzel *&node);
     double* initMas(double a_val, double b_val, int n_val);
