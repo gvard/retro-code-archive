@@ -17,6 +17,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
     a = 0;
     b = 0;
     is_first_graph = true;
+    FIsFullscreen = false;
     Mas = nullptr;
     Res = nullptr;
     p = nullptr;
@@ -420,6 +421,30 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     int bracketCount = 0;
     double mi = 0, ma = 0;
 
+    if (Sender != nullptr)
+    {
+        try
+        {
+            UnicodeString strA = Edit2->Text;
+            UnicodeString strB = Edit3->Text;
+            strA = System::Sysutils::StringReplace(strA, L",", L".", TReplaceFlags() << rfReplaceAll);
+            strB = System::Sysutils::StringReplace(strB, L",", L".", TReplaceFlags() << rfReplaceAll);
+
+            double temp_a = strA != "" ? strA.ToDouble() : this->a;
+            double temp_b = strB != "" ? strB.ToDouble() : this->b;
+
+            // Если текущие границы в полях ввода не совпадают с сохраненными границами
+            if (!is_first_graph && (temp_a != saved_a || temp_b != saved_b))
+            {
+                CheckBox1->Checked = false;
+                is_first_graph = true;
+            }
+        }
+        catch (const EConvertError&) {
+            // Ошибки конвертации обработает оригинальный try-catch ниже в коде
+        }
+    }
+
     if (CheckBox1->Checked && !is_first_graph)
     {
         Edit2->Text = FloatToStr(saved_a);
@@ -533,7 +558,7 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     mi = (mi > 0 ? 0 : mi);
     ma = (ma < 0 ? 0 : ma);
 
-    if (!CheckBox1->Checked || is_first_graph)
+    if (Sender != nullptr && (!CheckBox1->Checked || is_first_graph))
     {
         saved_mi = mi;
         saved_ma = ma;
@@ -541,9 +566,9 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
         saved_b = this->b;
         is_first_graph = false;
     }
-    else
+    else if (Sender == nullptr || CheckBox1->Checked)
     {
-        // Для всех последующих графиков берем сохраненный масштаб осей
+        // Восстанавливаем точные пропорции при изменении экрана или наложении
         mi = saved_mi;
         ma = saved_ma;
         this->a = saved_a;
@@ -556,9 +581,9 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     }
 
     int padTop = 20;
-    int padBottom = 8;
+    int padBottom = 14;
     int padLeft = 20;
-    int padRight = 20;
+    int padRight = 25;
 
     int workHeight = PaintBox1->Height - padTop - padBottom;
     int workWidth = PaintBox1->Width - padLeft - padRight;
@@ -611,14 +636,15 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     if (posY < padTop) posY = padTop;
     if (posY > PaintBox1->Height - padBottom) posY = PaintBox1->Height - padBottom;
 
+    int rightEdge = PaintBox1->Width - padRight;
     o1[0] = Point(padLeft, posY);
-    o1[1] = Point(PaintBox1->Width - 5, posY);
+    o1[1] = Point(rightEdge, posY);
     PaintBox1->Canvas->Polyline(o1, 1);
 
     TPoint arrowX[3];
-    arrowX[0] = Point(PaintBox1->Width - 5, posY);
-    arrowX[1] = Point(PaintBox1->Width - 13, posY - 4);
-    arrowX[2] = Point(PaintBox1->Width - 13, posY + 4);
+    arrowX[0] = Point(rightEdge, posY);
+    arrowX[1] = Point(rightEdge - 8, posY - 4);
+    arrowX[2] = Point(rightEdge - 8, posY + 4);
     PaintBox1->Canvas->Polygon(arrowX, 2);
 
     // Ось Y
@@ -700,11 +726,13 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     PaintBox1->Canvas->Brush->Style = bsClear;
 
     int textY = posY + 6;
-    if (textY + 15 > PaintBox1->Height)
+    if (textY + 18 > (PaintBox1->Height - padBottom))
     {
-        textY = posY - 18;
+        textY = posY - 32; // Подпись выше оси, если снизу нет места
     }
-    PaintBox1->Canvas->TextOut(PaintBox1->Width - 18, textY, "X");
+
+    rightEdge = PaintBox1->Width - padRight;
+    PaintBox1->Canvas->TextOut(rightEdge - 15, textY, "X");
     PaintBox1->Canvas->TextOut(posX + 8, 4, "Y");
 
     delete[] this->Res;
@@ -749,17 +777,35 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
 
 void __fastcall TForm1::ComboKeyPress(TObject *Sender, char &Key)
 {
-    if (Key == VK_RETURN)  Edit2->SetFocus();
+    if (Key == VK_RETURN)
+    {
+        Button1->SetFocus();
+        Button1Click(Button1);
+        Edit2->SetFocus();
+        Key = 0;
+    }
 }
 
 void __fastcall TForm1::E2KeyPress(TObject *Sender, char &Key)
 {
-    if (Key == VK_RETURN)  Edit3->SetFocus();
+    if (Key == VK_RETURN)
+    {
+        Button1->SetFocus();
+        Button1Click(Button1);
+        Edit3->SetFocus();
+        Key = 0;
+    }
 }
 
 void __fastcall TForm1::E3KeyPress(TObject *Sender, char &Key)
 {
-    if (Key == VK_RETURN)  Button1->SetFocus();
+    if (Key == VK_RETURN)
+    {
+        Button1->SetFocus();
+        Button1Click(Button1);
+        CheckBox1->SetFocus();
+        Key = 0;
+    }
 }
 
 void __fastcall TForm1::CheckBox1Click(TObject *Sender)
@@ -772,5 +818,77 @@ void __fastcall TForm1::CheckBox1Click(TObject *Sender)
         if (this->Res != nullptr) {
             is_first_graph = false;
         }
+    }
+}
+
+void __fastcall TForm1::ToggleFullscreen()
+{
+    int marginTop, marginRight;
+
+    if (!FIsFullscreen)
+    {
+        FOldBorderStyle = this->BorderStyle;
+        FOldWindowState = this->WindowState;
+        FOldLeft        = this->Left;
+        FOldTop         = this->Top;
+        FOldWidth       = this->Width;
+        FOldHeight      = this->Height;
+
+        this->BorderStyle = bsNone;
+        this->WindowState = wsMaximized;
+        FIsFullscreen = true;
+
+        // Выносим кнопку из панели на саму форму
+        Button1->Parent = this;
+        Button1->Align = alNone;
+        Button1->BringToFront();
+
+        marginTop = 15;
+        marginRight = 15;
+    }
+    else
+    {
+        // Возвращаем обычный режим формы
+        this->WindowState = wsNormal;
+        this->BorderStyle = FOldBorderStyle;
+        this->Left        = FOldLeft;
+        this->Top         = FOldTop;
+        this->Width       = FOldWidth;
+        this->Height      = FOldHeight;
+        this->WindowState = FOldWindowState;
+
+        FIsFullscreen = false;
+
+        // Возвращаем кнопку обратно внутрь панели
+        Button1->Parent = Panel1;
+
+        marginTop = 5;
+        marginRight = 5;
+    }
+
+    // Рассчитываем координаты кнопки.
+    // В полноэкранном режиме ширина берется от формы (ClientWidth),
+    // а в обычном - от панели (Panel1->ClientWidth).
+    Button1->Top = marginTop;
+    Button1->Left = (FIsFullscreen ? this->ClientWidth : Panel1->ClientWidth) - Button1->Width - marginRight;
+
+    Application->ProcessMessages();
+
+    Button1Click(nullptr);
+}
+
+
+void __fastcall TForm1::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+{
+    if (Key == VK_F11)
+    {
+        ToggleFullscreen();
+        Key = 0;
+    }
+    // Выход из полноэкранного режима по клавише Esc
+    else if (Key == VK_ESCAPE && FIsFullscreen)
+    {
+        ToggleFullscreen();
+        Key = 0;
     }
 }

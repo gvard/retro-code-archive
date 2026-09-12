@@ -19,23 +19,31 @@ struct uzel
 class TForm1 : public TForm
 {
 __published:
-    TEdit *Edit2;
-    TEdit *Edit3;
+	TPanel *Panel1;
+	TComboBox *ComboBox1;
+	TEdit *Edit2;
+	TEdit *Edit3;
+	TLabel *Label1;
+	TLabel *Label2;
+	TLabel *Label3;
+	TCheckBox *CheckBox1;
     TButton *Button1;
     TPaintBox *PaintBox1;
-    TComboBox *ComboBox1;
-    TLabel *Label1;
-    TLabel *Label2;
-    TLabel *Label3;
-	TCheckBox *CheckBox1;
     void __fastcall Button1Click(TObject *Sender);
     void __fastcall FormCreate(TObject *Sender);
     void __fastcall ComboKeyPress(TObject *Sender, char &Key);
     void __fastcall E2KeyPress(TObject *Sender, char &Key);
     void __fastcall E3KeyPress(TObject *Sender, char &Key);
     void __fastcall CheckBox1Click(TObject *Sender);
+    void __fastcall FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
+    void __fastcall ToggleFullscreen();
 
 private:
+    TBorderStyle FOldBorderStyle;
+    TWindowState FOldWindowState;
+    int FOldLeft, FOldTop, FOldWidth, FOldHeight;
+    bool FIsFullscreen;
+    TColor current_graph_color;
 
 public:
     __fastcall TForm1(TComponent* Owner);
