@@ -420,7 +420,7 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     int corr = -1;
     int bracketCount = 0;
     double mi = 0, ma = 0;
-    bool needDrawLabels = (!CheckBox1->Checked || is_first_graph);
+    bool needDrawLabels = (!CheckBox1->Checked || is_first_graph || Sender == nullptr);
 
     if (Sender != nullptr)
     {
