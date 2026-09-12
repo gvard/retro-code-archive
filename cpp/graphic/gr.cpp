@@ -420,6 +420,7 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     int corr = -1;
     int bracketCount = 0;
     double mi = 0, ma = 0;
+    bool needDrawLabels = (!CheckBox1->Checked || is_first_graph);
 
     if (Sender != nullptr)
     {
@@ -691,7 +692,33 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     double endX = floor(this->b / stepX) * stepX;
     int iterationsCountX = 0;
 
-    // Цикл отрисовки с лимитом 50 итераций
+    // Поиск ближайшей к нулю риски
+    double closestX = 1e300; // Хранит минимальное расстояние до нуля
+    double bestValX = 0.0;   // Значение координаты наилучшей риски
+
+    // Находим, какая риска из реально прошедших фильтр ближе всего к 0
+    int testCountX = 0;
+    for (double valX = startX; valX <= endX && testCountX < 50; valX += stepX)
+    {
+        testCountX++;
+        if (std::abs(valX) < 1e-9) continue; // Пропускаем сам ноль
+
+        int markX = padLeft + floor(workWidth * (valX - this->a) / (this->b - this->a));
+        if (markX >= padLeft && markX <= (rightEdge - 15))
+        {
+            double dist = std::abs(valX); // Расстояние до начала координат
+
+            // Берем риску, если она ближе к нулю, чем предыдущая найденная,
+            // или она находится на таком же расстоянии, но при этом она положительная
+            if (dist < (closestX - 1e-5) || (std::abs(dist - closestX) < 1e-5 && valX > 0.0))
+            {
+                closestX = dist;
+                bestValX = valX;
+            }
+        }
+    }
+
+    // Второй проход: отрисовка рисок и вывод текста для bestValX
     for (double valX = startX; valX <= endX && iterationsCountX < 50; valX += stepX)
     {
         iterationsCountX++;
@@ -704,6 +731,35 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
         {
             PaintBox1->Canvas->MoveTo(markX, posY - 3);
             PaintBox1->Canvas->LineTo(markX, posY + 3);
+
+            // Подписываем риску, которую алгоритм определил как ближайшую к нулю
+            if (closestX < 1e299 && std::abs(valX - bestValX) < 1e-9)
+            {
+                if (!CheckBox1->Checked || (CheckBox1->Checked && PaintBox1->Tag == 0))
+                {
+                    if (needDrawLabels && std::abs(valX) < 100000.0)
+                    {
+                        PaintBox1->Canvas->Brush->Style = bsClear;
+                        PaintBox1->Canvas->Font->Color = clBlack;
+
+                        AnsiString txtX = FloatToStrF(valX, ffGeneral, 4, 2);
+
+                        if (txtX.AnsiPos(".") > 0)
+                        {
+                            while (txtX.Length() > 0 && txtX[txtX.Length()] == '0') {
+                                txtX.Delete(txtX.Length(), 1);
+                            }
+                            if (txtX.Length() > 0 && txtX[txtX.Length()] == '.') {
+                                txtX.Delete(txtX.Length(), 1);
+                            }
+                        }
+
+                        int labelY = (posY + 6 + 14 > (PaintBox1->Height - padBottom)) ? (posY - 28) : (posY + 6);
+                        int textWidthHalf = PaintBox1->Canvas->TextWidth(txtX) / 2;
+                        PaintBox1->Canvas->TextOut(markX - textWidthHalf, labelY, txtX);
+                    }
+                }
+            }
         }
     }
 
@@ -724,6 +780,30 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     double endY = floor(ma / stepY) * stepY;
     int iterationsCount = 0;
 
+    double closestY = 1e300;
+    double bestValY = 0.0;
+
+    // Ищем риску Y, ближайшую к нулю
+    int testCountY = 0;
+    for (double valY = startY; valY <= endY && testCountY < 50; valY += stepY)
+    {
+        testCountY++;
+        if (std::abs(valY) < 1e-9) continue;
+
+        int markY = padTop + floor(workHeight * (ma - valY) / (ma - mi)) + (mi * ma == 0 ? corr : 0);
+        if (markY >= 15 && markY <= PaintBox1->Height - padBottom)
+        {
+            double dist = std::abs(valY);
+
+            if (dist < (closestY - 1e-5) || (std::abs(dist - closestY) < 1e-5 && valY > 0.0))
+            {
+                closestY = dist;
+                bestValY = valY;
+            }
+        }
+    }
+
+    // Второй проход: отрисовка рисок Y и вывод текста
     for (double valY = startY; valY <= endY && iterationsCount < 50; valY += stepY)
     {
         iterationsCount++;
@@ -734,25 +814,69 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
         {
             PaintBox1->Canvas->MoveTo(posX - 3, markY);
             PaintBox1->Canvas->LineTo(posX + 3, markY);
+
+            if (closestY < 1e299 && std::abs(valY - bestValY) < 1e-9)
+            {
+                if (needDrawLabels && std::abs(valY) < 100000.0)
+                {
+                    PaintBox1->Canvas->Brush->Style = bsClear;
+                    PaintBox1->Canvas->Font->Color = clBlack;
+
+                    AnsiString txtY = FloatToStrF(valY, ffFixed, 7, 2);
+
+                    if (txtY.AnsiPos(".") > 0)
+                    {
+                        while (txtY.Length() > 0 && txtY[txtY.Length()] == '0') {
+                            txtY.Delete(txtY.Length(), 1);
+                        }
+                        if (txtY.Length() > 0 && txtY[txtY.Length()] == '.') {
+                            txtY.Delete(txtY.Length(), 1);
+                        }
+                    }
+
+                    // Адаптивное позиционирование подписи оси Y
+                    // Узнаем точную физическую ширину строки в пикселях
+                    int realTextWidth = PaintBox1->Canvas->TextWidth(txtY);
+                    int textX;
+
+                    // Проверяем положение оси Y: если слева от оси слишком мало места
+                    if (posX - realTextWidth - 8 < padLeft)
+                    {
+                        // Ось слева -> рисуем подпись справа от оси с зазором в 8 пикселей
+                        textX = posX + 8;
+                    }
+                    else
+                    {
+                        // Иначе рисуем подпись слева от оси.
+                        // Отнимаем ширину текста и добавляем зазор в 6 пикселей от линии
+                        textX = posX - realTextWidth - 6;
+                    }
+
+                    PaintBox1->Canvas->TextOut(textX, markY - 7, txtY);
+                }
+            }
         }
     }
 
     // Подписи
-    PaintBox1->Canvas->Font->Name = "Arial";
-    PaintBox1->Canvas->Font->Size = 10;
-    PaintBox1->Canvas->Font->Color = clBlack;
-    PaintBox1->Canvas->Font->Style = TFontStyles() << fsBold;
-    PaintBox1->Canvas->Brush->Style = bsClear;
-
-    int textY = posY + 6;
-    if (textY + 18 > (PaintBox1->Height - padBottom))
+    if (needDrawLabels)
     {
-        textY = posY - 32; // Подпись выше оси, если снизу нет места
-    }
+        PaintBox1->Canvas->Font->Name = "Arial";
+        PaintBox1->Canvas->Font->Size = 10;
+        PaintBox1->Canvas->Font->Color = clBlack;
+        PaintBox1->Canvas->Font->Style = TFontStyles() << fsBold;
+        PaintBox1->Canvas->Brush->Style = bsClear;
 
-    rightEdge = PaintBox1->Width - padRight;
-    PaintBox1->Canvas->TextOut(rightEdge - 15, textY, "X");
-    PaintBox1->Canvas->TextOut(posX + 8, 4, "Y");
+        int textY = posY + 6;
+        if (textY + 18 > (PaintBox1->Height - padBottom))
+        {
+            textY = posY - 32;
+        }
+
+        rightEdge = PaintBox1->Width - padRight;
+        PaintBox1->Canvas->TextOut(rightEdge - 15, textY, "X");
+        PaintBox1->Canvas->TextOut(posX + 8, 4, "Y");
+    }
 
     delete[] this->Res;
     delete[] v;
