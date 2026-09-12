@@ -673,15 +673,34 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     PaintBox1->Canvas->Polygon(arrowY, 2);
 
     // Засечки оси X
-    double startX = ceil(this->a * 2.0) / 2.0;
-    double endX = floor(this->b * 2.0) / 2.0;
+    const int MAX_MARKS_X = 20;
+    double deltaX = this->b - this->a;
+    double stepX = 0.5;
 
-    for (double valX = startX; valX <= endX; valX += 0.5)
+    // Если количество рисок превышает лимит,
+    // пересчитываем шаг адаптивно
+    if ((deltaX / stepX) > MAX_MARKS_X)
     {
-        if (std::abs(valX) < 1e-9) continue;
+        // Выбираем более крупный шаг
+        stepX = ceil(deltaX / (double)MAX_MARKS_X);
+        if (stepX < 1.0) stepX = 1.0;
+    }
+
+    // Вычисляем стартовую и конечную точки цикла с учетом нового шага
+    double startX = ceil(this->a / stepX) * stepX;
+    double endX = floor(this->b / stepX) * stepX;
+    int iterationsCountX = 0;
+
+    // Цикл отрисовки с лимитом 50 итераций
+    for (double valX = startX; valX <= endX && iterationsCountX < 50; valX += stepX)
+    {
+        iterationsCountX++;
+        if (std::abs(valX) < 1e-9) continue; // Пропускаем ноль (там стоит ось Y)
 
         int markX = padLeft + floor(workWidth * (valX - this->a) / (this->b - this->a));
-        if (markX >= padLeft && markX <= PaintBox1->Width - 15)
+
+        // Не рисуем риску, если она находится в пределах 15 пикселей от острия
+        if (markX >= padLeft && markX <= (rightEdge - 15))
         {
             PaintBox1->Canvas->MoveTo(markX, posY - 3);
             PaintBox1->Canvas->LineTo(markX, posY + 3);
@@ -874,7 +893,14 @@ void __fastcall TForm1::ToggleFullscreen()
 
     Application->ProcessMessages();
 
-    Button1Click(nullptr);
+    if (is_first_graph)
+    {
+        PaintBox1->Repaint();
+    }
+    else
+    {
+        Button1Click(nullptr);
+    }
 }
 
 
