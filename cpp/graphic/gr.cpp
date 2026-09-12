@@ -2,6 +2,7 @@
 #pragma hdrstop
 #include "gr.h"
 #include <math.h>
+#define _USE_MATH_DEFINES
 #include <cmath>
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -366,11 +367,27 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
         return;
     }
 
-    if (str == "x")
+    AnsiString checkStr = str.LowerCase();
+
+    if (checkStr == "x")
     {
         for (int j = 0; j <= this->n; j++)
         {
             values[j] = this->Mas[j];
+        }
+    }
+    else if (checkStr == "pi")
+    {
+        for (int j = 0; j <= this->n; j++)
+        {
+            values[j] = M_PI;
+        }
+    }
+    else if (checkStr == "e")
+    {
+        for (int j = 0; j <= this->n; j++)
+        {
+            values[j] = M_E;
         }
     }
     else if (str != "")
@@ -722,6 +739,8 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
 	ComboBox1->Items->Add("ln(x)");
 	ComboBox1->Items->Add("x*ln(x)");
     ComboBox1->Items->Add("x^3/(x^2-0.5)");
+    ComboBox1->Items->Add("e^(-x^2)*cos(2*pi*x)");
+    ComboBox1->Items->Add("cos(pi*|x|)-|x|");
 
     ComboBox1->DropDownCount = ComboBox1->Items->Count;
     ComboBox1->ItemIndex = 0;
