@@ -90,6 +90,7 @@ object Form1: TForm1
       ParentFont = False
       TabOrder = 0
       Text = 'f(x)'
+      OnChange = ComboBox1Change
       OnKeyPress = ComboKeyPress
       Items.Strings = (
         'x^2+2*x+1'
@@ -144,7 +145,6 @@ object Form1: TForm1
       ParentFont = False
       TabOrder = 4
       OnClick = Button1Click
-      ExplicitTop = 0
     end
   end
 end

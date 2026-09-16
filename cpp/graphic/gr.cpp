@@ -1,13 +1,26 @@
 #include <vcl.h>
 #pragma hdrstop
 #include "gr.h"
-#include <math.h>
+
 #define _USE_MATH_DEFINES
 #include <cmath>
+
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 
+#include <System.JSON.hpp>
+#include <filesystem>
+#include <vector>
+
 TForm1 *Form1;
+
+struct TFormulaConfig
+{
+    double a;
+    double b;
+};
+
+std::vector<TFormulaConfig> FormulaLimits;
 
 __fastcall TForm1::TForm1(TComponent* Owner)
     : TForm(Owner)
@@ -70,8 +83,10 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
         while (bracketCount != 0 && i < str.Length())
         {
             i++;
-            if (str[i] == '(')  bracketCount++;
-            if (str[i] == ')')  bracketCount--;
+            if (str[i] == '(')
+                bracketCount++;
+            if (str[i] == ')')
+                bracketCount--;
         }
 
         if (i == str.Length() && bracketCount == 0)
@@ -134,8 +149,10 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
     // Операторы: + и -
     for (int i = str.Length(); i >= 1; i--)
     {
-        if (str[i] == '(')  bracketCount++;
-        if (str[i] == ')')  bracketCount--;
+        if (str[i] == '(')
+            bracketCount++;
+        if (str[i] == ')')
+            bracketCount--;
 
         if (bracketCount == 0 && isOperatorFound == 0)
         {
@@ -172,12 +189,15 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
     }
 
     // Оператор: *
-    if (isOperatorFound == 1) return;
+    if (isOperatorFound == 1)
+        return;
 
     for (int i = str.Length(); i >= 1; i--)
     {
-        if (str[i] == '(')  bracketCount++;
-        if (str[i] == ')')  bracketCount--;
+        if (str[i] == '(')
+            bracketCount++;
+        if (str[i] == ')')
+            bracketCount--;
 
         if (bracketCount == 0 && isOperatorFound == 0)
         {
@@ -209,12 +229,15 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
     }
 
     // Оператор: /
-    if (isOperatorFound == 1) return;
+    if (isOperatorFound == 1)
+        return;
 
     for (int i = str.Length(); i >= 1; i--)
     {
-        if (str[i] == '(')  bracketCount++;
-        if (str[i] == ')')  bracketCount--;
+        if (str[i] == '(')
+            bracketCount++;
+        if (str[i] == ')')
+            bracketCount--;
 
         if (bracketCount == 0 && isOperatorFound == 0)
         {
@@ -245,12 +268,15 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
     }
 
     // Оператор: ^
-    if (isOperatorFound == 1) return;
+    if (isOperatorFound == 1)
+        return;
 
     for (int i = str.Length(); i >= 1; i--)
     {
-        if (str[i] == '(')  bracketCount++;
-        if (str[i] == ')')  bracketCount--;
+        if (str[i] == '(')
+            bracketCount++;
+        if (str[i] == ')')
+            bracketCount--;
 
         if (bracketCount == 0 && isOperatorFound == 0)
         {
@@ -275,27 +301,54 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
     }
 
     // Математические функции: sin, cos, ctg, tg, ln
-    if (isOperatorFound == 1) return;
+    if (isOperatorFound == 1)
+        return;
 
     // Приведение строки к нижнему регистру
     AnsiString lowerStr = str.LowerCase();
 
     for (int i = 1; i <= lowerStr.Length(); i++)
     {
-        if (lowerStr[i] == '(')  bracketCount++;
-        if (lowerStr[i] == ')')  bracketCount--;
+        if (lowerStr[i] == '(')
+            bracketCount++;
+        if (lowerStr[i] == ')')
+            bracketCount--;
 
         if (bracketCount == 0)
         {
             functionType = 0;
             int offset = 0;
 
-            if (lowerStr.SubString(i, 4) == "sin(")       { functionType = 1; offset = 4; }
-            else if (lowerStr.SubString(i, 4) == "cos(")  { functionType = 2; offset = 4; }
-            else if (lowerStr.SubString(i, 4) == "ctg(")  { functionType = 3; offset = 4; }
-            else if (lowerStr.SubString(i, 3) == "tg(")   { functionType = 4; offset = 3; }
-            else if (lowerStr.SubString(i, 3) == "in(")   { functionType = 5; offset = 3; }
-            else if (lowerStr.SubString(i, 3) == "ln(")   { functionType = 5; offset = 3; }
+            if (lowerStr.SubString(i, 4) == "sin(")
+            {
+                functionType = 1;
+                offset = 4;
+            }
+            else if (lowerStr.SubString(i, 4) == "cos(")
+            {
+                functionType = 2;
+                offset = 4;
+            }
+            else if (lowerStr.SubString(i, 4) == "ctg(")
+            {
+                functionType = 3;
+                offset = 4;
+            }
+            else if (lowerStr.SubString(i, 3) == "tg(")
+            {
+                functionType = 4;
+                offset = 3;
+            }
+            else if (lowerStr.SubString(i, 3) == "in(")
+            {
+                functionType = 5;
+                offset = 3;
+            }
+            else if (lowerStr.SubString(i, 3) == "ln(")
+            {
+                functionType = 5;
+                offset = 3;
+            }
 
             if (functionType >= 1 && functionType <= 5)
             {
@@ -321,9 +374,12 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
                             }
                             else
                             {
-                                if (arg > 0.0) {
+                                if (arg > 0.0)
+                                {
                                     values[j] = log(arg);
-                                } else {
+                                }
+                                else
+                                {
                                     values[j] = 1e300;
                                 }
                             }
@@ -337,7 +393,8 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
         }
     }
 
-    if (isOperatorFound == 1) return;
+    if (isOperatorFound == 1)
+        return;
 
     // Раскрытие скобок в конце
     while (str.Length() > 0 && str[1] == '(' && str[str.Length()] == ')')
@@ -347,8 +404,10 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
         while (bracketCount != 0 && i < str.Length())
         {
             i++;
-            if (str[i] == '(')  bracketCount++;
-            if (str[i] == ')')  bracketCount--;
+            if (str[i] == '(')
+                bracketCount++;
+            if (str[i] == ')')
+                bracketCount--;
         }
         if (i == str.Length() && bracketCount == 0)
         {
@@ -441,7 +500,8 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
                 is_first_graph = true;
             }
         }
-        catch (const EConvertError&) {
+        catch (const EConvertError&)
+        {
             // Ошибки конвертации обработает оригинальный try-catch ниже в коде
         }
     }
@@ -462,7 +522,8 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
         PaintBox1->Repaint();
 
         // Очищаем старое дерево формулы, если оно существовало
-        if (this->p != nullptr) {
+        if (this->p != nullptr)
+        {
             this->p = nullptr;
         }
     }
@@ -480,8 +541,10 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     this->s = AnsiString(ComboBox1->Text);
     for (int i = 1; i <= this->s.Length(); i++)
     {
-        if (this->s[i] == '(')  bracketCount++;
-        if (this->s[i] == ')')  bracketCount--;
+        if (this->s[i] == '(')
+            bracketCount++;
+        if (this->s[i] == ')')
+            bracketCount--;
     }
 
     if (bracketCount != 0)
@@ -513,9 +576,7 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
         return;
     }
 
-    if (this->Mas != nullptr) {
-        delete[] this->Mas;
-    }
+    delete[] Mas;
     this->Mas = initMas(this->a, this->b, this->n);
     this->Res = new double[this->n + 1];
 
@@ -596,10 +657,13 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
         v[i] = Point(screenX, screenY);
     }
 
-    if (CheckBox1->Checked) {
+    if (CheckBox1->Checked)
+    {
         // Генерирует случайный цвет, исключая слишком светлые
         PaintBox1->Canvas->Pen->Color = (TColor)RGB(rand()%200, rand()%200, rand()%200);
-    } else {
+    }
+    else
+    {
         PaintBox1->Canvas->Pen->Color = clBlack;
         PaintBox1->Canvas->Pen->Width = 1;
     }
@@ -746,10 +810,12 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 
                         if (txtX.AnsiPos(".") > 0)
                         {
-                            while (txtX.Length() > 0 && txtX[txtX.Length()] == '0') {
+                            while (txtX.Length() > 0 && txtX[txtX.Length()] == '0')
+                            {
                                 txtX.Delete(txtX.Length(), 1);
                             }
-                            if (txtX.Length() > 0 && txtX[txtX.Length()] == '.') {
+                            if (txtX.Length() > 0 && txtX[txtX.Length()] == '.')
+                            {
                                 txtX.Delete(txtX.Length(), 1);
                             }
                         }
@@ -807,7 +873,8 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     for (double valY = startY; valY <= endY && iterationsCount < 50; valY += stepY)
     {
         iterationsCount++;
-        if (std::abs(valY) < 1e-9) continue;
+        if (std::abs(valY) < 1e-9)
+            continue;
 
         int markY = padTop + floor(workHeight * (ma - valY) / (ma - mi)) + (mi * ma == 0 ? corr : 0);
         if (markY >= 15 && markY <= PaintBox1->Height - padBottom)
@@ -826,10 +893,12 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 
                     if (txtY.AnsiPos(".") > 0)
                     {
-                        while (txtY.Length() > 0 && txtY[txtY.Length()] == '0') {
+                        while (txtY.Length() > 0 && txtY[txtY.Length()] == '0')
+                        {
                             txtY.Delete(txtY.Length(), 1);
                         }
-                        if (txtY.Length() > 0 && txtY[txtY.Length()] == '.') {
+                        if (txtY.Length() > 0 && txtY[txtY.Length()] == '.')
+                        {
                             txtY.Delete(txtY.Length(), 1);
                         }
                     }
@@ -884,37 +953,90 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     delete[] o2;
 }
 
+void LoadFormulasFromJSON(TComboBox *ComboBox)
+{
+    std::filesystem::path exeDir = std::filesystem::path(ParamStr(0).c_str()).parent_path();
+    std::filesystem::path jsonPath = exeDir / "functions.json";
+
+    String filePath = jsonPath.c_str();
+    TStringList *fileContent = new TStringList();
+
+    FormulaLimits.clear();
+    ComboBox->Items->Clear();
+
+    if (!std::filesystem::exists(jsonPath))
+    {
+        TJSONArray *baseArray = new TJSONArray();
+
+        UnicodeString defaultFormulas[] = {"x^2+2*x+1", "1/x", "sin(x)",
+                                           "ln(x)"};
+        double defaultA[] = {-2, -0.6, -3.16, -0.02};
+        double defaultB[] = {1, 0.6, -3.16, 10};
+
+        for (int i = 0; i < 4; i++)
+        {
+            TJSONObject *item = new TJSONObject();
+            item->AddPair("formula", defaultFormulas[i]);
+            item->AddPair("a", defaultA[i]);
+            item->AddPair("b", defaultB[i]);
+            baseArray->AddElement(item);
+        }
+
+        fileContent->Text = baseArray->ToString();
+        fileContent->SaveToFile(filePath, TEncoding::UTF8);
+        delete baseArray;
+    }
+
+    TJSONArray *jsonArray = nullptr;
+    try
+    {
+        fileContent->LoadFromFile(filePath, TEncoding::UTF8);
+        jsonArray = (TJSONArray*)TJSONObject::ParseJSONValue(fileContent->Text);
+
+        if (jsonArray != nullptr)
+        {
+            for (int i = 0; i < jsonArray->Count; i++)
+            {
+                TJSONObject *item = (TJSONObject*)jsonArray->Items[i];
+
+                UnicodeString formula = item->Values["formula"]->Value();
+                double valA = item->Values["a"]->Value().ToDouble();
+                double valB = item->Values["b"]->Value().ToDouble();
+
+                ComboBox->Items->Add(formula);
+
+                TFormulaConfig cfg = {valA, valB};
+                FormulaLimits.push_back(cfg);
+            }
+        }
+    }
+    __finally
+    {
+        delete fileContent;
+        if (jsonArray != nullptr)
+        delete jsonArray;
+    }
+}
+
 void __fastcall TForm1::FormCreate(TObject *Sender)
 {
     _control87(MCW_EM, MCW_EM);
 
     System::Sysutils::FormatSettings.DecimalSeparator = '.';
 
-    ComboBox1->Items->Clear();
-    ComboBox1->Items->Add("x^2+2*x+1");
-    ComboBox1->Items->Add("x^3-x");
-    ComboBox1->Items->Add("0.1*x^3-x^2+x");
-    ComboBox1->Items->Add("x^4-4*x^2");
-    ComboBox1->Items->Add("x*sin(1/x)");
-    ComboBox1->Items->Add("|x|");
-    ComboBox1->Items->Add("-x");
-    ComboBox1->Items->Add("1/x");
-    ComboBox1->Items->Add("1/x^2");
-    ComboBox1->Items->Add("1/(1+x^2)");
-    ComboBox1->Items->Add("1/(1+25*x^2)");
-    ComboBox1->Items->Add("sin(x)");
-    ComboBox1->Items->Add("cos(x)");
-    ComboBox1->Items->Add("sin(x)*cos(x)");
-    ComboBox1->Items->Add("tg(x)*ctg(x)");
-    ComboBox1->Items->Add("sin(x^2)");
-	ComboBox1->Items->Add("ln(x)");
-	ComboBox1->Items->Add("x*ln(x)");
-    ComboBox1->Items->Add("x^3/(x^2-0.5)");
-    ComboBox1->Items->Add("e^(-x^2)*cos(2*pi*x)");
-    ComboBox1->Items->Add("cos(pi*|x|)-|x|");
+    LoadFormulasFromJSON(ComboBox1);
 
     ComboBox1->DropDownCount = ComboBox1->Items->Count;
     ComboBox1->ItemIndex = 0;
+
+    if (!FormulaLimits.empty())
+    {
+        this->a = FormulaLimits[0].a;
+        this->b = FormulaLimits[0].b;
+        Edit2->Text = FloatToStr(this->a);
+        Edit3->Text = FloatToStr(this->b);
+    }
+
     ComboBox1->Focused();
 }
 
@@ -953,12 +1075,14 @@ void __fastcall TForm1::E3KeyPress(TObject *Sender, char &Key)
 
 void __fastcall TForm1::CheckBox1Click(TObject *Sender)
 {
-    if (!CheckBox1->Checked) {
+    if (!CheckBox1->Checked)
+    {
         is_first_graph = true;
     }
     else
     {
-        if (this->Res != nullptr) {
+        if (this->Res != nullptr)
+        {
             is_first_graph = false;
         }
     }
@@ -1027,7 +1151,6 @@ void __fastcall TForm1::ToggleFullscreen()
     }
 }
 
-
 void __fastcall TForm1::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
 {
     if (Key == VK_F11)
@@ -1040,5 +1163,29 @@ void __fastcall TForm1::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shif
     {
         ToggleFullscreen();
         Key = 0;
+    }
+}
+
+void __fastcall TForm1::ComboBox1Change(TObject *Sender)
+{
+    int index = ComboBox1->ItemIndex;
+
+    if (index >= 0 && index < (int)FormulaLimits.size())
+    {
+        if (!CheckBox1->Checked)
+        {
+            this->a = FormulaLimits[index].a;
+            this->b = FormulaLimits[index].b;
+
+            Edit2->Text = FloatToStr(this->a);
+            Edit3->Text = FloatToStr(this->b);
+
+            is_first_graph = true;
+        }
+        else
+        {
+            is_first_graph = false;
+        }
+        Button1Click(Button1);
     }
 }

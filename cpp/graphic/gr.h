@@ -37,6 +37,7 @@ __published:
     void __fastcall CheckBox1Click(TObject *Sender);
     void __fastcall FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
     void __fastcall ToggleFullscreen();
+	void __fastcall ComboBox1Change(TObject *Sender);
 
 private:
     TBorderStyle FOldBorderStyle;
