@@ -44,7 +44,7 @@ double* TForm1::initMas(double a_val, double b_val, int n_val)
     if (b_val <= a_val)
     {
         ShowMessage("Левая граница должна быть строго меньше правой!");
-        this->er = 1;
+        er = 1;
         return p_mas;
     }
 
@@ -65,13 +65,13 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
     int isOperatorFound = 0;
     int sign = 1;
 
-    if (this->er == 1)
+    if (er == 1)
     {
         return;
     }
 
     node = new uzel;
-    node->m = new double[this->n + 1];
+    node->m = new double[n + 1];
     node->l = nullptr;
     node->r = nullptr;
 
@@ -129,7 +129,7 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
             f(str, values, node->l);
 
             // Применяем математическую функцию модуля ко всем вычисленным точкам
-            for (int j = 0; j <= this->n; j++)
+            for (int j = 0; j <= n; j++)
             {
                 // Проверяем на маркер ошибки, чтобы не сломать логику разрывов
                 if (values[j] < 1e299 && !std::isnan(values[j]) && !std::isinf(values[j]))
@@ -163,7 +163,7 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 
                 if (sign == -1 && i == 1)
                 {
-                    for (int j = 0; j <= this->n; j++)
+                    for (int j = 0; j <= n; j++)
                     {
                         values[j] = 0;
                     }
@@ -177,7 +177,7 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
                 AnsiString sub2 = str.SubString(i + 1, str.Length() - i);
                 f(sub2, node->m, node->r);
 
-                for (int j = 0; j <= this->n; j++)
+                for (int j = 0; j <= n; j++)
                 {
                     values[j] = values[j] + sign * (*((node->m) + j));
                 }
@@ -210,7 +210,7 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
                 AnsiString sub2 = str.SubString(i + 1, str.Length() - i);
                 f(sub2, node->m, node->r);
 
-                for (int j = 0; j <= this->n; j++)
+                for (int j = 0; j <= n; j++)
             {
                 // Если левый или правый операнд - это маркер ошибки
                 if (values[j] >= 1e299 || *(node->m + j) >= 1e299)
@@ -250,7 +250,7 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
                 AnsiString sub2 = str.SubString(i + 1, str.Length() - i);
                 f(sub2, node->m, node->r);
 
-                for (int j = 0; j <= this->n; j++)
+                for (int j = 0; j <= n; j++)
                 {
                     if (std::abs(*(node->m + j)) <= 1e-10 || std::isnan(*(node->m + j)))
                     {
@@ -289,7 +289,7 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
                 AnsiString sub2 = str.SubString(i + 1, str.Length() - i);
                 f(sub2, node->m, node->r);
 
-                for (int j = 0; j <= this->n; j++)
+                for (int j = 0; j <= n; j++)
                 {
                     values[j] = pow(values[j], *(node->m + j));
                 }
@@ -358,7 +358,7 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
                 AnsiString sub = str.SubString(i + offset, str.Length() - (i + offset));
                 f(sub, node->m, node->l);
 
-                for (int j = 0; j <= this->n; j++)
+                for (int j = 0; j <= n; j++)
                 {
                     double arg = *(node->m + j);
                     switch (functionType)
@@ -439,21 +439,21 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 
     if (checkStr == "x")
     {
-        for (int j = 0; j <= this->n; j++)
+        for (int j = 0; j <= n; j++)
         {
-            values[j] = this->Mas[j];
+            values[j] = Mas[j];
         }
     }
     else if (checkStr == "pi")
     {
-        for (int j = 0; j <= this->n; j++)
+        for (int j = 0; j <= n; j++)
         {
             values[j] = M_PI;
         }
     }
     else if (checkStr == "e")
     {
-        for (int j = 0; j <= this->n; j++)
+        for (int j = 0; j <= n; j++)
         {
             values[j] = M_E;
         }
@@ -463,7 +463,7 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
         try
         {
             double val = str.ToDouble();
-            for (int j = 0; j <= this->n; j++)
+            for (int j = 0; j <= n; j++)
             {
                 values[j] = val;
             }
@@ -529,6 +529,10 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     {
         PaintBox1->Repaint();
 
+        PaintBox1->Canvas->Brush->Color = (TColor)this->BgColor;
+        PaintBox1->Canvas->Brush->Style = bsSolid;
+        PaintBox1->Canvas->FillRect(PaintBox1->ClientRect);
+
         // Очищаем старое дерево формулы, если оно существовало
         if (this->p != nullptr)
         {
@@ -543,8 +547,9 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     this->n = PaintBox1->Width - 1;
 
     TPoint *v = new TPoint[this->n + 1];
-    TPoint *o1 = new TPoint[2];
-    TPoint *o2 = new TPoint[2];
+    TPoint o1[2];
+    TPoint o2[2];
+
 
     this->s = AnsiString(ComboBox1->Text);
     for (int i = 1; i <= this->s.Length(); i++)
@@ -559,8 +564,6 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     {
         ShowMessage("Проверьте скобки в вашем выражении!");
         delete[] v;
-        delete[] o1;
-        delete[] o2;
         return;
     }
 
@@ -581,12 +584,11 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     {
         ShowMessage("Введите границы вывода в числовом виде! Допускаются как точки, так и запятые.");
         delete[] v;
-        delete[] o1;
-        delete[] o2;
         return;
     }
 
     delete[] Mas;
+    delete[] Res;
     this->Mas = initMas(this->a, this->b, this->n);
     this->Res = new double[this->n + 1];
 
@@ -598,12 +600,12 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     catch (...)
     {
         // В случае критического математического сбоя заполняем массив маркерами разрыва
-        for (int i = 0; i <= this->n; i++)
+        for (int i = 0; i <= n; i++)
             this->Res[i] = 1e300;
     }
 
     bool firstValid = false;
-    for (int i = 0; i <= this->n; i++)
+    for (int i = 0; i <= n; i++)
     {
         // Проверяем, что точка валидна, не бесконечна и не NaN
         if (this->Res[i] < 1e299 && !std::isinf(this->Res[i]) && !std::isnan(this->Res[i]))
@@ -663,7 +665,7 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     int workHeight = PaintBox1->Height - padTop - padBottom;
     int workWidth = PaintBox1->Width - padLeft - padRight;
 
-    for (int i = 0; i <= this->n; i++)
+    for (int i = 0; i <= n; i++)
     {
         int screenX = padLeft + floor((double)i * workWidth / this->n);
         int screenY = padTop + floor(workHeight * (ma - this->Res[i]) / (ma - mi)) + (mi * ma == 0 ? corr : 0);
@@ -677,12 +679,12 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     }
     else
     {
-        PaintBox1->Canvas->Pen->Color = clBlack;
-        PaintBox1->Canvas->Pen->Width = 1;
+        PaintBox1->Canvas->Pen->Color = (TColor)this->GraphColor;
     }
+    PaintBox1->Canvas->Pen->Width = this->GraphLineWidth;
     bool drawing = false; // Флаг: ведем ли мы сейчас линию
 
-    for (int i = 0; i <= this->n; i++)
+    for (int i = 0; i <= n; i++)
     {
         // Проверяем точку на валидность
         if (this->Res[i] < 1e299 && !std::isinf(this->Res[i]) && !std::isnan(this->Res[i]))
@@ -705,9 +707,9 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
         }
     }
 
-    PaintBox1->Canvas->Pen->Color = clRed;
-    PaintBox1->Canvas->Brush->Color = clRed;
-    PaintBox1->Canvas->Pen->Width = 2;
+    PaintBox1->Canvas->Pen->Color = (TColor)this->AxisColor;
+    PaintBox1->Canvas->Brush->Color = (TColor)this->AxisColor;
+    PaintBox1->Canvas->Pen->Width = this->AxisLineWidth;
 
     // Ось X
     int posY = padTop + floor(workHeight * ma / (ma - mi) + (mi * ma == 0 ? corr : 0));
@@ -822,7 +824,9 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
                     if (needDrawLabels && std::abs(valX) < 100000.0)
                     {
                         PaintBox1->Canvas->Brush->Style = bsClear;
-                        PaintBox1->Canvas->Font->Color = clBlack;
+                        PaintBox1->Canvas->Font->Name = this->FontName;
+                        PaintBox1->Canvas->Font->Size = this->FontSize;
+                        PaintBox1->Canvas->Font->Color = (TColor)this->FontColor;
 
                         AnsiString txtX = FloatToStrF(valX, ffGeneral, 4, 2);
 
@@ -838,7 +842,7 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
                             }
                         }
 
-                        int labelY = (posY + 6 + 14 > (PaintBox1->Height - padBottom)) ? (posY - 28) : (posY + 6);
+                        int labelY = (posY + 6 + 14 > (PaintBox1->Height - padBottom)) ? (posY - 32) : (posY + 6);
                         int textWidthHalf = PaintBox1->Canvas->TextWidth(txtX) / 2;
                         PaintBox1->Canvas->TextOut(markX - textWidthHalf, labelY, txtX);
                     }
@@ -906,7 +910,9 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
                 if (needDrawLabels && std::abs(valY) < 100000.0)
                 {
                     PaintBox1->Canvas->Brush->Style = bsClear;
-                    PaintBox1->Canvas->Font->Color = clBlack;
+                    PaintBox1->Canvas->Font->Name = this->FontName;
+                    PaintBox1->Canvas->Font->Size = this->FontSize;
+                    PaintBox1->Canvas->Font->Color = (TColor)this->FontColor;
 
                     AnsiString txtY = FloatToStrF(valY, ffFixed, 7, 2);
 
@@ -949,9 +955,9 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     // Подписи
     if (needDrawLabels)
     {
-        PaintBox1->Canvas->Font->Name = "Arial";
-        PaintBox1->Canvas->Font->Size = 10;
-        PaintBox1->Canvas->Font->Color = clBlack;
+        PaintBox1->Canvas->Font->Name = this->FontName;
+        PaintBox1->Canvas->Font->Size = this->FontSize;
+        PaintBox1->Canvas->Font->Color = (TColor)this->FontColor;
         PaintBox1->Canvas->Font->Style = TFontStyles() << fsBold;
         PaintBox1->Canvas->Brush->Style = bsClear;
 
@@ -968,8 +974,6 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 
     delete[] this->Res;
     delete[] v;
-    delete[] o1;
-    delete[] o2;
 }
 
 void LoadFormulasFromJSON(TComboBox *ComboBox)
@@ -1037,11 +1041,106 @@ void LoadFormulasFromJSON(TComboBox *ComboBox)
     }
 }
 
+void LoadProgramSettings(int& graphWidth, int& axisWidth, int& graphColor, int& axisColor, int& bgColor,
+                         int& btnTop, int& btnRight, UnicodeString& fontName, int& fontSize, int& fontColor)
+{
+    std::filesystem::path exeDir = std::filesystem::path(ParamStr(0).c_str()).parent_path();
+    std::filesystem::path configPath = exeDir / "settings.json";
+
+    String filePath = configPath.c_str();
+    TStringList* fileContent = new TStringList();
+
+    // Значения по умолчанию
+    graphWidth = 2;
+    axisWidth = 2;
+    graphColor = clBlack;
+    axisColor = clRed;
+    bgColor = clBtnFace;
+    btnTop = 15;
+    btnRight = 15;
+    fontName = "Arial";
+    fontSize = 10;
+    fontColor = clBlack;
+
+    if (!std::filesystem::exists(configPath))
+    {
+        TJSONObject* defaultSettings = new TJSONObject();
+        defaultSettings->AddPair("graph_line_width", graphWidth);
+        defaultSettings->AddPair("axis_line_width", axisWidth);
+        defaultSettings->AddPair("graph_color", "0x" + IntToHex(graphColor, 6));
+        defaultSettings->AddPair("axis_color", "0x" + IntToHex(axisColor, 6));
+        defaultSettings->AddPair("fs_btn_top", btnTop);
+        defaultSettings->AddPair("fs_btn_right", btnRight);
+        defaultSettings->AddPair("font_name", fontName);
+        defaultSettings->AddPair("font_size", fontSize);
+        defaultSettings->AddPair("font_color", "0x" + IntToHex(fontColor, 6));
+        defaultSettings->AddPair("bg_color", "0x" + IntToHex(bgColor, 6));
+
+        fileContent->Text = defaultSettings->ToString();
+        fileContent->SaveToFile(filePath, TEncoding::UTF8);
+        delete defaultSettings;
+    }
+
+    TJSONObject* jsonSettings = nullptr;
+    try
+    {
+        fileContent->LoadFromFile(filePath, TEncoding::UTF8);
+        jsonSettings = (TJSONObject*)TJSONObject::ParseJSONValue(fileContent->Text);
+
+        if (jsonSettings != nullptr)
+        {
+            // Чтение толщины (с жестким ограничением)
+            if (jsonSettings->Values["graph_line_width"] != nullptr)
+            {
+                int raw = jsonSettings->Values["graph_line_width"]->Value().ToInt();
+                graphWidth = (raw > 50 || raw < 1) ? 2 : raw;
+            }
+            if (jsonSettings->Values["axis_line_width"] != nullptr)
+            {
+                int raw = jsonSettings->Values["axis_line_width"]->Value().ToInt();
+                axisWidth = (raw > 10 || raw < 1) ? 2 : raw;
+            }
+
+            if (jsonSettings->Values["graph_color"] != nullptr)
+                graphColor = jsonSettings->Values["graph_color"]->Value().ToInt();
+
+            if (jsonSettings->Values["axis_color"] != nullptr)
+                axisColor = jsonSettings->Values["axis_color"]->Value().ToInt();
+
+            if (jsonSettings->Values["bg_color"] != nullptr)
+                bgColor = jsonSettings->Values["bg_color"]->Value().ToInt();
+
+            if (jsonSettings->Values["fs_btn_top"] != nullptr)
+                btnTop = jsonSettings->Values["fs_btn_top"]->Value().ToInt();
+
+            if (jsonSettings->Values["fs_btn_right"] != nullptr)
+                btnRight = jsonSettings->Values["fs_btn_right"]->Value().ToInt();
+
+            if (jsonSettings->Values["font_name"] != nullptr)
+                fontName = jsonSettings->Values["font_name"]->Value();
+
+            if (jsonSettings->Values["font_size"] != nullptr)
+                fontSize = jsonSettings->Values["font_size"]->Value().ToInt();
+
+            if (jsonSettings->Values["font_color"] != nullptr)
+                fontColor = jsonSettings->Values["font_color"]->Value().ToInt();
+        }
+    }
+    __finally
+    {
+        delete fileContent;
+        if (jsonSettings != nullptr) delete jsonSettings;
+    }
+}
+
 void __fastcall TForm1::FormCreate(TObject *Sender)
 {
     _control87(MCW_EM, MCW_EM);
 
     System::Sysutils::FormatSettings.DecimalSeparator = '.';
+
+    LoadProgramSettings(this->GraphLineWidth, this->AxisLineWidth, this->GraphColor, this->AxisColor, this->BgColor,
+                         this->FullscreenBtnTop, this->FullscreenBtnLeft, this->FontName, this->FontSize, this->FontColor);
 
     LoadFormulasFromJSON(ComboBox1);
 
@@ -1129,8 +1228,8 @@ void __fastcall TForm1::ToggleFullscreen()
         Button1->Align = alNone;
         Button1->BringToFront();
 
-        marginTop = 15;
-        marginRight = 15;
+        marginTop = this->FullscreenBtnTop;
+        marginRight = this->FullscreenBtnLeft;
     }
     else
     {
@@ -1166,7 +1265,7 @@ void __fastcall TForm1::ToggleFullscreen()
     }
     else
     {
-        Button1Click(nullptr);
+        Button1Click(Button1);
     }
 }
 

@@ -1,0 +1,12 @@
+{
+  "graph_line_width": 1,
+  "axis_line_width": 2,
+  "graph_color": "0xFFFFFF",
+  "axis_color": "0x0000FF",
+  "bg_color": "0x000000",
+  "font_color": "0xFFFFFF",
+  "font_name": "Arial",
+  "font_size": 10,
+  "fs_btn_top": 10,
+  "fs_btn_right": 10
+}

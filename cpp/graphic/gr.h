@@ -64,6 +64,17 @@ public:
     double saved_b;
     bool is_first_graph;
 
+    int GraphLineWidth;
+    int AxisLineWidth;
+    int GraphColor;
+    int AxisColor;
+    int BgColor;
+    int FullscreenBtnTop;
+    int FullscreenBtnLeft;
+    UnicodeString FontName;
+    int FontSize;
+    int FontColor;
+
     void f(AnsiString &str, double *values, uzel *&node);
     double* initMas(double a_val, double b_val, int n_val);
 };
