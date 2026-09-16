@@ -363,10 +363,18 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
                     double arg = *(node->m + j);
                     switch (functionType)
                     {
-                        case 1: values[j] = sin(arg); break;
-                        case 2: values[j] = cos(arg); break;
-                        case 3: values[j] = (std::abs(sin(arg)) <= 1e-10 ? 1e300 : 1.0 / tan(arg)); break;
-                        case 4: values[j] = (std::abs(cos(arg)) <= 1e-10 ? 1e300 : tan(arg)); break;
+                        case 1:
+                            values[j] = sin(arg);
+                            break;
+                        case 2:
+                            values[j] = cos(arg);
+                            break;
+                        case 3:
+                            values[j] = (std::abs(sin(arg)) <= 1e-10 ? 1e300 : 1.0 / tan(arg));
+                            break;
+                        case 4:
+                            values[j] = (std::abs(cos(arg)) <= 1e-10 ? 1e300 : tan(arg));
+                            break;
                         case 5:
                             if (arg <= 1e-10 || std::isnan(arg) || std::isinf(arg))
                             {
@@ -564,8 +572,10 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
         strA = System::Sysutils::StringReplace(strA, L",", L".", TReplaceFlags() << rfReplaceAll);
         strB = System::Sysutils::StringReplace(strB, L",", L".", TReplaceFlags() << rfReplaceAll);
 
-        if (strA != "") this->a = strA.ToDouble();
-        if (strB != "") this->b = strB.ToDouble();
+        if (strA != "")
+            this->a = strA.ToDouble();
+        if (strB != "")
+            this->b = strB.ToDouble();
     }
     catch (const EConvertError&)
     {
@@ -588,7 +598,8 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     catch (...)
     {
         // В случае критического математического сбоя заполняем массив маркерами разрыва
-        for (int i = 0; i <= this->n; i++) this->Res[i] = 1e300;
+        for (int i = 0; i <= this->n; i++)
+            this->Res[i] = 1e300;
     }
 
     bool firstValid = false;
@@ -605,8 +616,10 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
             }
             else
             {
-                if (mi > this->Res[i]) mi = this->Res[i];
-                if (ma < this->Res[i]) ma = this->Res[i];
+                if (mi > this->Res[i])
+                    mi = this->Res[i];
+                if (ma < this->Res[i])
+                    ma = this->Res[i];
             }
         }
     }
@@ -660,7 +673,7 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     if (CheckBox1->Checked)
     {
         // Генерирует случайный цвет, исключая слишком светлые
-        PaintBox1->Canvas->Pen->Color = (TColor)RGB(rand()%200, rand()%200, rand()%200);
+        PaintBox1->Canvas->Pen->Color = (TColor)RGB(rand() % 200, rand() % 200, rand() % 200);
     }
     else
     {
@@ -698,8 +711,10 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 
     // Ось X
     int posY = padTop + floor(workHeight * ma / (ma - mi) + (mi * ma == 0 ? corr : 0));
-    if (posY < padTop) posY = padTop;
-    if (posY > PaintBox1->Height - padBottom) posY = PaintBox1->Height - padBottom;
+    if (posY < padTop)
+        posY = padTop;
+    if (posY > PaintBox1->Height - padBottom)
+        posY = PaintBox1->Height - padBottom;
 
     int rightEdge = PaintBox1->Width - padRight;
     o1[0] = Point(padLeft, posY);
@@ -748,7 +763,8 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     {
         // Выбираем более крупный шаг
         stepX = ceil(deltaX / (double)MAX_MARKS_X);
-        if (stepX < 1.0) stepX = 1.0;
+        if (stepX < 1.0)
+            stepX = 1.0;
     }
 
     // Вычисляем стартовую и конечную точки цикла с учетом нового шага
@@ -765,7 +781,8 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     for (double valX = startX; valX <= endX && testCountX < 50; valX += stepX)
     {
         testCountX++;
-        if (std::abs(valX) < 1e-9) continue; // Пропускаем сам ноль
+        if (std::abs(valX) < 1e-9)
+            continue; // Пропускаем сам ноль
 
         int markX = padLeft + floor(workWidth * (valX - this->a) / (this->b - this->a));
         if (markX >= padLeft && markX <= (rightEdge - 15))
@@ -786,7 +803,8 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     for (double valX = startX; valX <= endX && iterationsCountX < 50; valX += stepX)
     {
         iterationsCountX++;
-        if (std::abs(valX) < 1e-9) continue; // Пропускаем ноль (там стоит ось Y)
+        if (std::abs(valX) < 1e-9)
+            continue; // Пропускаем ноль (там стоит ось Y)
 
         int markX = padLeft + floor(workWidth * (valX - this->a) / (this->b - this->a));
 
@@ -854,7 +872,8 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
     for (double valY = startY; valY <= endY && testCountY < 50; valY += stepY)
     {
         testCountY++;
-        if (std::abs(valY) < 1e-9) continue;
+        if (std::abs(valY) < 1e-9)
+            continue;
 
         int markY = padTop + floor(workHeight * (ma - valY) / (ma - mi)) + (mi * ma == 0 ? corr : 0);
         if (markY >= 15 && markY <= PaintBox1->Height - padBottom)
@@ -1096,10 +1115,10 @@ void __fastcall TForm1::ToggleFullscreen()
     {
         FOldBorderStyle = this->BorderStyle;
         FOldWindowState = this->WindowState;
-        FOldLeft        = this->Left;
-        FOldTop         = this->Top;
-        FOldWidth       = this->Width;
-        FOldHeight      = this->Height;
+        FOldLeft = this->Left;
+        FOldTop = this->Top;
+        FOldWidth = this->Width;
+        FOldHeight = this->Height;
 
         this->BorderStyle = bsNone;
         this->WindowState = wsMaximized;
@@ -1118,10 +1137,10 @@ void __fastcall TForm1::ToggleFullscreen()
         // Возвращаем обычный режим формы
         this->WindowState = wsNormal;
         this->BorderStyle = FOldBorderStyle;
-        this->Left        = FOldLeft;
-        this->Top         = FOldTop;
-        this->Width       = FOldWidth;
-        this->Height      = FOldHeight;
+        this->Left = FOldLeft;
+        this->Top = FOldTop;
+        this->Width = FOldWidth;
+        this->Height = FOldHeight;
         this->WindowState = FOldWindowState;
 
         FIsFullscreen = false;
