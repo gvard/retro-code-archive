@@ -29,7 +29,7 @@ __published:
 	TCheckBox *CheckBox1;
     TButton *Button1;
     TPaintBox *PaintBox1;
-    void __fastcall Button1Click(TObject *Sender);
+    void __fastcall UpdateGraphView(TObject *Sender);
     void __fastcall FormCreate(TObject *Sender);
     void __fastcall ComboKeyPress(TObject *Sender, char &Key);
     void __fastcall E2KeyPress(TObject *Sender, char &Key);

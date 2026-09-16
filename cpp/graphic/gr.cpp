@@ -482,7 +482,7 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
     }
 }
 
-void __fastcall TForm1::Button1Click(TObject *Sender)
+void __fastcall TForm1::UpdateGraphView(TObject *Sender)
 {
     int corr = -1;
     int bracketCount = 0;
@@ -1163,7 +1163,7 @@ void __fastcall TForm1::ComboKeyPress(TObject *Sender, char &Key)
     if (Key == VK_RETURN)
     {
         Button1->SetFocus();
-        Button1Click(Button1);
+        UpdateGraphView(Button1);
         Edit2->SetFocus();
         Key = 0;
     }
@@ -1174,7 +1174,7 @@ void __fastcall TForm1::E2KeyPress(TObject *Sender, char &Key)
     if (Key == VK_RETURN)
     {
         Button1->SetFocus();
-        Button1Click(Button1);
+        UpdateGraphView(Button1);
         Edit3->SetFocus();
         Key = 0;
     }
@@ -1185,7 +1185,7 @@ void __fastcall TForm1::E3KeyPress(TObject *Sender, char &Key)
     if (Key == VK_RETURN)
     {
         Button1->SetFocus();
-        Button1Click(Button1);
+        UpdateGraphView(Button1);
         CheckBox1->SetFocus();
         Key = 0;
     }
@@ -1259,13 +1259,28 @@ void __fastcall TForm1::ToggleFullscreen()
 
     Application->ProcessMessages();
 
-    if (is_first_graph)
+    static bool isProcessing = false;
+
+    if (isProcessing)
     {
-        PaintBox1->Repaint();
+        return;
     }
-    else
+
+    isProcessing = true;
+    try
     {
-        Button1Click(Button1);
+        if (is_first_graph)
+        {
+            PaintBox1->Repaint();
+        }
+        else
+        {
+            UpdateGraphView(Button1);
+        }
+    }
+    __finally
+    {
+        isProcessing = false;
     }
 }
 
@@ -1304,6 +1319,6 @@ void __fastcall TForm1::ComboBox1Change(TObject *Sender)
         {
             is_first_graph = false;
         }
-        Button1Click(Button1);
+        UpdateGraphView(Button1);
     }
 }
