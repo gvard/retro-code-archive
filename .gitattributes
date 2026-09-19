@@ -1,5 +1,11 @@
 .gitattributes text eol=lf
 
+*.cpp linguist-language=C++
+*.h linguist-language=C++
+*.dfm linguist-language=C++
+
+*.md linguist-documentation
+
 * text=auto
 
 *.py text eol=lf
