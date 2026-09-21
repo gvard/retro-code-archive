@@ -14,7 +14,6 @@
 
 #include <System.JSON.hpp>
 #include <filesystem>
-#include <vector>
 
 TForm1 *Form1;
 
@@ -27,15 +26,12 @@ __fastcall TForm1::TForm1(TComponent* Owner)
     b = 0;
     is_first_graph = true;
     FIsFullscreen = false;
-    Mas = nullptr;
-    Res = nullptr;
-    p = nullptr;
 }
 
-double* TForm1::initMas(double a_val, double b_val, int n_val)
+std::vector<double> TForm1::initMas(double a_val, double b_val, int n_val)
 {
     double h = (b_val - a_val) / n_val;
-    double *p_mas = new double[n_val + 1];
+    std::vector<double> p_mas(n_val + 1); // Выделяем память под N+1 элементов
 
     if (b_val <= a_val)
     {
@@ -44,17 +40,17 @@ double* TForm1::initMas(double a_val, double b_val, int n_val)
         return p_mas;
     }
 
-    *p_mas = a_val;
+    p_mas[0] = a_val;
     for (int i = 1; i <= n_val; i++)
     {
-        *(p_mas + i) = *(p_mas + i - 1) + h;
+        p_mas[i] = p_mas[i - 1] + h;
     }
 
     return p_mas;
 }
 
 // Передача AnsiString по константной ссылке исключает лишние копирования
-void TForm1::f(AnsiString &str, double *values, uzel *&node)
+void TForm1::f(AnsiString &str, std::vector<double> &values, std::unique_ptr<uzel> &node)
 {
     int bracketCount = 0;
     int functionType = 0;
@@ -66,10 +62,8 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
         return;
     }
 
-    node = new uzel;
-    node->m = new double[n + 1];
-    node->l = nullptr;
-    node->r = nullptr;
+    node = std::make_unique<uzel>();
+    node->m.resize(n + 1);
 
     // Раскрытие скобок в начале
     while (str.Length() > 0 && str[1] == '(' && str[str.Length()] == ')')
@@ -175,10 +169,9 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 
                 for (int j = 0; j <= n; j++)
                 {
-                    values[j] = values[j] + sign * (*((node->m) + j));
+                    values[j] = values[j] + sign * node->m[j];
                 }
 
-                delete[] node->m;
                 break;
             }
         }
@@ -209,16 +202,15 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
                 for (int j = 0; j <= n; j++)
             {
                 // Если левый или правый операнд - это маркер ошибки
-                if (values[j] >= 1e299 || *(node->m + j) >= 1e299)
+                if (values[j] >= 1e299 || node->m[j] >= 1e299)
                 {
                     values[j] = 1e300; // Пробрасываем ошибку дальше
                 }
                 else
                 {
-                    values[j] = values[j] * (*((node->m) + j));
+                    values[j] = values[j] * node->m[j];
                 }
             }
-                delete[] node->m;
                 break;
             }
         }
@@ -248,16 +240,15 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 
                 for (int j = 0; j <= n; j++)
                 {
-                    if (std::abs(*(node->m + j)) <= 1e-10 || std::isnan(*(node->m + j)))
+                    if (std::abs(node->m[j]) <= 1e-10 || std::isnan(node->m[j]))
                     {
                         values[j] = 1e300;
                     }
                     else
                     {
-                        values[j] = values[j] / (*((node->m) + j));
+                        values[j] = values[j] / node->m[j];
                     }
                 }
-                delete[] node->m;
                 break;
             }
         }
@@ -287,10 +278,9 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 
                 for (int j = 0; j <= n; j++)
                 {
-                    values[j] = pow(values[j], *(node->m + j));
+                    values[j] = pow(values[j], node->m[j]);
                 }
 
-                delete[] node->m;
                 break;
             }
         }
@@ -356,7 +346,7 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 
                 for (int j = 0; j <= n; j++)
                 {
-                    double arg = *(node->m + j);
+                    double arg = node->m[j];
                     switch (functionType)
                     {
                         case 1:
@@ -378,20 +368,12 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
                             }
                             else
                             {
-                                if (arg > 0.0)
-                                {
-                                    values[j] = log(arg);
-                                }
-                                else
-                                {
-                                    values[j] = 1e300;
-                                }
+                                values[j] = log(arg);
                             }
                             break;
                     }
                 }
 
-                delete[] node->m;
                 break;
             }
         }
@@ -493,13 +475,10 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
     CalculateGraphPoints();
 
     // Локальные структуры для передачи в отрисовщик (выделение памяти под динамический массив)
-    TPoint *v = new TPoint[this->n + 1];
+    std::vector<TPoint> v(this->n + 1);
 
     // 4. Отрисовка осей, кривых графиков, засечек и подписей текста
-    RenderAxesAndCurves(Sender, v);
-
-    // Освобождение локальных ресурсов
-    delete[] v;
+    RenderAxesAndCurves(Sender, v.data());
 }
 
 bool TForm1::ValidateInputAndParams(TObject* Sender)
@@ -548,16 +527,12 @@ void TForm1::PrepareCanvas()
     if (!CheckBox1->Checked)
     {
         PaintBox1->Repaint();
-
-        PaintBox1->Canvas->Brush->Color = (TColor)this->BgColor;
+        PaintBox1->Canvas->Brush->Color = static_cast<TColor>(this->BgColor);
         PaintBox1->Canvas->Brush->Style = bsSolid;
         PaintBox1->Canvas->FillRect(PaintBox1->ClientRect);
 
         // Очищаем старое дерево формулы, если оно существовало
-        if (this->p != nullptr)
-        {
-            this->p = nullptr;
-        }
+        this->p = nullptr;
     }
     else
     {
@@ -604,10 +579,8 @@ void TForm1::CalculateGraphPoints()
         return;
     }
 
-    delete[] Mas;
-    delete[] Res;
     this->Mas = initMas(this->a, this->b, this->n);
-    this->Res = new double[this->n + 1];
+    this->Res.resize(this->n + 1);
 
     try
     {
@@ -714,11 +687,11 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     if (CheckBox1->Checked)
     {
         // Генерирует случайный цвет, исключая слишком светлые
-        PaintBox1->Canvas->Pen->Color = (TColor)RGB(rand() % 200, rand() % 200, rand() % 200);
+        PaintBox1->Canvas->Pen->Color = static_cast<TColor>(RGB(rand() % 200, rand() % 200, rand() % 200));
     }
     else
     {
-        PaintBox1->Canvas->Pen->Color = (TColor)this->GraphColor;
+        PaintBox1->Canvas->Pen->Color = static_cast<TColor>(this->GraphColor);
     }
     PaintBox1->Canvas->Pen->Width = this->GraphLineWidth;
 
@@ -748,8 +721,8 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
         }
     }
 
-    PaintBox1->Canvas->Pen->Color = (TColor)this->AxisColor;
-    PaintBox1->Canvas->Brush->Color = (TColor)this->AxisColor;
+    PaintBox1->Canvas->Pen->Color = static_cast<TColor>(this->AxisColor);
+    PaintBox1->Canvas->Brush->Color = static_cast<TColor>(this->AxisColor);
     PaintBox1->Canvas->Pen->Width = this->AxisLineWidth;
 
     // 4. Отрисовка оси X
@@ -866,7 +839,7 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
                         PaintBox1->Canvas->Brush->Style = bsClear;
                         PaintBox1->Canvas->Font->Name = this->FontName;
                         PaintBox1->Canvas->Font->Size = this->FontSize;
-                        PaintBox1->Canvas->Font->Color = (TColor)this->FontColor;
+                        PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FontColor);
 
                         AnsiString txtX = FloatToStrF(valX, ffGeneral, 4, 2);
 
@@ -952,7 +925,7 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
                     PaintBox1->Canvas->Brush->Style = bsClear;
                     PaintBox1->Canvas->Font->Name = this->FontName;
                     PaintBox1->Canvas->Font->Size = this->FontSize;
-                    PaintBox1->Canvas->Font->Color = (TColor)this->FontColor;
+                    PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FontColor);
 
                     AnsiString txtY = FloatToStrF(valY, ffFixed, 7, 2);
 
@@ -997,7 +970,7 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     {
         PaintBox1->Canvas->Font->Name = this->FontName;
         PaintBox1->Canvas->Font->Size = this->FontSize;
-        PaintBox1->Canvas->Font->Color = (TColor)this->FontColor;
+        PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FontColor);
         PaintBox1->Canvas->Font->Style = TFontStyles() << fsBold;
         PaintBox1->Canvas->Brush->Style = bsClear;
 
@@ -1247,7 +1220,7 @@ void __fastcall TForm1::CheckBox1Click(TObject *Sender)
     }
     else
     {
-        if (this->Res != nullptr)
+        if (!this->Res.empty())
         {
             is_first_graph = false;
         }
@@ -1351,7 +1324,7 @@ void __fastcall TForm1::ComboBox1Change(TObject *Sender)
 {
     int index = ComboBox1->ItemIndex;
 
-    if (index >= 0 && index < (int)FFormulaLimits.size())
+    if (index >= 0 && index < static_cast<int>(FFormulaLimits.size()))
     {
         if (!CheckBox1->Checked)
         {

@@ -6,6 +6,7 @@
 #include <Vcl.StdCtrls.hpp>
 #include <Vcl.Forms.hpp>
 #include <Vcl.ExtCtrls.hpp>
+#include <memory>
 #include <vector>
 
 struct TFormulaConfig
@@ -16,9 +17,9 @@ struct TFormulaConfig
 
 struct uzel
 {
-    double *m = nullptr;
-    uzel *l = nullptr;
-    uzel *r = nullptr;
+    std::vector<double> m;
+    std::unique_ptr<uzel> l = nullptr;
+    std::unique_ptr<uzel> r = nullptr;
 };
 
 class TForm1 : public TForm
@@ -57,9 +58,9 @@ private:
     double a;
     double b;
     AnsiString s;
-    double *Mas;
-    double *Res;
-    uzel *p;
+    std::vector<double> Mas;
+    std::vector<double> Res;
+    std::unique_ptr<uzel> p = nullptr;
 
     double saved_mi;
     double saved_ma;
@@ -81,8 +82,8 @@ private:
     void __fastcall ToggleFullscreen();
     void __fastcall LoadFormulasFromJSON(TComboBox *ComboBox);
 
-    void f(AnsiString &str, double *values, uzel *&node);
-    double* initMas(double a_val, double b_val, int n_val);
+    void f(AnsiString &str, std::vector<double> &values, std::unique_ptr<uzel> &node);
+    std::vector<double> initMas(double a_val, double b_val, int n_val);
 
     bool ValidateInputAndParams(TObject* Sender);
     void PrepareCanvas();
