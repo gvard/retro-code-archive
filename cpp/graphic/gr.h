@@ -1,19 +1,12 @@
 #ifndef grH
 #define grH
-
-#ifdef __clang_analyzer__
-    #define published public
-#else
-    #define published __published
-#endif
+#include "parser.h"
 
 #include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>
 #include <Vcl.ExtCtrls.hpp>
 #include <Vcl.Forms.hpp>
 #include <Vcl.StdCtrls.hpp>
-#include <memory>
-#include <vector>
 
 struct TFormulaConfig
 {
@@ -21,16 +14,9 @@ struct TFormulaConfig
     double b = 0.0;
 };
 
-struct uzel
-{
-    std::vector<double> m;
-    std::unique_ptr<uzel> l = nullptr;
-    std::unique_ptr<uzel> r = nullptr;
-};
-
 class TForm1 : public TForm
 {
-published:
+__published:
     TPanel* Panel1;
     TComboBox* ComboBox1;
     TEdit* Edit2;
@@ -87,9 +73,6 @@ private:
 
     void __fastcall ToggleFullscreen();
     void __fastcall LoadFormulasFromJSON(TComboBox* ComboBox);
-
-    void f(AnsiString& str, std::vector<double>& values, std::unique_ptr<uzel>& node);
-    std::vector<double> initMas(double a_val, double b_val, int n_val);
 
     bool ValidateInputAndParams(TObject* Sender);
     void PrepareCanvas();

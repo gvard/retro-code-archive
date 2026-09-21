@@ -32,7 +32,6 @@ StatementMacros:
   - __published
   - __declspec
   - __pascal
-  - published
 
 # Инструкции для корректной группировки блоков видимости класса
 MacroBlockBegin: "^__published:|^private:|^public:|^protected:"
