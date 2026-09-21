@@ -14,14 +14,6 @@
 
 TForm1 *Form1;
 
-struct TFormulaConfig
-{
-    double a;
-    double b;
-};
-
-std::vector<TFormulaConfig> FormulaLimits;
-
 __fastcall TForm1::TForm1(TComponent* Owner)
     : TForm(Owner)
 {
@@ -484,11 +476,30 @@ void TForm1::f(AnsiString &str, double *values, uzel *&node)
 
 void __fastcall TForm1::UpdateGraphView(TObject *Sender)
 {
-    int corr = -1;
-    int bracketCount = 0;
-    double mi = 0, ma = 0;
-    bool needDrawLabels = (!CheckBox1->Checked || is_first_graph || Sender == nullptr);
+    // 1. Валидация входных данных (границы, чекбоксы масштабирования)
+    if (!ValidateInputAndParams(Sender))
+    {
+        return;
+    }
 
+    // 2. Очистка холста и заливка фона
+    PrepareCanvas();
+
+    // 3. Вычисление точек графика (инициализация массивов, вызов f())
+    CalculateGraphPoints();
+
+    // Локальные структуры для передачи в отрисовщик (выделение памяти под динамический массив)
+    TPoint *v = new TPoint[this->n + 1];
+
+    // 4. Отрисовка осей, кривых графиков, засечек и подписей текста
+    RenderAxesAndCurves(Sender, v);
+
+    // Освобождение локальных ресурсов
+    delete[] v;
+}
+
+bool TForm1::ValidateInputAndParams(TObject* Sender)
+{
     if (Sender != nullptr)
     {
         try
@@ -525,6 +536,11 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
         this->er = 0;
     }
 
+    return true;
+}
+
+void TForm1::PrepareCanvas()
+{
     if (!CheckBox1->Checked)
     {
         PaintBox1->Repaint();
@@ -543,14 +559,14 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
     {
         this->p = nullptr;
     }
+}
 
+void TForm1::CalculateGraphPoints()
+{
     this->n = PaintBox1->Width - 1;
 
-    TPoint *v = new TPoint[this->n + 1];
-    TPoint o1[2];
-    TPoint o2[2];
-
-
+    // Проверка скобок и границ перенесена сюда, так как она завязана на вычислениях
+    int bracketCount = 0;
     this->s = AnsiString(ComboBox1->Text);
     for (int i = 1; i <= this->s.Length(); i++)
     {
@@ -563,7 +579,6 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
     if (bracketCount != 0)
     {
         ShowMessage("Проверьте скобки в вашем выражении!");
-        delete[] v;
         return;
     }
 
@@ -571,7 +586,6 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
     {
         UnicodeString strA = Edit2->Text;
         UnicodeString strB = Edit3->Text;
-
         strA = System::Sysutils::StringReplace(strA, L",", L".", TReplaceFlags() << rfReplaceAll);
         strB = System::Sysutils::StringReplace(strB, L",", L".", TReplaceFlags() << rfReplaceAll);
 
@@ -583,7 +597,6 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
     catch (const EConvertError&)
     {
         ShowMessage("Введите границы вывода в числовом виде! Допускаются как точки, так и запятые.");
-        delete[] v;
         return;
     }
 
@@ -592,7 +605,6 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
     this->Mas = initMas(this->a, this->b, this->n);
     this->Res = new double[this->n + 1];
 
-    // Безопасный вызов парсера f() с отловом аппаратных исключений
     try
     {
         f(this->s, this->Res, this->p);
@@ -603,7 +615,29 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
         for (int i = 0; i <= n; i++)
             this->Res[i] = 1e300;
     }
+}
 
+void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
+{
+    // Оставшийся код отрисовки:
+    // 1. Поиск mi, ma и проверка на валидность точек (firstValid)
+    // 2. Расчет пропорций экрана (workHeight, workWidth)
+    // 3. Цикл перевода координат: v[i] = Point(...)
+    // 4. Отрисовка кривой графика (MoveTo/LineTo)
+    // 5. Отрисовка осей X и Y (Polyline/Polygon)
+    // 6. Циклы разметки засечек оси X и оси Y
+    // 7. Вывод подписей текста
+    TPoint o1[2];
+    TPoint o2[2];
+
+    int posY = 0;
+    int posX = 0;
+    int rightEdge = 0;
+    int corr = -1;
+    double mi = 0, ma = 0;
+    bool needDrawLabels = (!CheckBox1->Checked || is_first_graph || Sender == nullptr);
+
+    // 1. Поиск mi, ma и проверка на валидность точек (firstValid)
     bool firstValid = false;
     for (int i = 0; i <= n; i++)
     {
@@ -665,6 +699,7 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
     int workHeight = PaintBox1->Height - padTop - padBottom;
     int workWidth = PaintBox1->Width - padLeft - padRight;
 
+    // 2. Цикл перевода координат в экранные
     for (int i = 0; i <= n; i++)
     {
         int screenX = padLeft + floor((double)i * workWidth / this->n);
@@ -682,7 +717,9 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
         PaintBox1->Canvas->Pen->Color = (TColor)this->GraphColor;
     }
     PaintBox1->Canvas->Pen->Width = this->GraphLineWidth;
-    bool drawing = false; // Флаг: ведем ли мы сейчас линию
+
+    // 3. Отрисовка кривой графика (MoveTo/LineTo)
+    bool drawing = false;
 
     for (int i = 0; i <= n; i++)
     {
@@ -711,14 +748,14 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
     PaintBox1->Canvas->Brush->Color = (TColor)this->AxisColor;
     PaintBox1->Canvas->Pen->Width = this->AxisLineWidth;
 
-    // Ось X
-    int posY = padTop + floor(workHeight * ma / (ma - mi) + (mi * ma == 0 ? corr : 0));
+    // 4. Отрисовка оси X
+    posY = padTop + floor(workHeight * ma / (ma - mi) + (mi * ma == 0 ? corr : 0));
     if (posY < padTop)
         posY = padTop;
     if (posY > PaintBox1->Height - padBottom)
         posY = PaintBox1->Height - padBottom;
 
-    int rightEdge = PaintBox1->Width - padRight;
+    rightEdge = PaintBox1->Width - padRight;
     o1[0] = Point(padLeft, posY);
     o1[1] = Point(rightEdge, posY);
     PaintBox1->Canvas->Polyline(o1, 1);
@@ -729,8 +766,7 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
     arrowX[2] = Point(rightEdge - 8, posY + 4);
     PaintBox1->Canvas->Polygon(arrowX, 2);
 
-    // Ось Y
-    int posX = 0;
+    // 5. Отрисовка оси Y
     if (this->a <= 0 && this->b >= 0)
     {
         posX = padLeft + floor(workWidth * (0 - this->a) / (this->b - this->a));
@@ -754,7 +790,7 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
     arrowY[2] = Point(posX + 4, 13);
     PaintBox1->Canvas->Polygon(arrowY, 2);
 
-    // Засечки оси X
+    // 6. Разметка засечек оси X
     const int MAX_MARKS_X = 20;
     double deltaX = this->b - this->a;
     double stepX = 0.5;
@@ -806,7 +842,7 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
     {
         iterationsCountX++;
         if (std::abs(valX) < 1e-9)
-            continue; // Пропускаем ноль (там стоит ось Y)
+            continue;
 
         int markX = padLeft + floor(workWidth * (valX - this->a) / (this->b - this->a));
 
@@ -851,7 +887,7 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
         }
     }
 
-    // Динамические засечки оси Y
+    // 7. Разметка засечек оси Y
     double deltaY = ma - mi;
     double stepY = 0.5;
 
@@ -952,7 +988,7 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
         }
     }
 
-    // Подписи
+    // 8. Вывод подписей текста (букв X и Y на краях осей)
     if (needDrawLabels)
     {
         PaintBox1->Canvas->Font->Name = this->FontName;
@@ -971,12 +1007,9 @@ void __fastcall TForm1::UpdateGraphView(TObject *Sender)
         PaintBox1->Canvas->TextOut(rightEdge - 15, textY, "X");
         PaintBox1->Canvas->TextOut(posX + 8, 4, "Y");
     }
-
-    delete[] this->Res;
-    delete[] v;
 }
 
-void LoadFormulasFromJSON(TComboBox *ComboBox)
+void __fastcall TForm1::LoadFormulasFromJSON(TComboBox *ComboBox)
 {
     std::filesystem::path exeDir = std::filesystem::path(ParamStr(0).c_str()).parent_path();
     std::filesystem::path jsonPath = exeDir / "functions.json";
@@ -984,7 +1017,7 @@ void LoadFormulasFromJSON(TComboBox *ComboBox)
     String filePath = jsonPath.c_str();
     TStringList *fileContent = new TStringList();
 
-    FormulaLimits.clear();
+    FFormulaLimits.clear();
     ComboBox->Items->Clear();
 
     if (!std::filesystem::exists(jsonPath))
@@ -1029,7 +1062,7 @@ void LoadFormulasFromJSON(TComboBox *ComboBox)
                 ComboBox->Items->Add(formula);
 
                 TFormulaConfig cfg = {valA, valB};
-                FormulaLimits.push_back(cfg);
+                FFormulaLimits.push_back(cfg);
             }
         }
     }
@@ -1140,17 +1173,17 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     System::Sysutils::FormatSettings.DecimalSeparator = '.';
 
     LoadProgramSettings(this->GraphLineWidth, this->AxisLineWidth, this->GraphColor, this->AxisColor, this->BgColor,
-                         this->FullscreenBtnTop, this->FullscreenBtnLeft, this->FontName, this->FontSize, this->FontColor);
+                        this->FullscreenBtnTop, this->FullscreenBtnLeft, this->FontName, this->FontSize, this->FontColor);
 
     LoadFormulasFromJSON(ComboBox1);
 
     ComboBox1->DropDownCount = ComboBox1->Items->Count;
     ComboBox1->ItemIndex = 0;
 
-    if (!FormulaLimits.empty())
+    if (!FFormulaLimits.empty())
     {
-        this->a = FormulaLimits[0].a;
-        this->b = FormulaLimits[0].b;
+        this->a = FFormulaLimits[0].a;
+        this->b = FFormulaLimits[0].b;
         Edit2->Text = FloatToStr(this->a);
         Edit3->Text = FloatToStr(this->b);
     }
@@ -1303,12 +1336,12 @@ void __fastcall TForm1::ComboBox1Change(TObject *Sender)
 {
     int index = ComboBox1->ItemIndex;
 
-    if (index >= 0 && index < (int)FormulaLimits.size())
+    if (index >= 0 && index < (int)FFormulaLimits.size())
     {
         if (!CheckBox1->Checked)
         {
-            this->a = FormulaLimits[index].a;
-            this->b = FormulaLimits[index].b;
+            this->a = FFormulaLimits[index].a;
+            this->b = FFormulaLimits[index].b;
 
             Edit2->Text = FloatToStr(this->a);
             Edit3->Text = FloatToStr(this->b);

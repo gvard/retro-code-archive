@@ -5,15 +5,20 @@
 #include <Vcl.Controls.hpp>
 #include <Vcl.StdCtrls.hpp>
 #include <Vcl.Forms.hpp>
-#include <ExtCtrls.hpp>
-#include <iostream>
-#include <math.h>
+#include <Vcl.ExtCtrls.hpp>
+#include <vector>
+
+struct TFormulaConfig
+{
+    double a = 0.0;
+    double b = 0.0;
+};
 
 struct uzel
 {
-    double *m;
-    uzel *l;
-    uzel *r;
+    double *m = nullptr;
+    uzel *l = nullptr;
+    uzel *r = nullptr;
 };
 
 class TForm1 : public TForm
@@ -38,6 +43,7 @@ __published:
     void __fastcall FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
     void __fastcall ToggleFullscreen();
 	void __fastcall ComboBox1Change(TObject *Sender);
+    void __fastcall LoadFormulasFromJSON(TComboBox *ComboBox);
 
 private:
     TBorderStyle FOldBorderStyle;
@@ -45,9 +51,7 @@ private:
     int FOldLeft, FOldTop, FOldWidth, FOldHeight;
     bool FIsFullscreen;
     TColor current_graph_color;
-
-public:
-    __fastcall TForm1(TComponent* Owner);
+    std::vector<TFormulaConfig> FFormulaLimits;
 
     int n;
     int er;
@@ -57,6 +61,9 @@ public:
     double *Mas;
     double *Res;
     uzel *p;
+
+public:
+    __fastcall TForm1(TComponent* Owner);
 
     double saved_mi;
     double saved_ma;
@@ -77,6 +84,11 @@ public:
 
     void f(AnsiString &str, double *values, uzel *&node);
     double* initMas(double a_val, double b_val, int n_val);
+
+    bool ValidateInputAndParams(TObject* Sender);
+    void PrepareCanvas();
+    void CalculateGraphPoints();
+    void RenderAxesAndCurves(TObject *Sender, TPoint *v);
 };
 
 extern PACKAGE TForm1 *Form1;
