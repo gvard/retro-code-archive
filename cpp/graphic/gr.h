@@ -34,23 +34,22 @@ __published:
 	TCheckBox *CheckBox1;
     TButton *Button1;
     TPaintBox *PaintBox1;
-    void __fastcall UpdateGraphView(TObject *Sender);
+
     void __fastcall FormCreate(TObject *Sender);
+    void __fastcall UpdateGraphView(TObject *Sender);
     void __fastcall ComboKeyPress(TObject *Sender, char &Key);
     void __fastcall E2KeyPress(TObject *Sender, char &Key);
     void __fastcall E3KeyPress(TObject *Sender, char &Key);
     void __fastcall CheckBox1Click(TObject *Sender);
     void __fastcall FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
-    void __fastcall ToggleFullscreen();
 	void __fastcall ComboBox1Change(TObject *Sender);
-    void __fastcall LoadFormulasFromJSON(TComboBox *ComboBox);
 
 private:
     TBorderStyle FOldBorderStyle;
     TWindowState FOldWindowState;
     int FOldLeft, FOldTop, FOldWidth, FOldHeight;
     bool FIsFullscreen;
-    TColor current_graph_color;
+
     std::vector<TFormulaConfig> FFormulaLimits;
 
     int n;
@@ -61,9 +60,6 @@ private:
     double *Mas;
     double *Res;
     uzel *p;
-
-public:
-    __fastcall TForm1(TComponent* Owner);
 
     double saved_mi;
     double saved_ma;
@@ -82,6 +78,9 @@ public:
     int FontSize;
     int FontColor;
 
+    void __fastcall ToggleFullscreen();
+    void __fastcall LoadFormulasFromJSON(TComboBox *ComboBox);
+
     void f(AnsiString &str, double *values, uzel *&node);
     double* initMas(double a_val, double b_val, int n_val);
 
@@ -89,9 +88,11 @@ public:
     void PrepareCanvas();
     void CalculateGraphPoints();
     void RenderAxesAndCurves(TObject *Sender, TPoint *v);
+
+public:
+    __fastcall TForm1(TComponent* Owner);
 };
 
 extern PACKAGE TForm1 *Form1;
 
 #endif
-
