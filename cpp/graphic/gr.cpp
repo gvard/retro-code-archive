@@ -15,7 +15,7 @@
 #include <System.JSON.hpp>
 #include <filesystem>
 
-TForm1 *Form1;
+TForm1* Form1;
 
 __fastcall TForm1::TForm1(TComponent* Owner)
     : TForm(Owner)
@@ -50,7 +50,7 @@ std::vector<double> TForm1::initMas(double a_val, double b_val, int n_val)
 }
 
 // Передача AnsiString по константной ссылке исключает лишние копирования
-void TForm1::f(AnsiString &str, std::vector<double> &values, std::unique_ptr<uzel> &node)
+void TForm1::f(AnsiString& str, std::vector<double>& values, std::unique_ptr<uzel>& node)
 {
     int bracketCount = 0;
     int functionType = 0;
@@ -460,7 +460,7 @@ void TForm1::f(AnsiString &str, std::vector<double> &values, std::unique_ptr<uze
     }
 }
 
-void __fastcall TForm1::UpdateGraphView(TObject *Sender)
+void __fastcall TForm1::UpdateGraphView(TObject* Sender)
 {
     // 1. Валидация входных данных (границы, чекбоксы масштабирования)
     if (!ValidateInputAndParams(Sender))
@@ -986,20 +986,20 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     }
 }
 
-void __fastcall TForm1::LoadFormulasFromJSON(TComboBox *ComboBox)
+void __fastcall TForm1::LoadFormulasFromJSON(TComboBox* ComboBox)
 {
     std::filesystem::path exeDir = std::filesystem::path(ParamStr(0).c_str()).parent_path();
     std::filesystem::path jsonPath = exeDir / "functions.json";
 
     String filePath = jsonPath.c_str();
-    TStringList *fileContent = new TStringList();
+    TStringList* fileContent = new TStringList();
 
     FFormulaLimits.clear();
     ComboBox->Items->Clear();
 
     if (!std::filesystem::exists(jsonPath))
     {
-        TJSONArray *baseArray = new TJSONArray();
+        TJSONArray* baseArray = new TJSONArray();
 
         UnicodeString defaultFormulas[] = {"x^2+2*x+1", "1/x", "sin(x)",
                                            "ln(x)"};
@@ -1008,7 +1008,7 @@ void __fastcall TForm1::LoadFormulasFromJSON(TComboBox *ComboBox)
 
         for (int i = 0; i < 4; i++)
         {
-            TJSONObject *item = new TJSONObject();
+            TJSONObject* item = new TJSONObject();
             item->AddPair("formula", defaultFormulas[i]);
             item->AddPair("a", defaultA[i]);
             item->AddPair("b", defaultB[i]);
@@ -1020,7 +1020,7 @@ void __fastcall TForm1::LoadFormulasFromJSON(TComboBox *ComboBox)
         delete baseArray;
     }
 
-    TJSONArray *jsonArray = nullptr;
+    TJSONArray* jsonArray = nullptr;
     try
     {
         fileContent->LoadFromFile(filePath, TEncoding::UTF8);
@@ -1033,7 +1033,7 @@ void __fastcall TForm1::LoadFormulasFromJSON(TComboBox *ComboBox)
 
             for (int i = 0; i < jsonArray->Count; i++)
             {
-                TJSONObject *item = (TJSONObject*)jsonArray->Items[i];
+                TJSONObject* item = (TJSONObject*)jsonArray->Items[i];
 
                 UnicodeString formula = item->Values["formula"]->Value();
 
@@ -1144,11 +1144,12 @@ void LoadProgramSettings(int& graphWidth, int& axisWidth, int& graphColor, int& 
     __finally
     {
         delete fileContent;
-        if (jsonSettings != nullptr) delete jsonSettings;
+        if (jsonSettings != nullptr)
+            delete jsonSettings;
     }
 }
 
-void __fastcall TForm1::FormCreate(TObject *Sender)
+void __fastcall TForm1::FormCreate(TObject* Sender)
 {
     Set8087CW(0x133F);
 
@@ -1179,7 +1180,7 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     ComboBox1->Focused();
 }
 
-void __fastcall TForm1::ComboKeyPress(TObject *Sender, char &Key)
+void __fastcall TForm1::ComboKeyPress(TObject* Sender, char& Key)
 {
     if (Key == VK_RETURN)
     {
@@ -1190,7 +1191,7 @@ void __fastcall TForm1::ComboKeyPress(TObject *Sender, char &Key)
     }
 }
 
-void __fastcall TForm1::E2KeyPress(TObject *Sender, char &Key)
+void __fastcall TForm1::E2KeyPress(TObject* Sender, char& Key)
 {
     if (Key == VK_RETURN)
     {
@@ -1201,7 +1202,7 @@ void __fastcall TForm1::E2KeyPress(TObject *Sender, char &Key)
     }
 }
 
-void __fastcall TForm1::E3KeyPress(TObject *Sender, char &Key)
+void __fastcall TForm1::E3KeyPress(TObject* Sender, char& Key)
 {
     if (Key == VK_RETURN)
     {
@@ -1212,7 +1213,7 @@ void __fastcall TForm1::E3KeyPress(TObject *Sender, char &Key)
     }
 }
 
-void __fastcall TForm1::CheckBox1Click(TObject *Sender)
+void __fastcall TForm1::CheckBox1Click(TObject* Sender)
 {
     if (!CheckBox1->Checked)
     {
@@ -1305,7 +1306,7 @@ void __fastcall TForm1::ToggleFullscreen()
     }
 }
 
-void __fastcall TForm1::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+void __fastcall TForm1::FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
 {
     if (Key == VK_F11)
     {
@@ -1320,7 +1321,7 @@ void __fastcall TForm1::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shif
     }
 }
 
-void __fastcall TForm1::ComboBox1Change(TObject *Sender)
+void __fastcall TForm1::ComboBox1Change(TObject* Sender)
 {
     int index = ComboBox1->ItemIndex;
 

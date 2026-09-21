@@ -1,0 +1,40 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+Standard: Latest
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# Сдвиг "public:", "private:", "published:" на 2 пробела влево от содержимого класса
+AccessModifierOffset: -2
+ConstructorInitializerIndentWidth: 4
+PackConstructorInitializers: Never
+
+DerivePointerAlignment: false
+PointerAlignment: Left
+BreakBeforeBraces: Allman
+
+ColumnLimit: 0
+ReflowComments: false
+BinPackParameters: false
+BinPackArguments: false
+
+# Штрафы за переносы (включаются, только если ColumnLimit > 0, но полезны для явности)
+PenaltyBreakAssignment: 100
+PenaltyBreakBeforeFirstCallParameter: 100
+
+# Заставляет Clang воспринимать ключевые слова Builder как полноценные операторы C++,
+StatementMacros:
+  - PACKAGE
+  - __fastcall
+  - __published
+  - __declspec
+  - __pascal
+  - published
+
+# Инструкции для корректной группировки блоков видимости класса
+MacroBlockBegin: "^__published:|^private:|^public:|^protected:"
+MacroBlockEnd: "};"
+...

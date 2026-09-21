@@ -1,11 +1,17 @@
 #ifndef grH
 #define grH
 
+#ifdef __clang_analyzer__
+    #define published public
+#else
+    #define published __published
+#endif
+
 #include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>
-#include <Vcl.StdCtrls.hpp>
-#include <Vcl.Forms.hpp>
 #include <Vcl.ExtCtrls.hpp>
+#include <Vcl.Forms.hpp>
+#include <Vcl.StdCtrls.hpp>
 #include <memory>
 #include <vector>
 
@@ -24,26 +30,26 @@ struct uzel
 
 class TForm1 : public TForm
 {
-__published:
-	TPanel *Panel1;
-	TComboBox *ComboBox1;
-	TEdit *Edit2;
-	TEdit *Edit3;
-	TLabel *Label1;
-	TLabel *Label2;
-	TLabel *Label3;
-	TCheckBox *CheckBox1;
-    TButton *Button1;
-    TPaintBox *PaintBox1;
+published:
+    TPanel* Panel1;
+    TComboBox* ComboBox1;
+    TEdit* Edit2;
+    TEdit* Edit3;
+    TLabel* Label1;
+    TLabel* Label2;
+    TLabel* Label3;
+    TCheckBox* CheckBox1;
+    TButton* Button1;
+    TPaintBox* PaintBox1;
 
-    void __fastcall FormCreate(TObject *Sender);
-    void __fastcall UpdateGraphView(TObject *Sender);
-    void __fastcall ComboKeyPress(TObject *Sender, char &Key);
-    void __fastcall E2KeyPress(TObject *Sender, char &Key);
-    void __fastcall E3KeyPress(TObject *Sender, char &Key);
-    void __fastcall CheckBox1Click(TObject *Sender);
-    void __fastcall FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
-	void __fastcall ComboBox1Change(TObject *Sender);
+    void __fastcall FormCreate(TObject* Sender);
+    void __fastcall UpdateGraphView(TObject* Sender);
+    void __fastcall ComboKeyPress(TObject* Sender, char& Key);
+    void __fastcall E2KeyPress(TObject* Sender, char& Key);
+    void __fastcall E3KeyPress(TObject* Sender, char& Key);
+    void __fastcall CheckBox1Click(TObject* Sender);
+    void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
+    void __fastcall ComboBox1Change(TObject* Sender);
 
 private:
     TBorderStyle FOldBorderStyle;
@@ -80,20 +86,20 @@ private:
     int FontColor;
 
     void __fastcall ToggleFullscreen();
-    void __fastcall LoadFormulasFromJSON(TComboBox *ComboBox);
+    void __fastcall LoadFormulasFromJSON(TComboBox* ComboBox);
 
-    void f(AnsiString &str, std::vector<double> &values, std::unique_ptr<uzel> &node);
+    void f(AnsiString& str, std::vector<double>& values, std::unique_ptr<uzel>& node);
     std::vector<double> initMas(double a_val, double b_val, int n_val);
 
     bool ValidateInputAndParams(TObject* Sender);
     void PrepareCanvas();
     void CalculateGraphPoints();
-    void RenderAxesAndCurves(TObject *Sender, TPoint *v);
+    void RenderAxesAndCurves(TObject* Sender, TPoint* v);
 
 public:
     __fastcall TForm1(TComponent* Owner);
 };
 
-extern PACKAGE TForm1 *Form1;
+extern PACKAGE TForm1* Form1;
 
 #endif
