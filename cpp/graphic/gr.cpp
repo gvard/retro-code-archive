@@ -2,6 +2,10 @@
 #pragma hdrstop
 #include "gr.h"
 
+#ifdef _WIN64
+  #include <xmmintrin.h>
+#endif
+
 #define _USE_MATH_DEFINES
 #include <cmath>
 
@@ -1051,13 +1055,18 @@ void __fastcall TForm1::LoadFormulasFromJSON(TComboBox *ComboBox)
 
         if (jsonArray != nullptr)
         {
+            TFormatSettings jsonLocale = TFormatSettings::Create("en-US");
+            jsonLocale.DecimalSeparator = '.';
+
             for (int i = 0; i < jsonArray->Count; i++)
             {
                 TJSONObject *item = (TJSONObject*)jsonArray->Items[i];
 
                 UnicodeString formula = item->Values["formula"]->Value();
-                double valA = item->Values["a"]->Value().ToDouble();
-                double valB = item->Values["b"]->Value().ToDouble();
+
+                // Парсим double с явным указанием локали, чтобы не зависеть от Win64 RTL
+                double valA = StrToFloat(item->Values["a"]->Value(), jsonLocale);
+                double valB = StrToFloat(item->Values["b"]->Value(), jsonLocale);
 
                 ComboBox->Items->Add(formula);
 
@@ -1135,13 +1144,13 @@ void LoadProgramSettings(int& graphWidth, int& axisWidth, int& graphColor, int& 
             }
 
             if (jsonSettings->Values["graph_color"] != nullptr)
-                graphColor = jsonSettings->Values["graph_color"]->Value().ToInt();
+                graphColor = static_cast<int>(StrToInt64(jsonSettings->Values["graph_color"]->Value()));
 
             if (jsonSettings->Values["axis_color"] != nullptr)
-                axisColor = jsonSettings->Values["axis_color"]->Value().ToInt();
+                axisColor = static_cast<int>(StrToInt64(jsonSettings->Values["axis_color"]->Value()));
 
             if (jsonSettings->Values["bg_color"] != nullptr)
-                bgColor = jsonSettings->Values["bg_color"]->Value().ToInt();
+                bgColor = static_cast<int>(StrToInt64(jsonSettings->Values["bg_color"]->Value()));
 
             if (jsonSettings->Values["fs_btn_top"] != nullptr)
                 btnTop = jsonSettings->Values["fs_btn_top"]->Value().ToInt();
@@ -1156,7 +1165,7 @@ void LoadProgramSettings(int& graphWidth, int& axisWidth, int& graphColor, int& 
                 fontSize = jsonSettings->Values["font_size"]->Value().ToInt();
 
             if (jsonSettings->Values["font_color"] != nullptr)
-                fontColor = jsonSettings->Values["font_color"]->Value().ToInt();
+                fontColor = static_cast<int>(StrToInt64(jsonSettings->Values["font_color"]->Value()));
         }
     }
     __finally
@@ -1168,7 +1177,13 @@ void LoadProgramSettings(int& graphWidth, int& axisWidth, int& graphColor, int& 
 
 void __fastcall TForm1::FormCreate(TObject *Sender)
 {
-    _control87(MCW_EM, MCW_EM);
+    Set8087CW(0x133F);
+
+    #ifdef _WIN64
+        // Маскирование исключений для Win64 (SSE/SSE2)
+        // Компилируется и выполняется только в 64-битном режиме
+        _mm_setcsr(0x1F80);
+    #endif
 
     System::Sysutils::FormatSettings.DecimalSeparator = '.';
 
