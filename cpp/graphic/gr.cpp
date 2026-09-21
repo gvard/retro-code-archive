@@ -20,11 +20,11 @@ TForm1* Form1;
 __fastcall TForm1::TForm1(TComponent* Owner)
     : TForm(Owner)
 {
-    n = 0;
-    er = 0;
-    a = 0;
-    b = 0;
-    is_first_graph = true;
+    FPointsCount = 0;
+    FErrorFlag = 0;
+    FMinX = 0;
+    FMaxX = 0;
+    FIsFirstGraph = true;
     FIsFullscreen = false;
 }
 
@@ -43,7 +43,7 @@ void __fastcall TForm1::UpdateGraphView(TObject* Sender)
     CalculateGraphPoints();
 
     // Локальные структуры для передачи в отрисовщик (выделение памяти под динамический массив)
-    std::vector<TPoint> v(this->n + 1);
+    std::vector<TPoint> v(this->FPointsCount + 1);
 
     // 4. Отрисовка осей, кривых графиков, засечек и подписей текста
     RenderAxesAndCurves(Sender, v.data());
@@ -60,14 +60,14 @@ bool TForm1::ValidateInputAndParams(TObject* Sender)
             strA = System::Sysutils::StringReplace(strA, L",", L".", TReplaceFlags() << rfReplaceAll);
             strB = System::Sysutils::StringReplace(strB, L",", L".", TReplaceFlags() << rfReplaceAll);
 
-            double temp_a = strA != "" ? strA.ToDouble() : this->a;
-            double temp_b = strB != "" ? strB.ToDouble() : this->b;
+            double tempA = strA != "" ? strA.ToDouble() : this->FMinX;
+            double tempB = strB != "" ? strB.ToDouble() : this->FMaxX;
 
             // Если текущие границы в полях ввода не совпадают с сохраненными границами
-            if (!is_first_graph && (temp_a != saved_a || temp_b != saved_b))
+            if (!FIsFirstGraph && (tempA != FSavedA || tempB != FSavedB))
             {
                 CheckBox1->Checked = false;
-                is_first_graph = true;
+                FIsFirstGraph = true;
             }
         }
         catch (const EConvertError&)
@@ -76,15 +76,15 @@ bool TForm1::ValidateInputAndParams(TObject* Sender)
         }
     }
 
-    if (CheckBox1->Checked && !is_first_graph)
+    if (CheckBox1->Checked && !FIsFirstGraph)
     {
-        Edit2->Text = FloatToStr(saved_a);
-        Edit3->Text = FloatToStr(saved_b);
+        Edit2->Text = FloatToStr(FSavedA);
+        Edit3->Text = FloatToStr(FSavedB);
     }
 
-    if (this->er == 1)
+    if (this->FErrorFlag == 1)
     {
-        this->er = 0;
+        this->FErrorFlag = 0;
     }
 
     return true;
@@ -95,7 +95,7 @@ void TForm1::PrepareCanvas()
     if (!CheckBox1->Checked)
     {
         PaintBox1->Repaint();
-        PaintBox1->Canvas->Brush->Color = static_cast<TColor>(this->BgColor);
+        PaintBox1->Canvas->Brush->Color = static_cast<TColor>(this->FBgColor);
         PaintBox1->Canvas->Brush->Style = bsSolid;
         PaintBox1->Canvas->FillRect(PaintBox1->ClientRect);
 
@@ -110,15 +110,15 @@ void TForm1::PrepareCanvas()
 
 void TForm1::CalculateGraphPoints()
 {
-    this->n = PaintBox1->Width - 1;
+    this->FPointsCount = PaintBox1->Width - 1;
 
     int bracketCount = 0;
-    this->s = AnsiString(ComboBox1->Text);
-    for (int i = 1; i <= this->s.Length(); i++)
+    this->FFormulaString = AnsiString(ComboBox1->Text);
+    for (int i = 1; i <= this->FFormulaString.Length(); i++)
     {
-        if (this->s[i] == '(')
+        if (this->FFormulaString[i] == '(')
             bracketCount++;
-        if (this->s[i] == ')')
+        if (this->FFormulaString[i] == ')')
             bracketCount--;
     }
 
@@ -136,9 +136,9 @@ void TForm1::CalculateGraphPoints()
         strB = System::Sysutils::StringReplace(strB, L",", L".", TReplaceFlags() << rfReplaceAll);
 
         if (strA != "")
-            this->a = strA.ToDouble();
+            this->FMinX = strA.ToDouble();
         if (strB != "")
-            this->b = strB.ToDouble();
+            this->FMaxX = strB.ToDouble();
     }
     catch (const EConvertError&)
     {
@@ -146,23 +146,23 @@ void TForm1::CalculateGraphPoints()
         return;
     }
 
-    // Вызываем функцию из parser.cpp, передавая er по ссылке
-    this->Mas = ::initMas(this->a, this->b, this->n, this->er);
+    // Вызываем функцию из parser.cpp, передавая FErrorFlag по ссылке
+    this->FValuesX = ::initMas(this->FMinX, this->FMaxX, this->FPointsCount, this->FErrorFlag);
 
-    if (this->er == 1)
+    if (this->FErrorFlag == 1)
     {
         ShowMessage("Левая граница должна быть строго меньше правой!");
         return;
     }
 
-    this->Res.resize(this->n + 1);
+    this->FValuesY.resize(this->FPointsCount + 1);
 
     try
     {
         // Вызываем функцию парсера из parser.cpp с явным пробросом параметров
-        ::f(this->s, this->Res, this->p, this->n, this->er, this->Mas);
+        ::f(this->FFormulaString, this->FValuesY, this->p, this->FPointsCount, this->FErrorFlag, this->FValuesX);
 
-        if (this->er == 1)
+        if (this->FErrorFlag == 1)
         {
             ShowMessage("Ошибка в записи формулы или расстановке скобок!");
         }
@@ -170,8 +170,8 @@ void TForm1::CalculateGraphPoints()
     catch (...)
     {
         // В случае критического математического сбоя заполняем массив маркерами разрыва
-        for (int i = 0; i <= n; i++)
-            this->Res[i] = 1e300;
+        for (int i = 0; i <= FPointsCount; i++)
+            this->FValuesY[i] = 1e300;
     }
 }
 
@@ -193,27 +193,27 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     int rightEdge = 0;
     int corr = -1;
     double mi = 0, ma = 0;
-    bool needDrawLabels = (!CheckBox1->Checked || is_first_graph || Sender == nullptr);
+    bool needDrawLabels = (!CheckBox1->Checked || FIsFirstGraph || Sender == nullptr);
 
     // 1. Поиск mi, ma и проверка на валидность точек (firstValid)
     bool firstValid = false;
-    for (int i = 0; i <= n; i++)
+    for (int i = 0; i <= FPointsCount; i++)
     {
         // Проверяем, что точка валидна, не бесконечна и не NaN
-        if (this->Res[i] < 1e299 && !std::isinf(this->Res[i]) && !std::isnan(this->Res[i]))
+        if (this->FValuesY[i] < 1e299 && !std::isinf(this->FValuesY[i]) && !std::isnan(this->FValuesY[i]))
         {
             if (!firstValid)
             {
-                mi = this->Res[i];
-                ma = this->Res[i];
+                mi = this->FValuesY[i];
+                ma = this->FValuesY[i];
                 firstValid = true;
             }
             else
             {
-                if (mi > this->Res[i])
-                    mi = this->Res[i];
-                if (ma < this->Res[i])
-                    ma = this->Res[i];
+                if (mi > this->FValuesY[i])
+                    mi = this->FValuesY[i];
+                if (ma < this->FValuesY[i])
+                    ma = this->FValuesY[i];
             }
         }
     }
@@ -227,21 +227,21 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     mi = (mi > 0 ? 0 : mi);
     ma = (ma < 0 ? 0 : ma);
 
-    if (Sender != nullptr && (!CheckBox1->Checked || is_first_graph))
+    if (Sender != nullptr && (!CheckBox1->Checked || FIsFirstGraph))
     {
-        saved_mi = mi;
-        saved_ma = ma;
-        saved_a = this->a;
-        saved_b = this->b;
-        is_first_graph = false;
+        FSavedMi = mi;
+        FSavedMa = ma;
+        FSavedA = this->FMinX;
+        FSavedB = this->FMaxX;
+        FIsFirstGraph = false;
     }
     else if (Sender == nullptr || CheckBox1->Checked)
     {
         // Восстанавливаем точные пропорции при изменении экрана или наложении
-        mi = saved_mi;
-        ma = saved_ma;
-        this->a = saved_a;
-        this->b = saved_b;
+        mi = FSavedMi;
+        ma = FSavedMa;
+        this->FMinX = FSavedA;
+        this->FMaxX = FSavedB;
     }
 
     if (ma == 0)
@@ -258,10 +258,10 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     int workWidth = PaintBox1->Width - padLeft - padRight;
 
     // 2. Цикл перевода координат в экранные
-    for (int i = 0; i <= n; i++)
+    for (int i = 0; i <= FPointsCount; i++)
     {
-        int screenX = padLeft + floor((double)i * workWidth / this->n);
-        int screenY = padTop + floor(workHeight * (ma - this->Res[i]) / (ma - mi)) + (mi * ma == 0 ? corr : 0);
+        int screenX = padLeft + floor((double)i * workWidth / this->FPointsCount);
+        int screenY = padTop + floor(workHeight * (ma - this->FValuesY[i]) / (ma - mi)) + (mi * ma == 0 ? corr : 0);
         v[i] = Point(screenX, screenY);
     }
 
@@ -272,17 +272,17 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     }
     else
     {
-        PaintBox1->Canvas->Pen->Color = static_cast<TColor>(this->GraphColor);
+        PaintBox1->Canvas->Pen->Color = static_cast<TColor>(this->FGraphColor);
     }
-    PaintBox1->Canvas->Pen->Width = this->GraphLineWidth;
+    PaintBox1->Canvas->Pen->Width = this->FGraphLineWidth;
 
     // 3. Отрисовка кривой графика (MoveTo/LineTo)
     bool drawing = false;
 
-    for (int i = 0; i <= n; i++)
+    for (int i = 0; i <= FPointsCount; i++)
     {
         // Проверяем точку на валидность
-        if (this->Res[i] < 1e299 && !std::isinf(this->Res[i]) && !std::isnan(this->Res[i]))
+        if (this->FValuesY[i] < 1e299 && !std::isinf(this->FValuesY[i]) && !std::isnan(this->FValuesY[i]))
         {
             if (!drawing)
             {
@@ -302,9 +302,9 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
         }
     }
 
-    PaintBox1->Canvas->Pen->Color = static_cast<TColor>(this->AxisColor);
-    PaintBox1->Canvas->Brush->Color = static_cast<TColor>(this->AxisColor);
-    PaintBox1->Canvas->Pen->Width = this->AxisLineWidth;
+    PaintBox1->Canvas->Pen->Color = static_cast<TColor>(this->FAxisColor);
+    PaintBox1->Canvas->Brush->Color = static_cast<TColor>(this->FAxisColor);
+    PaintBox1->Canvas->Pen->Width = this->FAxisLineWidth;
 
     // 4. Отрисовка оси X
     posY = padTop + floor(workHeight * ma / (ma - mi) + (mi * ma == 0 ? corr : 0));
@@ -325,11 +325,11 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     PaintBox1->Canvas->Polygon(arrowX, 2);
 
     // 5. Отрисовка оси Y
-    if (this->a <= 0 && this->b >= 0)
+    if (this->FMinX <= 0 && this->FMaxX >= 0)
     {
-        posX = padLeft + floor(workWidth * (0 - this->a) / (this->b - this->a));
+        posX = padLeft + floor(workWidth * (0 - this->FMinX) / (this->FMaxX - this->FMinX));
     }
-    else if (this->a > 0)
+    else if (this->FMinX > 0)
     {
         posX = padLeft;
     }
@@ -350,7 +350,7 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
 
     // 6. Разметка засечек оси X
     const int MAX_MARKS_X = 20;
-    double deltaX = this->b - this->a;
+    double deltaX = this->FMaxX - this->FMinX;
     double stepX = 0.5;
 
     // Если количество рисок превышает лимит,
@@ -364,8 +364,8 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     }
 
     // Вычисляем стартовую и конечную точки цикла с учетом нового шага
-    double startX = ceil(this->a / stepX) * stepX;
-    double endX = floor(this->b / stepX) * stepX;
+    double startX = ceil(this->FMinX / stepX) * stepX;
+    double endX = floor(this->FMaxX / stepX) * stepX;
     int iterationsCountX = 0;
 
     // Поиск ближайшей к нулю риски
@@ -380,7 +380,7 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
         if (std::abs(valX) < 1e-9)
             continue; // Пропускаем сам ноль
 
-        int markX = padLeft + floor(workWidth * (valX - this->a) / (this->b - this->a));
+        int markX = padLeft + floor(workWidth * (valX - this->FMinX) / (this->FMaxX - this->FMinX));
         if (markX >= padLeft && markX <= (rightEdge - 15))
         {
             double dist = std::abs(valX); // Расстояние до начала координат
@@ -402,7 +402,7 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
         if (std::abs(valX) < 1e-9)
             continue;
 
-        int markX = padLeft + floor(workWidth * (valX - this->a) / (this->b - this->a));
+        int markX = padLeft + floor(workWidth * (valX - this->FMinX) / (this->FMaxX - this->FMinX));
 
         // Не рисуем риску, если она находится в пределах 15 пикселей от острия
         if (markX >= padLeft && markX <= (rightEdge - 15))
@@ -418,9 +418,9 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
                     if (needDrawLabels && std::abs(valX) < 100000.0)
                     {
                         PaintBox1->Canvas->Brush->Style = bsClear;
-                        PaintBox1->Canvas->Font->Name = this->FontName;
-                        PaintBox1->Canvas->Font->Size = this->FontSize;
-                        PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FontColor);
+                        PaintBox1->Canvas->Font->Name = this->FFontName;
+                        PaintBox1->Canvas->Font->Size = this->FFontSize;
+                        PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FFontColor);
 
                         AnsiString txtX = FloatToStrF(valX, ffGeneral, 4, 2);
 
@@ -504,9 +504,9 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
                 if (needDrawLabels && std::abs(valY) < 100000.0)
                 {
                     PaintBox1->Canvas->Brush->Style = bsClear;
-                    PaintBox1->Canvas->Font->Name = this->FontName;
-                    PaintBox1->Canvas->Font->Size = this->FontSize;
-                    PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FontColor);
+                    PaintBox1->Canvas->Font->Name = this->FFontName;
+                    PaintBox1->Canvas->Font->Size = this->FFontSize;
+                    PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FFontColor);
 
                     AnsiString txtY = FloatToStrF(valY, ffFixed, 7, 2);
 
@@ -549,9 +549,9 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     // 8. Вывод подписей текста (букв X и Y на краях осей)
     if (needDrawLabels)
     {
-        PaintBox1->Canvas->Font->Name = this->FontName;
-        PaintBox1->Canvas->Font->Size = this->FontSize;
-        PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FontColor);
+        PaintBox1->Canvas->Font->Name = this->FFontName;
+        PaintBox1->Canvas->Font->Size = this->FFontSize;
+        PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FFontColor);
         PaintBox1->Canvas->Font->Style = TFontStyles() << fsBold;
         PaintBox1->Canvas->Brush->Style = bsClear;
 
@@ -637,8 +637,8 @@ void __fastcall TForm1::LoadFormulasFromJSON(TComboBox* ComboBox)
     }
 }
 
-void LoadProgramSettings(int& graphWidth, int& axisWidth, int& graphColor, int& axisColor, int& bgColor,
-                         int& btnTop, int& btnRight, UnicodeString& fontName, int& fontSize, int& fontColor)
+void LoadProgramSettings(int& graphLineWidth, int& axisLineWidth, int& graphColor, int& axisColor, int& bgColor,
+                         int& fullscreenBtnTop, int& fullscreenBtnRight, UnicodeString& fontName, int& fontSize, int& fontColor)
 {
     std::filesystem::path exeDir = std::filesystem::path(ParamStr(0).c_str()).parent_path();
     std::filesystem::path configPath = exeDir / "settings.json";
@@ -647,13 +647,13 @@ void LoadProgramSettings(int& graphWidth, int& axisWidth, int& graphColor, int& 
     TStringList* fileContent = new TStringList();
 
     // Значения по умолчанию
-    graphWidth = 2;
-    axisWidth = 2;
+    graphLineWidth = 2;
+    axisLineWidth = 2;
     graphColor = clBlack;
     axisColor = clRed;
     bgColor = clBtnFace;
-    btnTop = 15;
-    btnRight = 15;
+    fullscreenBtnTop = 15;
+    fullscreenBtnRight = 15;
     fontName = "Arial";
     fontSize = 10;
     fontColor = clBlack;
@@ -661,12 +661,12 @@ void LoadProgramSettings(int& graphWidth, int& axisWidth, int& graphColor, int& 
     if (!std::filesystem::exists(configPath))
     {
         TJSONObject* defaultSettings = new TJSONObject();
-        defaultSettings->AddPair("graph_line_width", graphWidth);
-        defaultSettings->AddPair("axis_line_width", axisWidth);
+        defaultSettings->AddPair("graph_line_width", graphLineWidth);
+        defaultSettings->AddPair("axis_line_width", axisLineWidth);
         defaultSettings->AddPair("graph_color", "0x" + IntToHex(graphColor, 6));
         defaultSettings->AddPair("axis_color", "0x" + IntToHex(axisColor, 6));
-        defaultSettings->AddPair("fs_btn_top", btnTop);
-        defaultSettings->AddPair("fs_btn_right", btnRight);
+        defaultSettings->AddPair("fs_btn_top", fullscreenBtnTop);
+        defaultSettings->AddPair("fs_btn_right", fullscreenBtnRight);
         defaultSettings->AddPair("font_name", fontName);
         defaultSettings->AddPair("font_size", fontSize);
         defaultSettings->AddPair("font_color", "0x" + IntToHex(fontColor, 6));
@@ -689,12 +689,12 @@ void LoadProgramSettings(int& graphWidth, int& axisWidth, int& graphColor, int& 
             if (jsonSettings->Values["graph_line_width"] != nullptr)
             {
                 int raw = jsonSettings->Values["graph_line_width"]->Value().ToInt();
-                graphWidth = (raw > 50 || raw < 1) ? 2 : raw;
+                graphLineWidth = (raw > 50 || raw < 1) ? 2 : raw;
             }
             if (jsonSettings->Values["axis_line_width"] != nullptr)
             {
                 int raw = jsonSettings->Values["axis_line_width"]->Value().ToInt();
-                axisWidth = (raw > 10 || raw < 1) ? 2 : raw;
+                axisLineWidth = (raw > 10 || raw < 1) ? 2 : raw;
             }
 
             if (jsonSettings->Values["graph_color"] != nullptr)
@@ -707,10 +707,10 @@ void LoadProgramSettings(int& graphWidth, int& axisWidth, int& graphColor, int& 
                 bgColor = static_cast<int>(StrToInt64(jsonSettings->Values["bg_color"]->Value()));
 
             if (jsonSettings->Values["fs_btn_top"] != nullptr)
-                btnTop = jsonSettings->Values["fs_btn_top"]->Value().ToInt();
+                fullscreenBtnTop = jsonSettings->Values["fs_btn_top"]->Value().ToInt();
 
             if (jsonSettings->Values["fs_btn_right"] != nullptr)
-                btnRight = jsonSettings->Values["fs_btn_right"]->Value().ToInt();
+                fullscreenBtnRight = jsonSettings->Values["fs_btn_right"]->Value().ToInt();
 
             if (jsonSettings->Values["font_name"] != nullptr)
                 fontName = jsonSettings->Values["font_name"]->Value();
@@ -742,8 +742,8 @@ void __fastcall TForm1::FormCreate(TObject* Sender)
 
     System::Sysutils::FormatSettings.DecimalSeparator = '.';
 
-    LoadProgramSettings(this->GraphLineWidth, this->AxisLineWidth, this->GraphColor, this->AxisColor, this->BgColor,
-                        this->FullscreenBtnTop, this->FullscreenBtnLeft, this->FontName, this->FontSize, this->FontColor);
+    LoadProgramSettings(this->FGraphLineWidth, this->FAxisLineWidth, this->FGraphColor, this->FAxisColor, this->FBgColor,
+                        this->FFullscreenBtnTop, this->FFullscreenBtnRight, this->FFontName, this->FFontSize, this->FFontColor);
 
     LoadFormulasFromJSON(ComboBox1);
 
@@ -752,10 +752,10 @@ void __fastcall TForm1::FormCreate(TObject* Sender)
 
     if (!FFormulaLimits.empty())
     {
-        this->a = FFormulaLimits[0].a;
-        this->b = FFormulaLimits[0].b;
-        Edit2->Text = FloatToStr(this->a);
-        Edit3->Text = FloatToStr(this->b);
+        this->FMinX = FFormulaLimits[0].a;
+        this->FMaxX = FFormulaLimits[0].b;
+        Edit2->Text = FloatToStr(this->FMinX);
+        Edit3->Text = FloatToStr(this->FMaxX);
     }
 
     ComboBox1->Focused();
@@ -798,13 +798,13 @@ void __fastcall TForm1::CheckBox1Click(TObject* Sender)
 {
     if (!CheckBox1->Checked)
     {
-        is_first_graph = true;
+        FIsFirstGraph = true;
     }
     else
     {
-        if (!this->Res.empty())
+        if (!this->FValuesY.empty())
         {
-            is_first_graph = false;
+            FIsFirstGraph = false;
         }
     }
 }
@@ -831,8 +831,8 @@ void __fastcall TForm1::ToggleFullscreen()
         Button1->Align = alNone;
         Button1->BringToFront();
 
-        marginTop = this->FullscreenBtnTop;
-        marginRight = this->FullscreenBtnLeft;
+        marginTop = this->FFullscreenBtnTop;
+        marginRight = this->FFullscreenBtnRight;
     }
     else
     {
@@ -872,7 +872,7 @@ void __fastcall TForm1::ToggleFullscreen()
     isProcessing = true;
     try
     {
-        if (is_first_graph)
+        if (FIsFirstGraph)
         {
             PaintBox1->Repaint();
         }
@@ -910,17 +910,17 @@ void __fastcall TForm1::ComboBox1Change(TObject* Sender)
     {
         if (!CheckBox1->Checked)
         {
-            this->a = FFormulaLimits[index].a;
-            this->b = FFormulaLimits[index].b;
+            this->FMinX = FFormulaLimits[index].a;
+            this->FMaxX = FFormulaLimits[index].b;
 
-            Edit2->Text = FloatToStr(this->a);
-            Edit3->Text = FloatToStr(this->b);
+            Edit2->Text = FloatToStr(this->FMinX);
+            Edit3->Text = FloatToStr(this->FMaxX);
 
-            is_first_graph = true;
+            FIsFirstGraph = true;
         }
         else
         {
-            is_first_graph = false;
+            FIsFirstGraph = false;
         }
         UpdateGraphView(Button1);
     }

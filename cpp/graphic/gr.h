@@ -45,31 +45,31 @@ private:
 
     std::vector<TFormulaConfig> FFormulaLimits;
 
-    int n;
-    int er;
-    double a;
-    double b;
-    AnsiString s;
-    std::vector<double> Mas;
-    std::vector<double> Res;
+    int FPointsCount;
+    int FErrorFlag;
+    double FMinX;
+    double FMaxX;
+    AnsiString FFormulaString;
+    std::vector<double> FValuesX;
+    std::vector<double> FValuesY;
     std::unique_ptr<uzel> p = nullptr;
 
-    double saved_mi;
-    double saved_ma;
-    double saved_a;
-    double saved_b;
-    bool is_first_graph;
+    double FSavedMi;
+    double FSavedMa;
+    double FSavedA;
+    double FSavedB;
+    bool FIsFirstGraph;
 
-    int GraphLineWidth;
-    int AxisLineWidth;
-    int GraphColor;
-    int AxisColor;
-    int BgColor;
-    int FullscreenBtnTop;
-    int FullscreenBtnLeft;
-    UnicodeString FontName;
-    int FontSize;
-    int FontColor;
+    int FGraphLineWidth;
+    int FAxisLineWidth;
+    int FGraphColor;
+    int FAxisColor;
+    int FBgColor;
+    int FFullscreenBtnTop;
+    int FFullscreenBtnRight;
+    UnicodeString FFontName;
+    int FFontSize;
+    int FFontColor;
 
     void __fastcall ToggleFullscreen();
     void __fastcall LoadFormulasFromJSON(TComboBox* ComboBox);
