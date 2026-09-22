@@ -5,15 +5,27 @@
 #include <memory>
 #include <vector>
 
-// Математический узел дерева формулы
+// Переключатель парсеров
+// Оставьте активным для TinyExpr. Закомментируйте для возврата к старому коду.
+#define USE_TINYEXPR
+
+#ifndef USE_TINYEXPR
+// Оригинальный математический узел дерева формулы (нужен для отката)
 struct uzel
 {
     std::vector<double> m;
     std::unique_ptr<uzel> l = nullptr;
     std::unique_ptr<uzel> r = nullptr;
 };
+#else
+// Заглушка для совместимости с полем в TForm1
+struct uzel
+{
+};
+#endif
 
-// Прототипы функций парсера (теперь это свободные функции, не методы TForm1)
+
+// Прототипы функций парсера (остаются сквозными и неизменными для обоих движков)
 std::vector<double> initMas(double a_val, double b_val, int n_val, int &errorFlag);
 
 void f(AnsiString &str,

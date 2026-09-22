@@ -14,10 +14,13 @@
   {"formula": "cos(x)", "a": -3.16, "b": 3.16},
   {"formula": "sin(x)*cos(x)", "a": -3.16, "b": 3.16},
   {"formula": "sin(x^2)", "a": -3.16, "b": 3.16},
-  {"formula": "tg(x)*ctg(x)", "a": -3.16, "b": 3.16},
+  {"formula": "(x > 0)*sin(x) + (x <= 0)*cos(x)", "a": -6.32, "b": 6.32},
+  {"formula": "ln(x) / sqrt(x)", "a": -0.02, "b": 0.05},
   {"formula": "ln(x)", "a": -0.02, "b": 10},
+  {"formula": "log(x)", "a": -0.02, "b": 10},
   {"formula": "x*ln(x)", "a": -0.02, "b": 2.8},
   {"formula": "x^3/(x^2-0.5)", "a": -2, "b": 2},
   {"formula": "e^(-x^2)*cos(2*pi*x)", "a": -2.7, "b": 2.7},
-  {"formula": "cos(pi*|x|)-|x|", "a": -6, "b": 6}
+  {"formula": "cos(pi*|x|)-|x|", "a": -6, "b": 6},
+  {"formula": "abs(x) * sin(5*x)", "a": -6, "b": 6}
 ]

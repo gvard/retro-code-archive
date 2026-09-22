@@ -114,19 +114,19 @@ void TForm1::CalculateGraphPoints()
 
     int bracketCount = 0;
     this->FFormulaString = AnsiString(ComboBox1->Text);
-    for (int i = 1; i <= this->FFormulaString.Length(); i++)
-    {
-        if (this->FFormulaString[i] == '(')
-            bracketCount++;
-        if (this->FFormulaString[i] == ')')
-            bracketCount--;
-    }
+    // for (int i = 1; i <= this->FFormulaString.Length(); i++)
+    // {
+    //     if (this->FFormulaString[i] == '(')
+    //         bracketCount++;
+    //     if (this->FFormulaString[i] == ')')
+    //         bracketCount--;
+    // }
 
-    if (bracketCount != 0)
-    {
-        ShowMessage("Проверьте скобки в вашем выражении!");
-        return;
-    }
+    // if (bracketCount != 0)
+    // {
+    //     ShowMessage("Проверьте скобки в вашем выражении!");
+    //     return;
+    // }
 
     try
     {
