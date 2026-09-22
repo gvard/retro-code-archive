@@ -1,5 +1,5 @@
-#ifndef grH
-#define grH
+#ifndef main_windowH
+#define main_windowH
 #include "parser.h"
 
 #include <System.Classes.hpp>
@@ -14,7 +14,7 @@ struct TFormulaConfig
     double b = 0.0;
 };
 
-class TForm1 : public TForm
+class TMainWindow : public TForm
 {
 __published:
     TPanel* Panel1;
@@ -77,10 +77,10 @@ private:
     void RenderAxesAndCurves(TObject* Sender, TPoint* v);
 
 public:
-    __fastcall TForm1(TComponent* Owner);
+    __fastcall TMainWindow(TComponent* Owner);
     std::vector<TFormulaConfig> FFormulaLimits;
 };
 
-extern PACKAGE TForm1* Form1;
+extern PACKAGE TMainWindow* MainWindow;
 
 #endif

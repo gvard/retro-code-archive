@@ -1,5 +1,5 @@
 #include "project_model.h"
-#include "gr.h"
+#include "main_window.h"
 #include <System.JSON.hpp>
 #include <filesystem>
 

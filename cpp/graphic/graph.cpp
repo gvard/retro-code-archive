@@ -1,16 +1,16 @@
 #include <vcl.h>
 #pragma hdrstop
 #include <tchar.h>
+#include "main_window.h"
 
-USEFORM("gr.cpp", Form1);
-
+USEFORM("main_window.cpp", Form1);
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {
     try
     {
         Application->Initialize();
         Application->MainFormOnTaskBar = true;
-        Application->CreateForm(__classid(TForm1), &Form1);
+        Application->CreateForm(__classid(TMainWindow), &MainWindow);
         Application->Run();
     }
     catch (Exception& exception)

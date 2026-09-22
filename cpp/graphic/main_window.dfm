@@ -1,4 +1,4 @@
-object Form1: TForm1
+object MainWindow: TMainWindow
   Left = 200
   Top = 104
   BorderIcons = [biSystemMenu, biMinimize]

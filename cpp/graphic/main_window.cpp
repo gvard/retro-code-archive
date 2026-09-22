@@ -1,6 +1,6 @@
 #include <vcl.h>
 #pragma hdrstop
-#include "gr.h"
+#include "main_window.h"
 #include "project_model.h"
 
 #ifdef _WIN64
@@ -16,9 +16,9 @@
 #include <System.JSON.hpp>
 #include <filesystem>
 
-TForm1* Form1;
+TMainWindow* MainWindow;
 
-__fastcall TForm1::TForm1(TComponent* Owner)
+__fastcall TMainWindow::TMainWindow(TComponent* Owner)
     : TForm(Owner)
 {
     FPointsCount = 0;
@@ -29,7 +29,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
     FIsFullscreen = false;
 }
 
-void __fastcall TForm1::UpdateGraphView(TObject* Sender)
+void __fastcall TMainWindow::UpdateGraphView(TObject* Sender)
 {
     // 1. Валидация входных данных (границы, чекбоксы масштабирования)
     if (!ValidateInputAndParams(Sender))
@@ -50,7 +50,7 @@ void __fastcall TForm1::UpdateGraphView(TObject* Sender)
     RenderAxesAndCurves(Sender, v.data());
 }
 
-bool TForm1::ValidateInputAndParams(TObject* Sender)
+bool TMainWindow::ValidateInputAndParams(TObject* Sender)
 {
     if (Sender != nullptr)
     {
@@ -91,7 +91,7 @@ bool TForm1::ValidateInputAndParams(TObject* Sender)
     return true;
 }
 
-void TForm1::PrepareCanvas()
+void TMainWindow::PrepareCanvas()
 {
     if (!CheckBox1->Checked)
     {
@@ -109,25 +109,12 @@ void TForm1::PrepareCanvas()
     }
 }
 
-void TForm1::CalculateGraphPoints()
+void TMainWindow::CalculateGraphPoints()
 {
     this->FPointsCount = PaintBox1->Width - 1;
 
     int bracketCount = 0;
     this->FFormulaString = AnsiString(ComboBox1->Text);
-    // for (int i = 1; i <= this->FFormulaString.Length(); i++)
-    // {
-    //     if (this->FFormulaString[i] == '(')
-    //         bracketCount++;
-    //     if (this->FFormulaString[i] == ')')
-    //         bracketCount--;
-    // }
-
-    // if (bracketCount != 0)
-    // {
-    //     ShowMessage("Проверьте скобки в вашем выражении!");
-    //     return;
-    // }
 
     try
     {
@@ -176,7 +163,7 @@ void TForm1::CalculateGraphPoints()
     }
 }
 
-void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
+void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
 {
     // Оставшийся код отрисовки:
     // 1. Поиск mi, ma и проверка на валидность точек (firstValid)
@@ -261,8 +248,8 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     // 2. Цикл перевода координат в экранные
     for (int i = 0; i <= FPointsCount; i++)
     {
-        int screenX = padLeft + floor((double)i * workWidth / this->FPointsCount);
-        int screenY = padTop + floor(workHeight * (ma - this->FValuesY[i]) / (ma - mi)) + (mi * ma == 0 ? corr : 0);
+        int screenX = padLeft + static_cast<int>(floor(static_cast<double>(i) * workWidth / this->FPointsCount));
+        int screenY = padTop + static_cast<int>(floor(static_cast<double>(workHeight) * (ma - this->FValuesY[i]) / (ma - mi))) + (mi * ma == 0 ? corr : 0);
         v[i] = Point(screenX, screenY);
     }
 
@@ -568,7 +555,7 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     }
 }
 
-void __fastcall TForm1::FormCreate(TObject* Sender)
+void __fastcall TMainWindow::FormCreate(TObject* Sender)
 {
     Set8087CW(0x133F);
 
@@ -599,7 +586,7 @@ void __fastcall TForm1::FormCreate(TObject* Sender)
     ComboBox1->Focused();
 }
 
-void __fastcall TForm1::ComboKeyPress(TObject* Sender, char& Key)
+void __fastcall TMainWindow::ComboKeyPress(TObject* Sender, char& Key)
 {
     if (Key == VK_RETURN)
     {
@@ -610,7 +597,7 @@ void __fastcall TForm1::ComboKeyPress(TObject* Sender, char& Key)
     }
 }
 
-void __fastcall TForm1::E2KeyPress(TObject* Sender, char& Key)
+void __fastcall TMainWindow::E2KeyPress(TObject* Sender, char& Key)
 {
     if (Key == VK_RETURN)
     {
@@ -621,7 +608,7 @@ void __fastcall TForm1::E2KeyPress(TObject* Sender, char& Key)
     }
 }
 
-void __fastcall TForm1::E3KeyPress(TObject* Sender, char& Key)
+void __fastcall TMainWindow::E3KeyPress(TObject* Sender, char& Key)
 {
     if (Key == VK_RETURN)
     {
@@ -632,7 +619,7 @@ void __fastcall TForm1::E3KeyPress(TObject* Sender, char& Key)
     }
 }
 
-void __fastcall TForm1::CheckBox1Click(TObject* Sender)
+void __fastcall TMainWindow::CheckBox1Click(TObject* Sender)
 {
     if (!CheckBox1->Checked)
     {
@@ -647,7 +634,7 @@ void __fastcall TForm1::CheckBox1Click(TObject* Sender)
     }
 }
 
-void __fastcall TForm1::ToggleFullscreen()
+void __fastcall TMainWindow::ToggleFullscreen()
 {
     int marginTop, marginRight;
 
@@ -725,7 +712,7 @@ void __fastcall TForm1::ToggleFullscreen()
     }
 }
 
-void __fastcall TForm1::FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
+void __fastcall TMainWindow::FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
 {
     if (Key == VK_F11)
     {
@@ -740,7 +727,7 @@ void __fastcall TForm1::FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shif
     }
 }
 
-void __fastcall TForm1::ComboBox1Change(TObject* Sender)
+void __fastcall TMainWindow::ComboBox1Change(TObject* Sender)
 {
     int index = ComboBox1->ItemIndex;
 

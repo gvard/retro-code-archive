@@ -18,7 +18,7 @@ struct uzel
     std::unique_ptr<uzel> r = nullptr;
 };
 #else
-// Заглушка для совместимости с полем в TForm1
+// Заглушка для совместимости с полем в TMainWindow
 struct uzel
 {
 };
