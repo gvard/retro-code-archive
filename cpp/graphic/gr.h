@@ -43,8 +43,6 @@ private:
     int FOldLeft, FOldTop, FOldWidth, FOldHeight;
     bool FIsFullscreen;
 
-    std::vector<TFormulaConfig> FFormulaLimits;
-
     int FPointsCount;
     int FErrorFlag;
     double FMinX;
@@ -72,7 +70,6 @@ private:
     int FFontColor;
 
     void __fastcall ToggleFullscreen();
-    void __fastcall LoadFormulasFromJSON(TComboBox* ComboBox);
 
     bool ValidateInputAndParams(TObject* Sender);
     void PrepareCanvas();
@@ -81,6 +78,7 @@ private:
 
 public:
     __fastcall TForm1(TComponent* Owner);
+    std::vector<TFormulaConfig> FFormulaLimits;
 };
 
 extern PACKAGE TForm1* Form1;

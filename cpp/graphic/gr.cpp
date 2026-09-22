@@ -1,6 +1,7 @@
 #include <vcl.h>
 #pragma hdrstop
 #include "gr.h"
+#include "project_model.h"
 
 #ifdef _WIN64
   #include <xmmintrin.h>
@@ -567,169 +568,6 @@ void TForm1::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     }
 }
 
-void __fastcall TForm1::LoadFormulasFromJSON(TComboBox* ComboBox)
-{
-    std::filesystem::path exeDir = std::filesystem::path(ParamStr(0).c_str()).parent_path();
-    std::filesystem::path jsonPath = exeDir / "functions.json";
-
-    String filePath = jsonPath.c_str();
-    TStringList* fileContent = new TStringList();
-
-    FFormulaLimits.clear();
-    ComboBox->Items->Clear();
-
-    if (!std::filesystem::exists(jsonPath))
-    {
-        TJSONArray* baseArray = new TJSONArray();
-
-        UnicodeString defaultFormulas[] = {"x^2+2*x+1", "1/x", "sin(x)",
-                                           "ln(x)"};
-        double defaultA[] = {-2, -0.6, -3.16, -0.02};
-        double defaultB[] = {1, 0.6, -3.16, 10};
-
-        for (int i = 0; i < 4; i++)
-        {
-            TJSONObject* item = new TJSONObject();
-            item->AddPair("formula", defaultFormulas[i]);
-            item->AddPair("a", defaultA[i]);
-            item->AddPair("b", defaultB[i]);
-            baseArray->AddElement(item);
-        }
-
-        fileContent->Text = baseArray->ToString();
-        fileContent->SaveToFile(filePath, TEncoding::UTF8);
-        delete baseArray;
-    }
-
-    TJSONArray* jsonArray = nullptr;
-    try
-    {
-        fileContent->LoadFromFile(filePath, TEncoding::UTF8);
-        jsonArray = (TJSONArray*)TJSONObject::ParseJSONValue(fileContent->Text);
-
-        if (jsonArray != nullptr)
-        {
-            TFormatSettings jsonLocale = TFormatSettings::Create("en-US");
-            jsonLocale.DecimalSeparator = '.';
-
-            for (int i = 0; i < jsonArray->Count; i++)
-            {
-                TJSONObject* item = (TJSONObject*)jsonArray->Items[i];
-
-                UnicodeString formula = item->Values["formula"]->Value();
-
-                // Парсим double с явным указанием локали, чтобы не зависеть от Win64 RTL
-                double valA = StrToFloat(item->Values["a"]->Value(), jsonLocale);
-                double valB = StrToFloat(item->Values["b"]->Value(), jsonLocale);
-
-                ComboBox->Items->Add(formula);
-
-                TFormulaConfig cfg = {valA, valB};
-                FFormulaLimits.push_back(cfg);
-            }
-        }
-    }
-    __finally
-    {
-        delete fileContent;
-        if (jsonArray != nullptr)
-        delete jsonArray;
-    }
-}
-
-void LoadProgramSettings(int& graphLineWidth, int& axisLineWidth, int& graphColor, int& axisColor, int& bgColor,
-                         int& fullscreenBtnTop, int& fullscreenBtnRight, UnicodeString& fontName, int& fontSize, int& fontColor)
-{
-    std::filesystem::path exeDir = std::filesystem::path(ParamStr(0).c_str()).parent_path();
-    std::filesystem::path configPath = exeDir / "settings.json";
-
-    String filePath = configPath.c_str();
-    TStringList* fileContent = new TStringList();
-
-    // Значения по умолчанию
-    graphLineWidth = 2;
-    axisLineWidth = 2;
-    graphColor = clBlack;
-    axisColor = clRed;
-    bgColor = clBtnFace;
-    fullscreenBtnTop = 15;
-    fullscreenBtnRight = 15;
-    fontName = "Arial";
-    fontSize = 10;
-    fontColor = clBlack;
-
-    if (!std::filesystem::exists(configPath))
-    {
-        TJSONObject* defaultSettings = new TJSONObject();
-        defaultSettings->AddPair("graph_line_width", graphLineWidth);
-        defaultSettings->AddPair("axis_line_width", axisLineWidth);
-        defaultSettings->AddPair("graph_color", "0x" + IntToHex(graphColor, 6));
-        defaultSettings->AddPair("axis_color", "0x" + IntToHex(axisColor, 6));
-        defaultSettings->AddPair("fs_btn_top", fullscreenBtnTop);
-        defaultSettings->AddPair("fs_btn_right", fullscreenBtnRight);
-        defaultSettings->AddPair("font_name", fontName);
-        defaultSettings->AddPair("font_size", fontSize);
-        defaultSettings->AddPair("font_color", "0x" + IntToHex(fontColor, 6));
-        defaultSettings->AddPair("bg_color", "0x" + IntToHex(bgColor, 6));
-
-        fileContent->Text = defaultSettings->ToString();
-        fileContent->SaveToFile(filePath, TEncoding::UTF8);
-        delete defaultSettings;
-    }
-
-    TJSONObject* jsonSettings = nullptr;
-    try
-    {
-        fileContent->LoadFromFile(filePath, TEncoding::UTF8);
-        jsonSettings = (TJSONObject*)TJSONObject::ParseJSONValue(fileContent->Text);
-
-        if (jsonSettings != nullptr)
-        {
-            // Чтение толщины (с жестким ограничением)
-            if (jsonSettings->Values["graph_line_width"] != nullptr)
-            {
-                int raw = jsonSettings->Values["graph_line_width"]->Value().ToInt();
-                graphLineWidth = (raw > 50 || raw < 1) ? 2 : raw;
-            }
-            if (jsonSettings->Values["axis_line_width"] != nullptr)
-            {
-                int raw = jsonSettings->Values["axis_line_width"]->Value().ToInt();
-                axisLineWidth = (raw > 10 || raw < 1) ? 2 : raw;
-            }
-
-            if (jsonSettings->Values["graph_color"] != nullptr)
-                graphColor = static_cast<int>(StrToInt64(jsonSettings->Values["graph_color"]->Value()));
-
-            if (jsonSettings->Values["axis_color"] != nullptr)
-                axisColor = static_cast<int>(StrToInt64(jsonSettings->Values["axis_color"]->Value()));
-
-            if (jsonSettings->Values["bg_color"] != nullptr)
-                bgColor = static_cast<int>(StrToInt64(jsonSettings->Values["bg_color"]->Value()));
-
-            if (jsonSettings->Values["fs_btn_top"] != nullptr)
-                fullscreenBtnTop = jsonSettings->Values["fs_btn_top"]->Value().ToInt();
-
-            if (jsonSettings->Values["fs_btn_right"] != nullptr)
-                fullscreenBtnRight = jsonSettings->Values["fs_btn_right"]->Value().ToInt();
-
-            if (jsonSettings->Values["font_name"] != nullptr)
-                fontName = jsonSettings->Values["font_name"]->Value();
-
-            if (jsonSettings->Values["font_size"] != nullptr)
-                fontSize = jsonSettings->Values["font_size"]->Value().ToInt();
-
-            if (jsonSettings->Values["font_color"] != nullptr)
-                fontColor = static_cast<int>(StrToInt64(jsonSettings->Values["font_color"]->Value()));
-        }
-    }
-    __finally
-    {
-        delete fileContent;
-        if (jsonSettings != nullptr)
-            delete jsonSettings;
-    }
-}
-
 void __fastcall TForm1::FormCreate(TObject* Sender)
 {
     Set8087CW(0x133F);
@@ -742,10 +580,10 @@ void __fastcall TForm1::FormCreate(TObject* Sender)
 
     System::Sysutils::FormatSettings.DecimalSeparator = '.';
 
-    LoadProgramSettings(this->FGraphLineWidth, this->FAxisLineWidth, this->FGraphColor, this->FAxisColor, this->FBgColor,
-                        this->FFullscreenBtnTop, this->FFullscreenBtnRight, this->FFontName, this->FFontSize, this->FFontColor);
+    ::loadProgramSettings(this->FGraphLineWidth, this->FAxisLineWidth, this->FGraphColor, this->FAxisColor, this->FBgColor,
+                          this->FFullscreenBtnTop, this->FFullscreenBtnRight, this->FFontName, this->FFontSize, this->FFontColor);
 
-    LoadFormulasFromJSON(ComboBox1);
+    ::loadFormulasFromJSON(ComboBox1, this->FFormulaLimits);
 
     ComboBox1->DropDownCount = ComboBox1->Items->Count;
     ComboBox1->ItemIndex = 0;
