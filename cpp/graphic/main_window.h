@@ -75,7 +75,6 @@ private:
     AnsiString FFormulaString;
     std::vector<double> FValuesX;
     std::vector<double> FValuesY;
-    std::unique_ptr<uzel> p = nullptr;
 
     double FSavedMi;
     double FSavedMa;

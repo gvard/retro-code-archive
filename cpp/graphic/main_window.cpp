@@ -112,11 +112,6 @@ void TMainWindow::PrepareCanvas()
         PaintBox1->Canvas->Brush->Style = bsSolid;
         PaintBox1->Canvas->FillRect(PaintBox1->ClientRect);
 
-        this->p = nullptr;
-    }
-    else
-    {
-        this->p = nullptr;
     }
 }
 
@@ -158,7 +153,7 @@ void TMainWindow::CalculateGraphPoints()
     try
     {
         // Вызываем функцию парсера из parser.cpp с явным пробросом параметров
-        ::f(this->FFormulaString, this->FValuesY, this->p, this->FPointsCount, this->FErrorFlag, this->FValuesX);
+        ::f(this->FFormulaString, this->FValuesY, this->FPointsCount, this->FErrorFlag, this->FValuesX);
 
         if (this->FErrorFlag == 1)
         {
