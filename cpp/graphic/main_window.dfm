@@ -132,9 +132,9 @@ object MainWindow: TMainWindow
     end
     object Button1: TButton
       AlignWithMargins = True
-      Left = 542
+      Left = 550
       Top = 3
-      Width = 95
+      Width = 87
       Height = 22
       Align = alRight
       Caption = #1055#1086#1089#1090#1088#1086#1080#1090#1100

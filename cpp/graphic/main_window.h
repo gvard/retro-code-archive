@@ -40,8 +40,33 @@ __published:
 private:
     TBorderStyle FOldBorderStyle;
     TWindowState FOldWindowState;
+    TColor FCurrentDynamicColor;
     int FOldLeft, FOldTop, FOldWidth, FOldHeight;
     bool FIsFullscreen;
+    bool FGraphOverAxes = true;
+    struct RenderContext
+    {
+        int posX = 0;
+        int posY = 0;
+        int rightEdge = 0;
+        int workWidth = 0;
+        int workHeight = 0;
+        int corr = -1;
+
+        double startX = 0.0;
+        double endX = 0.0;
+        double stepX = 0.0;
+        double closestX = 1e300;
+        double bestValX = 0.0;
+
+        double startY = 0.0;
+        double endY = 0.0;
+        double stepY = 0.0;
+        double closestY = 1e300;
+        double bestValY = 0.0;
+
+        bool needDrawLabels = true;
+    };
 
     int FPointsCount;
     int FErrorFlag;
@@ -75,6 +100,9 @@ private:
     void PrepareCanvas();
     void CalculateGraphPoints();
     void RenderAxesAndCurves(TObject* Sender, TPoint* v);
+    void DrawGraphCurve(TPoint* v);
+    void DrawCoordinateAxes(const RenderContext& ctx);
+    void DrawLabelsAndTicksText(const RenderContext& ctx);
 
 public:
     __fastcall TMainWindow(TComponent* Owner);

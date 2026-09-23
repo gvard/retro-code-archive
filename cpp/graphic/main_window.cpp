@@ -28,6 +28,11 @@ __fastcall TMainWindow::TMainWindow(TComponent* Owner)
 
 void __fastcall TMainWindow::UpdateGraphView(TObject* Sender)
 {
+    if (Sender != Button1)
+    {
+        FIsFirstGraph = true;
+    }
+
     // 1. Валидация входных данных (границы, чекбоксы масштабирования)
     if (!ValidateInputAndParams(Sender))
     {
@@ -39,6 +44,16 @@ void __fastcall TMainWindow::UpdateGraphView(TObject* Sender)
 
     // 3. Вычисление точек графика (инициализация массивов, вызов f())
     CalculateGraphPoints();
+
+    if (CheckBox1->Checked)
+    {
+        // Генерируем новый цвет только при клике на кнопку.
+        // При изменении размеров окна (Sender != Button1) используем старый сохраненный цвет.
+        if (Sender == Button1)
+        {
+            FCurrentDynamicColor = static_cast<TColor>(RGB(rand() % 200, rand() % 200, rand() % 200));
+        }
+    }
 
     // Локальные структуры для передачи в отрисовщик (выделение памяти под динамический массив)
     std::vector<TPoint> v(this->FPointsCount + 1);
@@ -90,7 +105,7 @@ bool TMainWindow::ValidateInputAndParams(TObject* Sender)
 
 void TMainWindow::PrepareCanvas()
 {
-    if (!CheckBox1->Checked)
+    if (!CheckBox1->Checked || FIsFirstGraph)
     {
         PaintBox1->Repaint();
         PaintBox1->Canvas->Brush->Color = static_cast<TColor>(this->FBgColor);
@@ -250,43 +265,6 @@ void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
         v[i] = Point(screenX, screenY);
     }
 
-    if (CheckBox1->Checked)
-    {
-        // Генерирует случайный цвет, исключая слишком светлые
-        PaintBox1->Canvas->Pen->Color = static_cast<TColor>(RGB(rand() % 200, rand() % 200, rand() % 200));
-    }
-    else
-    {
-        PaintBox1->Canvas->Pen->Color = static_cast<TColor>(this->FGraphColor);
-    }
-    PaintBox1->Canvas->Pen->Width = this->FGraphLineWidth;
-
-    // 3. Отрисовка кривой графика (MoveTo/LineTo)
-    bool drawing = false;
-
-    for (int i = 0; i <= FPointsCount; i++)
-    {
-        // Проверяем точку на валидность
-        if (this->FValuesY[i] < 1e299 && !std::isinf(this->FValuesY[i]) && !std::isnan(this->FValuesY[i]))
-        {
-            if (!drawing)
-            {
-                // Начинаем новую линию с этой корректной точки
-                PaintBox1->Canvas->MoveTo(v[i].X, v[i].Y);
-                drawing = true;
-            }
-            else
-            {
-                // Продолжаем существующую линию
-                PaintBox1->Canvas->LineTo(v[i].X, v[i].Y);
-            }
-        }
-        else
-        {
-            drawing = false;
-        }
-    }
-
     PaintBox1->Canvas->Pen->Color = static_cast<TColor>(this->FAxisColor);
     PaintBox1->Canvas->Brush->Color = static_cast<TColor>(this->FAxisColor);
     PaintBox1->Canvas->Pen->Width = this->FAxisLineWidth;
@@ -380,56 +358,6 @@ void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
         }
     }
 
-    // Второй проход: отрисовка рисок и вывод текста для bestValX
-    for (double valX = startX; valX <= endX && iterationsCountX < 50; valX += stepX)
-    {
-        iterationsCountX++;
-        if (std::abs(valX) < 1e-9)
-            continue;
-
-        int markX = padLeft + floor(workWidth * (valX - this->FMinX) / (this->FMaxX - this->FMinX));
-
-        // Не рисуем риску, если она находится в пределах 15 пикселей от острия
-        if (markX >= padLeft && markX <= (rightEdge - 15))
-        {
-            PaintBox1->Canvas->MoveTo(markX, posY - 3);
-            PaintBox1->Canvas->LineTo(markX, posY + 3);
-
-            // Подписываем риску, которую алгоритм определил как ближайшую к нулю
-            if (closestX < 1e299 && std::abs(valX - bestValX) < 1e-9)
-            {
-                if (!CheckBox1->Checked || (CheckBox1->Checked && PaintBox1->Tag == 0))
-                {
-                    if (needDrawLabels && std::abs(valX) < 100000.0)
-                    {
-                        PaintBox1->Canvas->Brush->Style = bsClear;
-                        PaintBox1->Canvas->Font->Name = this->FFontName;
-                        PaintBox1->Canvas->Font->Size = this->FFontSize;
-                        PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FFontColor);
-
-                        AnsiString txtX = FloatToStrF(valX, ffGeneral, 4, 2);
-
-                        if (txtX.AnsiPos(".") > 0)
-                        {
-                            while (txtX.Length() > 0 && txtX[txtX.Length()] == '0')
-                            {
-                                txtX.Delete(txtX.Length(), 1);
-                            }
-                            if (txtX.Length() > 0 && txtX[txtX.Length()] == '.')
-                            {
-                                txtX.Delete(txtX.Length(), 1);
-                            }
-                        }
-
-                        int labelY = (posY + 6 + 14 > (PaintBox1->Height - padBottom)) ? (posY - 32) : (posY + 6);
-                        int textWidthHalf = PaintBox1->Canvas->TextWidth(txtX) / 2;
-                        PaintBox1->Canvas->TextOut(markX - textWidthHalf, labelY, txtX);
-                    }
-                }
-            }
-        }
-    }
-
     // 7. Разметка засечек оси Y
     double deltaY = ma - mi;
     double stepY = 0.5;
@@ -471,85 +399,218 @@ void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
         }
     }
 
-    // Второй проход: отрисовка рисок Y и вывод текста
-    for (double valY = startY; valY <= endY && iterationsCount < 50; valY += stepY)
+    RenderContext ctx;
+    ctx.posX = posX;
+    ctx.posY = posY;
+    ctx.rightEdge = rightEdge;
+    ctx.workWidth = workWidth;
+    ctx.workHeight = workHeight;
+    ctx.corr = corr;
+
+    ctx.startX = startX;
+    ctx.endX = endX;
+    ctx.stepX = stepX;
+    ctx.closestX = closestX;
+    ctx.bestValX = bestValX;
+
+    ctx.startY = startY;
+    ctx.endY = endY;
+    ctx.stepY = stepY;
+    ctx.closestY = closestY;
+    ctx.bestValY = bestValY;
+
+    ctx.needDrawLabels = needDrawLabels;
+
+    if (this->FGraphOverAxes)
     {
-        iterationsCount++;
-        if (std::abs(valY) < 1e-9)
-            continue;
+        this->DrawCoordinateAxes(ctx);
+        this->DrawGraphCurve(v);
+    }
+    else
+    {
+        this->DrawGraphCurve(v);
+        this->DrawCoordinateAxes(ctx);
+    }
 
-        int markY = padTop + floor(workHeight * (ma - valY) / (ma - mi)) + (mi * ma == 0 ? corr : 0);
-        if (markY >= 15 && markY <= PaintBox1->Height - padBottom)
+    this->DrawLabelsAndTicksText(ctx);
+}
+
+void TMainWindow::DrawGraphCurve(TPoint* v)
+{
+    if (CheckBox1->Checked)
+    {
+        PaintBox1->Canvas->Pen->Color = this->FCurrentDynamicColor;
+    }
+    else
+    {
+        PaintBox1->Canvas->Pen->Color = static_cast<TColor>(this->FGraphColor);
+    }
+    PaintBox1->Canvas->Pen->Width = this->FGraphLineWidth;
+
+    bool drawing = false;
+    for (int i = 0; i <= FPointsCount; i++)
+    {
+        if (this->FValuesY[i] < 1e299 && !std::isinf(this->FValuesY[i]) && !std::isnan(this->FValuesY[i]))
         {
-            PaintBox1->Canvas->MoveTo(posX - 3, markY);
-            PaintBox1->Canvas->LineTo(posX + 3, markY);
-
-            if (closestY < 1e299 && std::abs(valY - bestValY) < 1e-9)
+            if (!drawing)
             {
-                if (needDrawLabels && std::abs(valY) < 100000.0)
+                PaintBox1->Canvas->MoveTo(v[i].X, v[i].Y);
+                drawing = true;
+            }
+            else
+            {
+                PaintBox1->Canvas->LineTo(v[i].X, v[i].Y);
+            }
+        }
+        else
+        {
+            drawing = false;
+        }
+    }
+}
+
+void TMainWindow::DrawCoordinateAxes(const RenderContext& ctx)
+{
+    TPoint o1[2];
+    TPoint o2[2];
+
+    PaintBox1->Canvas->Pen->Color = static_cast<TColor>(this->FAxisColor);
+    PaintBox1->Canvas->Brush->Color = static_cast<TColor>(this->FAxisColor);
+    PaintBox1->Canvas->Pen->Width = this->FAxisLineWidth;
+
+    // Ось X
+    o1[0] = Point(20, ctx.posY); // padLeft = 20
+    o1[1] = Point(ctx.rightEdge, ctx.posY);
+    PaintBox1->Canvas->Polyline(o1, 1);
+
+    TPoint arrowX[3];
+    arrowX[0] = Point(ctx.rightEdge, ctx.posY);
+    arrowX[1] = Point(ctx.rightEdge - 8, ctx.posY - 4);
+    arrowX[2] = Point(ctx.rightEdge - 8, ctx.posY + 4);
+    PaintBox1->Canvas->Polygon(arrowX, 2);
+
+    // Ось Y
+    o2[0] = Point(ctx.posX, PaintBox1->Height - 14); // padBottom = 14
+    o2[1] = Point(ctx.posX, 5);
+    PaintBox1->Canvas->Polyline(o2, 1);
+
+    TPoint arrowY[3];
+    arrowY[0] = Point(ctx.posX, 5);
+    arrowY[1] = Point(ctx.posX - 4, 13);
+    arrowY[2] = Point(ctx.posX + 4, 13);
+    PaintBox1->Canvas->Polygon(arrowY, 2);
+
+    // Риски оси X
+    int iterationsCountX = 0;
+    for (double valX = ctx.startX; valX <= ctx.endX && iterationsCountX < 50; valX += ctx.stepX)
+    {
+        iterationsCountX++;
+        if (std::abs(valX) < 1e-9) continue;
+
+        int markX = 20 + static_cast<int>(floor(static_cast<double>(ctx.workWidth) * (valX - this->FMinX) / (this->FMaxX - this->FMinX)));
+        if (markX >= 20 && markX <= (ctx.rightEdge - 15))
+        {
+            PaintBox1->Canvas->MoveTo(markX, ctx.posY - 3);
+            PaintBox1->Canvas->LineTo(markX, ctx.posY + 3);
+        }
+    }
+
+    // Риски оси Y
+    int iterationsCountY = 0;
+    for (double valY = ctx.startY; valY <= ctx.endY && iterationsCountY < 50; valY += ctx.stepY)
+    {
+        iterationsCountY++;
+        if (std::abs(valY) < 1e-9) continue;
+
+        int markY = 20 + static_cast<int>(floor(static_cast<double>(ctx.workHeight) * (ctx.endY - valY) / (ctx.endY - ctx.startY))) + (ctx.startX * ctx.endX == 0 ? ctx.corr : 0);
+        if (markY >= 15 && markY <= PaintBox1->Height - 14)
+        {
+            PaintBox1->Canvas->MoveTo(ctx.posX - 3, markY);
+            PaintBox1->Canvas->LineTo(ctx.posX + 3, markY);
+        }
+    }
+}
+
+void TMainWindow::DrawLabelsAndTicksText(const RenderContext& ctx)
+{
+    if (!ctx.needDrawLabels) return;
+
+    // Числовые подписи оси X
+    int iterationsCountX = 0;
+    for (double valX = ctx.startX; valX <= ctx.endX && iterationsCountX < 50; valX += ctx.stepX)
+    {
+        iterationsCountX++;
+        if (std::abs(valX) < 1e-9) continue;
+
+        int markX = 20 + static_cast<int>(floor(static_cast<double>(ctx.workWidth) * (valX - this->FMinX) / (this->FMaxX - this->FMinX)));
+
+        if (markX >= 20 && markX <= (ctx.rightEdge - 15))
+        {
+            if (ctx.closestX < 1e299 && std::abs(valX - ctx.bestValX) < 1e-9)
+            {
+                if (!CheckBox1->Checked || (CheckBox1->Checked && PaintBox1->Tag == 0))
                 {
                     PaintBox1->Canvas->Brush->Style = bsClear;
                     PaintBox1->Canvas->Font->Name = this->FFontName;
                     PaintBox1->Canvas->Font->Size = this->FFontSize;
                     PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FFontColor);
 
-                    AnsiString txtY = FloatToStrF(valY, ffFixed, 7, 2);
-
-                    if (txtY.AnsiPos(".") > 0)
+                    AnsiString txtX = FloatToStrF(valX, ffGeneral, 4, 2);
+                    if (txtX.AnsiPos(".") > 0)
                     {
-                        while (txtY.Length() > 0 && txtY[txtY.Length()] == '0')
-                        {
-                            txtY.Delete(txtY.Length(), 1);
-                        }
-                        if (txtY.Length() > 0 && txtY[txtY.Length()] == '.')
-                        {
-                            txtY.Delete(txtY.Length(), 1);
-                        }
+                        while (txtX.Length() > 0 && txtX[txtX.Length()] == '0') txtX.Delete(txtX.Length(), 1);
+                        if (txtX.Length() > 0 && txtX[txtX.Length()] == '.') txtX.Delete(txtX.Length(), 1);
                     }
 
-                    // Адаптивное позиционирование подписи оси Y
-                    // Узнаем точную физическую ширину строки в пикселях
-                    int realTextWidth = PaintBox1->Canvas->TextWidth(txtY);
-                    int textX;
-
-                    // Проверяем положение оси Y: если слева от оси слишком мало места
-                    if (posX - realTextWidth - 8 < padLeft)
-                    {
-                        // Ось слева -> рисуем подпись справа от оси с зазором в 8 пикселей
-                        textX = posX + 8;
-                    }
-                    else
-                    {
-                        // Иначе рисуем подпись слева от оси.
-                        // Отнимаем ширину текста и добавляем зазор в 6 пикселей от линии
-                        textX = posX - realTextWidth - 6;
-                    }
-
-                    PaintBox1->Canvas->TextOut(textX, markY - 7, txtY);
+                    int labelY = (ctx.posY + 6 + 14 > (PaintBox1->Height - 14)) ? (ctx.posY - 32) : (ctx.posY + 6);
+                    int textWidthHalf = PaintBox1->Canvas->TextWidth(txtX) / 2;
+                    PaintBox1->Canvas->TextOut(markX - textWidthHalf, labelY, txtX);
                 }
             }
         }
     }
 
-    // 8. Вывод подписей текста (букв X и Y на краях осей)
-    if (needDrawLabels)
+    // Числовые подписи оси Y
+    int iterationsCountY = 0;
+    for (double valY = ctx.startY; valY <= ctx.endY && iterationsCountY < 50; valY += ctx.stepY)
     {
-        PaintBox1->Canvas->Font->Name = this->FFontName;
-        PaintBox1->Canvas->Font->Size = this->FFontSize;
-        PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FFontColor);
-        PaintBox1->Canvas->Font->Style = TFontStyles() << fsBold;
-        PaintBox1->Canvas->Brush->Style = bsClear;
+        iterationsCountY++;
+        if (std::abs(valY) < 1e-9) continue;
 
-        int textY = posY + 6;
-        if (textY + 18 > (PaintBox1->Height - padBottom))
+        int markY = 20 + static_cast<int>(floor(static_cast<double>(ctx.workHeight) * (ctx.endY - valY) / (ctx.endY - ctx.startY))) + (ctx.startX * ctx.endX == 0 ? ctx.corr : 0);
+        if (markY >= 15 && markY <= PaintBox1->Height - 14)
         {
-            textY = posY - 32;
-        }
+            if (ctx.closestY < 1e299 && std::abs(valY - ctx.bestValY) < 1e-9)
+            {
+                PaintBox1->Canvas->Brush->Style = bsClear;
+                PaintBox1->Canvas->Font->Name = this->FFontName;
+                PaintBox1->Canvas->Font->Size = this->FFontSize;
+                PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FFontColor);
 
-        rightEdge = PaintBox1->Width - padRight;
-        PaintBox1->Canvas->TextOut(rightEdge - 15, textY, "X");
-        PaintBox1->Canvas->TextOut(posX + 8, 4, "Y");
+                AnsiString txtY = FloatToStrF(valY, ffFixed, 7, 2);
+                if (txtY.AnsiPos(".") > 0)
+                {
+                    while (txtY.Length() > 0 && txtY[txtY.Length()] == '0') txtY.Delete(txtY.Length(), 1);
+                    if (txtY.Length() > 0 && txtY[txtY.Length()] == '.') txtY.Delete(txtY.Length(), 1);
+                }
+
+                int realTextWidth = PaintBox1->Canvas->TextWidth(txtY);
+                int textX = (ctx.posX - realTextWidth - 8 < 20) ? (ctx.posX + 8) : (ctx.posX - realTextWidth - 6);
+                PaintBox1->Canvas->TextOut(textX, markY - 7, txtY);
+            }
+        }
     }
+
+    // Буквенные подписи X и Y
+    PaintBox1->Canvas->Font->Name = this->FFontName;
+    PaintBox1->Canvas->Font->Size = this->FFontSize;
+    PaintBox1->Canvas->Font->Color = static_cast<TColor>(this->FFontColor);
+    PaintBox1->Canvas->Font->Style = TFontStyles() << fsBold;
+    PaintBox1->Canvas->Brush->Style = bsClear;
+
+    int textY = (ctx.posY + 6 + 18 > (PaintBox1->Height - 14)) ? (ctx.posY - 32) : (ctx.posY + 6);
+    PaintBox1->Canvas->TextOut(ctx.rightEdge - 15, textY, "X");
+    PaintBox1->Canvas->TextOut(ctx.posX + 8, 4, "Y");
 }
 
 void __fastcall TMainWindow::FormCreate(TObject* Sender)
@@ -583,6 +644,7 @@ void __fastcall TMainWindow::FormCreate(TObject* Sender)
     }
 
     this->DoubleBuffered = true;
+    this->FCurrentDynamicColor = static_cast<TColor>(this->FGraphColor);
     ComboBox1->Focused();
 }
 
@@ -674,6 +736,7 @@ void __fastcall TMainWindow::ToggleFullscreen()
 
         // Возвращаем кнопку обратно внутрь панели
         Button1->Parent = Panel1;
+        Button1->Align = alRight;
 
         marginTop = 5;
         marginRight = 5;
@@ -706,7 +769,7 @@ void __fastcall TMainWindow::ToggleFullscreen()
         this->FPointsCount = PaintBox1->Width - 1;
 
         std::vector<TPoint> v(this->FPointsCount + 1);
-        RenderAxesAndCurves(this, v.data());
+        RenderAxesAndCurves(nullptr, v.data());
     }
     __finally
     {
