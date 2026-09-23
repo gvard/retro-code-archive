@@ -68,8 +68,8 @@ bool TMainWindow::ValidateInputAndParams(TObject* Sender)
     {
         try
         {
-            UnicodeString strA = Edit2->Text;
-            UnicodeString strB = Edit3->Text;
+            UnicodeString strA = EditA->Text;
+            UnicodeString strB = EditB->Text;
             strA = System::Sysutils::StringReplace(strA, L",", L".", TReplaceFlags() << rfReplaceAll);
             strB = System::Sysutils::StringReplace(strB, L",", L".", TReplaceFlags() << rfReplaceAll);
 
@@ -91,8 +91,8 @@ bool TMainWindow::ValidateInputAndParams(TObject* Sender)
 
     if (CheckBox1->Checked && !FIsFirstGraph)
     {
-        Edit2->Text = FloatToStr(FSavedA);
-        Edit3->Text = FloatToStr(FSavedB);
+        EditA->Text = FloatToStr(FSavedA);
+        EditB->Text = FloatToStr(FSavedB);
     }
 
     if (this->FErrorFlag == 1)
@@ -122,8 +122,8 @@ void TMainWindow::CalculateGraphPoints()
 
     try
     {
-        UnicodeString strA = Edit2->Text;
-        UnicodeString strB = Edit3->Text;
+        UnicodeString strA = EditA->Text;
+        UnicodeString strB = EditB->Text;
         strA = System::Sysutils::StringReplace(strA, L",", L".", TReplaceFlags() << rfReplaceAll);
         strB = System::Sysutils::StringReplace(strB, L",", L".", TReplaceFlags() << rfReplaceAll);
 
@@ -669,8 +669,8 @@ void __fastcall TMainWindow::FormCreate(TObject* Sender)
         // TODO: Обновить до minX/maxX
         this->FMinX = FFormulaLimits[0].a;
         this->FMaxX = FFormulaLimits[0].b;
-        Edit2->Text = FloatToStr(this->FMinX);
-        Edit3->Text = FloatToStr(this->FMaxX);
+        EditA->Text = FloatToStr(this->FMinX);
+        EditB->Text = FloatToStr(this->FMaxX);
     }
 
     this->DoubleBuffered = true;
@@ -684,23 +684,23 @@ void __fastcall TMainWindow::ComboKeyPress(TObject* Sender, char& Key)
     {
         Button1->SetFocus();
         UpdateGraphView(Button1);
-        Edit2->SetFocus();
+        EditA->SetFocus();
         Key = 0;
     }
 }
 
-void __fastcall TMainWindow::E2KeyPress(TObject* Sender, char& Key)
+void __fastcall TMainWindow::EditAKeyPress(TObject* Sender, char& Key)
 {
     if (Key == VK_RETURN)
     {
         Button1->SetFocus();
         UpdateGraphView(Button1);
-        Edit3->SetFocus();
+        EditB->SetFocus();
         Key = 0;
     }
 }
 
-void __fastcall TMainWindow::E3KeyPress(TObject* Sender, char& Key)
+void __fastcall TMainWindow::EditBKeyPress(TObject* Sender, char& Key)
 {
     if (Key == VK_RETURN)
     {
@@ -833,8 +833,8 @@ void __fastcall TMainWindow::ComboBox1Change(TObject* Sender)
             this->FMinX = FFormulaLimits[index].a;
             this->FMaxX = FFormulaLimits[index].b;
 
-            Edit2->Text = FloatToStr(this->FMinX);
-            Edit3->Text = FloatToStr(this->FMaxX);
+            EditA->Text = FloatToStr(this->FMinX);
+            EditB->Text = FloatToStr(this->FMaxX);
 
             FIsFirstGraph = true;
         }

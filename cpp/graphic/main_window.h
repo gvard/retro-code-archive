@@ -19,8 +19,8 @@ class TMainWindow : public TForm
 __published:
     TPanel* Panel1;
     TComboBox* ComboBox1;
-    TEdit* Edit2;
-    TEdit* Edit3;
+    TEdit* EditA;
+    TEdit* EditB;
     TLabel* Label1;
     TLabel* Label2;
     TLabel* Label3;
@@ -31,8 +31,8 @@ __published:
     void __fastcall FormCreate(TObject* Sender);
     void __fastcall UpdateGraphView(TObject* Sender);
     void __fastcall ComboKeyPress(TObject* Sender, char& Key);
-    void __fastcall E2KeyPress(TObject* Sender, char& Key);
-    void __fastcall E3KeyPress(TObject* Sender, char& Key);
+    void __fastcall EditAKeyPress(TObject* Sender, char& Key);
+    void __fastcall EditBKeyPress(TObject* Sender, char& Key);
     void __fastcall CheckBox1Click(TObject* Sender);
     void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
     void __fastcall ComboBox1Change(TObject* Sender);
