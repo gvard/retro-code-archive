@@ -565,6 +565,7 @@ void __fastcall TMainWindow::FormCreate(TObject* Sender)
         _mm_setcsr(0x1F80);
     #endif
 
+    // this->Caption = "Ширина холста: " + IntToStr(PaintBox1->Width) + " Высота: " + IntToStr(PaintBox1->Height);
     System::Sysutils::FormatSettings.DecimalSeparator = '.';
 
     ::loadProgramSettings(this->FGraphLineWidth, this->FAxisLineWidth, this->FGraphColor, this->FAxisColor, this->FBgColor,
@@ -583,6 +584,7 @@ void __fastcall TMainWindow::FormCreate(TObject* Sender)
         Edit3->Text = FloatToStr(this->FMaxX);
     }
 
+    this->DoubleBuffered = true;
     ComboBox1->Focused();
 }
 

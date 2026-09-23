@@ -1,11 +1,11 @@
 object MainWindow: TMainWindow
   Left = 200
   Top = 104
-  BorderIcons = [biSystemMenu, biMinimize]
-  BorderStyle = bsSingle
+  BorderIcons = [biSystemMenu, biMinimize, biMaximize]
+  BorderStyle = bsSizeable
   Caption = #1055#1086#1089#1090#1088#1086#1080#1090#1100' '#1075#1088#1072#1092#1080#1082' y=f(x) '#1086#1090' a '#1076#1086' b'
-  ClientHeight = 461
-  ClientWidth = 634
+  ClientHeight = 480
+  ClientWidth = 640
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,13 +16,14 @@ object MainWindow: TMainWindow
   OldCreateOrder = False
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
+  OnResize = UpdateGraphView
   PixelsPerInch = 96
   TextHeight = 13
   object PaintBox1: TPaintBox
     Left = 0
     Top = 28
-    Width = 634
-    Height = 433
+    Width = 640
+    Height = 452
     Align = alClient
     OnClick = CheckBox1Click
     ExplicitLeft = 8
@@ -33,7 +34,7 @@ object MainWindow: TMainWindow
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 634
+    Width = 640
     Height = 28
     Align = alTop
     BevelOuter = bvNone
@@ -131,7 +132,7 @@ object MainWindow: TMainWindow
     end
     object Button1: TButton
       AlignWithMargins = True
-      Left = 536
+      Left = 542
       Top = 3
       Width = 95
       Height = 22

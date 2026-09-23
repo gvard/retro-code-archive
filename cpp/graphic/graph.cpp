@@ -1,6 +1,5 @@
 #include <vcl.h>
 #pragma hdrstop
-#include <tchar.h>
 #include "main_window.h"
 
 USEFORM("main_window.cpp", Form1);
