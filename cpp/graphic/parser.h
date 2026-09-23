@@ -11,6 +11,5 @@ void f(AnsiString &str,
        std::vector<double> &values,
        int n_val,
        int &errorFlag,
-       const std::vector<double> &mas_x);
-
+       std::vector<double> &mas_x);
 #endif

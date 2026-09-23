@@ -5,7 +5,6 @@
   {"formula": "x^4-4*x^2", "a": -2.5, "b": 2.5},
   {"formula": "x*sin(1/x)", "a": -0.9, "b": 0.9},
   {"formula": "|x|", "a": -0.9, "b": 0.9},
-  {"formula": "-x", "a": -2, "b": 2},
   {"formula": "1/x", "a": -0.6, "b": 0.6},
   {"formula": "1/x^2", "a": -0.0005, "b": 0.0005},
   {"formula": "1/(1+x^2)", "a": -10, "b": 10},
@@ -23,5 +22,13 @@
   {"formula": "x^3/(x^2-0.5)", "a": -2, "b": 2},
   {"formula": "e^(-x^2)*cos(2*pi*x)", "a": -2.7, "b": 2.7},
   {"formula": "cos(pi*|x|)-|x|", "a": -6, "b": 6},
-  {"formula": "abs(x) * sin(5*x)", "a": -6, "b": 6}
+  {"formula": "abs(x) * sin(5*x)", "a": -6, "b": 6},
+  {"formula": "sin(3*t); sin(4*t)", "a": 0, "b": 6.29},
+  {"formula": "sin(5*t); sin(6*t)", "a": 0, "b": 6.29},
+  {"formula": "cos(t)^3; sin(t)^3", "a": 0, "b": 6.29},
+  {"formula": "t - sin(t); 1 - cos(t)", "a": 0, "b": 12.57},
+  {"formula": "2*cos(t) - cos(2*t); 2*sin(t) - sin(2*t)", "a": 0, "b": 6.29},
+  {"formula": "(t^2 - 1) / (t^2 + 1); t * (t^2 - 1) / (t^2 + 1)", "a": -4, "b": 4},
+  {"formula": "3*t / (1 + t^3); 3*t^2 / (1 + t^3)", "a": -0.9, "b": 4},
+  {"formula": "sin(t) * (exp(cos(t)) - 2*cos(4*t) - sin(t/12)^5); cos(t) * (exp(cos(t)) - 2*cos(4*t) - sin(t/12)^5)", "a": 0, "b": 24}
 ]

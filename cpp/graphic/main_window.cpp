@@ -118,7 +118,6 @@ void TMainWindow::PrepareCanvas()
 void TMainWindow::CalculateGraphPoints()
 {
     this->FPointsCount = PaintBox1->Width - 1;
-
     this->FFormulaString = AnsiString(ComboBox1->Text);
 
     try
@@ -139,6 +138,14 @@ void TMainWindow::CalculateGraphPoints()
         return;
     }
 
+    // Если включен режим наложения и это не первый график,
+    // восстанавливаем исходные расчетные границы, чтобы initMas не ломался от прошлых перезаписей X
+    if (CheckBox1->Checked && !FIsFirstGraph)
+    {
+        this->FMinX = FSavedA;
+        this->FMaxX = FSavedB;
+    }
+
     // Вызываем функцию из parser.cpp, передавая FErrorFlag по ссылке
     this->FValuesX = ::initMas(this->FMinX, this->FMaxX, this->FPointsCount, this->FErrorFlag);
 
@@ -152,7 +159,6 @@ void TMainWindow::CalculateGraphPoints()
 
     try
     {
-        // Вызываем функцию парсера из parser.cpp с явным пробросом параметров
         ::f(this->FFormulaString, this->FValuesY, this->FPointsCount, this->FErrorFlag, this->FValuesX);
 
         if (this->FErrorFlag == 1)
@@ -172,14 +178,6 @@ void TMainWindow::CalculateGraphPoints()
 
 void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
 {
-    // Оставшийся код отрисовки:
-    // 1. Поиск mi, ma и проверка на валидность точек (firstValid)
-    // 2. Расчет пропорций экрана (workHeight, workWidth)
-    // 3. Цикл перевода координат: v[i] = Point(...)
-    // 4. Отрисовка кривой графика (MoveTo/LineTo)
-    // 5. Отрисовка осей X и Y (Polyline/Polygon)
-    // 6. Циклы разметки засечек оси X и оси Y
-    // 7. Вывод подписей текста
     TPoint o1[2];
     TPoint o2[2];
 
@@ -187,20 +185,25 @@ void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     int posX = 0;
     int rightEdge = 0;
     int corr = -1;
-    double mi = 0, ma = 0;
+    double mi = 0, ma = 0;      // Минимум и максимум по Y
+    double minX = 0, maxX = 0;  // Реальные экранные границы по X
     bool needDrawLabels = (!CheckBox1->Checked || FIsFirstGraph || Sender == nullptr);
 
-    // 1. Поиск mi, ma и проверка на валидность точек (firstValid)
+    // 1. Поиск экстремумов по Y (mi, ma) и по X (minX, maxX)
     bool firstValid = false;
+    bool isParametric = (this->FFormulaString.AnsiPos(";") > 0);
+
     for (int i = 0; i <= FPointsCount; i++)
     {
-        // Проверяем, что точка валидна, не бесконечна и не NaN
-        if (this->FValuesY[i] < 1e299 && !std::isinf(this->FValuesY[i]) && !std::isnan(this->FValuesY[i]))
+        if (this->FValuesY[i] < 1e299 && !std::isinf(this->FValuesY[i]) && !std::isnan(this->FValuesY[i]) &&
+            this->FValuesX[i] < 1e299 && !std::isinf(this->FValuesX[i]) && !std::isnan(this->FValuesX[i]))
         {
             if (!firstValid)
             {
                 mi = this->FValuesY[i];
                 ma = this->FValuesY[i];
+                minX = this->FValuesX[i];
+                maxX = this->FValuesX[i];
                 firstValid = true;
             }
             else
@@ -209,40 +212,60 @@ void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
                     mi = this->FValuesY[i];
                 if (ma < this->FValuesY[i])
                     ma = this->FValuesY[i];
+                if (minX > this->FValuesX[i])
+                    minX = this->FValuesX[i];
+                if (maxX < this->FValuesX[i])
+                    maxX = this->FValuesX[i];
             }
         }
     }
 
-    // Если вообще все точки оказались ошибочными (например, ln(-5))
     if (!firstValid)
     {
         mi = -1.0;
         ma = 1.0;
+        minX = this->FMinX;
+        maxX = this->FMaxX;
     }
+
+    // Для обычного графика X-границы экрана жестко привязаны к вводу
+    if (!isParametric)
+    {
+        minX = this->FMinX;
+        maxX = this->FMaxX;
+    }
+
     mi = (mi > 0 ? 0 : mi);
     ma = (ma < 0 ? 0 : ma);
 
-    if (Sender != nullptr && (!CheckBox1->Checked || FIsFirstGraph))
+    // Если это первый график или строим по нажатию кнопки без режима наложения графиков,
+    // мы должны зафиксировать новые реальные масштабы фигуры.
+    if (FIsFirstGraph || (Sender == Button1 && !CheckBox1->Checked))
     {
         FSavedMi = mi;
         FSavedMa = ma;
-        FSavedA = this->FMinX;
-        FSavedB = this->FMaxX;
+
+        if (isParametric) {
+            FSavedA = minX;
+            FSavedB = maxX;
+        } else {
+            FSavedA = this->FMinX;
+            FSavedB = this->FMaxX;
+        }
         FIsFirstGraph = false;
     }
-    else if (Sender == nullptr || CheckBox1->Checked)
+    else
     {
-        // Восстанавливаем точные пропорции при изменении экрана или наложении
+        // Во всех остальных случаях (перерисовка окна, наложение графиков CheckBox1)
+        // восстанавливаем сохраненные физические границы экрана.
         mi = FSavedMi;
         ma = FSavedMa;
-        this->FMinX = FSavedA;
-        this->FMaxX = FSavedB;
+        minX = FSavedA;
+        maxX = FSavedB;
     }
 
-    if (ma == 0)
-    {
-        corr = 1;
-    }
+
+    if (ma == 0) corr = 1;
 
     int padTop = 20;
     int padBottom = 14;
@@ -252,13 +275,22 @@ void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     int workHeight = PaintBox1->Height - padTop - padBottom;
     int workWidth = PaintBox1->Width - padLeft - padRight;
 
-    // 2. Цикл перевода координат в экранные
+    // Защита от деления на 0 при сборке пустых/вертикальных графиков
+    if (std::abs(maxX - minX) < 1e-9) maxX = minX + 1.0;
+
+    // 2. Цикл перевода координат с поддержкой параметрического массива X
     for (int i = 0; i <= FPointsCount; i++)
     {
-        int screenX = padLeft + static_cast<int>(floor(static_cast<double>(i) * workWidth / this->FPointsCount));
+        int screenX = padLeft + static_cast<int>(floor((this->FValuesX[i] - minX) * workWidth / (maxX - minX)));
         int screenY = padTop + static_cast<int>(floor(static_cast<double>(workHeight) * (ma - this->FValuesY[i]) / (ma - mi))) + (mi * ma == 0 ? corr : 0);
         v[i] = Point(screenX, screenY);
     }
+
+    // Временно подменяем FMinX и FMaxX на физические экранные значения.
+    double originalMinX = this->FMinX;
+    double originalMaxX = this->FMaxX;
+    this->FMinX = minX;
+    this->FMaxX = maxX;
 
     PaintBox1->Canvas->Pen->Color = static_cast<TColor>(this->FAxisColor);
     PaintBox1->Canvas->Brush->Color = static_cast<TColor>(this->FAxisColor);
@@ -428,6 +460,9 @@ void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     }
 
     this->DrawLabelsAndTicksText(ctx);
+
+    this->FMinX = originalMinX;
+    this->FMaxX = originalMaxX;
 }
 
 void TMainWindow::DrawGraphCurve(TPoint* v)
