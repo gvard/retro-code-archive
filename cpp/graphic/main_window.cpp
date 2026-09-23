@@ -13,9 +13,6 @@
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 
-#include <System.JSON.hpp>
-#include <filesystem>
-
 TMainWindow* MainWindow;
 
 __fastcall TMainWindow::TMainWindow(TComponent* Owner)
@@ -100,7 +97,6 @@ void TMainWindow::PrepareCanvas()
         PaintBox1->Canvas->Brush->Style = bsSolid;
         PaintBox1->Canvas->FillRect(PaintBox1->ClientRect);
 
-        // Очищаем старое дерево формулы, если оно существовало
         this->p = nullptr;
     }
     else
@@ -113,7 +109,6 @@ void TMainWindow::CalculateGraphPoints()
 {
     this->FPointsCount = PaintBox1->Width - 1;
 
-    int bracketCount = 0;
     this->FFormulaString = AnsiString(ComboBox1->Text);
 
     try
@@ -153,6 +148,8 @@ void TMainWindow::CalculateGraphPoints()
         if (this->FErrorFlag == 1)
         {
             ShowMessage("Ошибка в записи формулы или расстановке скобок!");
+            this->FValuesY.assign(this->FPointsCount + 1, 1e300);
+            return;
         }
     }
     catch (...)
@@ -578,6 +575,7 @@ void __fastcall TMainWindow::FormCreate(TObject* Sender)
 
     if (!FFormulaLimits.empty())
     {
+        // TODO: Обновить до minX/maxX
         this->FMinX = FFormulaLimits[0].a;
         this->FMaxX = FFormulaLimits[0].b;
         Edit2->Text = FloatToStr(this->FMinX);
@@ -699,14 +697,16 @@ void __fastcall TMainWindow::ToggleFullscreen()
     isProcessing = true;
     try
     {
-        if (FIsFirstGraph)
-        {
-            PaintBox1->Repaint();
-        }
-        else
-        {
-            UpdateGraphView(Button1);
-        }
+        // Принудительно очищаем и красим фон
+        PaintBox1->Repaint();
+        PaintBox1->Canvas->Brush->Color = static_cast<TColor>(this->FBgColor);
+        PaintBox1->Canvas->Brush->Style = bsSolid;
+        PaintBox1->Canvas->FillRect(PaintBox1->ClientRect);
+
+        this->FPointsCount = PaintBox1->Width - 1;
+
+        std::vector<TPoint> v(this->FPointsCount + 1);
+        RenderAxesAndCurves(this, v.data());
     }
     __finally
     {
