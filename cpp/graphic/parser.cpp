@@ -1,7 +1,7 @@
 #include "parser.h"
 #define _USE_MATH_DEFINES
-#include <cctype>
 #include <cmath>
+#include <cctype>
 
 #include "tinyexpr.h"
 
@@ -81,7 +81,7 @@ static void preprocess_formula_string(AnsiString& s)
 }
 
 static void tabulate_grid(te_expr* expr_x, te_expr* expr_y, double& t_var,
-                          int n_val, std::vector<double>& values, std::vector<double>& x_values)
+                          int n_val, std::vector<double>& y_values, std::vector<double>& x_values)
 {
     if (expr_x == nullptr)
     {
@@ -91,18 +91,18 @@ static void tabulate_grid(te_expr* expr_x, te_expr* expr_y, double& t_var,
             double y_val = te_eval(expr_y);
 
             if (std::isnan(y_val) || std::isinf(y_val))
-                values[j] = 1e300;
+                y_values[j] = 1e300;
             else
-                values[j] = y_val;
+                y_values[j] = y_val;
         }
     }
     // Если заданы оба выражения - это параметрический режим x(t); y(t)
     else
     {
-        std::vector<double> mas_t = x_values; // Сохраняем копию сетки параметра t
+        std::vector<double> t_values = x_values; // Сохраняем копию сетки параметра t
         for (int j = 0; j <= n_val; j++)
         {
-            t_var = mas_t[j];
+            t_var = t_values[j];
 
             double x_val = te_eval(expr_x);
             if (std::isnan(x_val) || std::isinf(x_val))
@@ -112,15 +112,15 @@ static void tabulate_grid(te_expr* expr_x, te_expr* expr_y, double& t_var,
 
             double y_val = te_eval(expr_y);
             if (std::isnan(y_val) || std::isinf(y_val))
-                values[j] = 1e300;
+                y_values[j] = 1e300;
             else
-                values[j] = y_val;
+                y_values[j] = y_val;
         }
     }
 }
 
 void eval_formula(const AnsiString& formula_str,
-                  std::vector<double>& values,
+                  std::vector<double>& y_values,
                   int n_val,
                   int& error_code,
                   std::vector<double>& x_values)
@@ -156,7 +156,7 @@ void eval_formula(const AnsiString& formula_str,
             return;
         }
 
-        tabulate_grid(expr_x, expr_y, t_variable, n_val, values, x_values);
+        tabulate_grid(expr_x, expr_y, t_variable, n_val, y_values, x_values);
 
         te_free(expr_x);
         te_free(expr_y);
@@ -174,7 +174,7 @@ void eval_formula(const AnsiString& formula_str,
             return;
         }
 
-        tabulate_grid(nullptr, expr, t_variable, n_val, values, x_values);
+        tabulate_grid(nullptr, expr, t_variable, n_val, y_values, x_values);
 
         te_free(expr);
     }

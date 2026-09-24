@@ -1,18 +1,10 @@
-#ifndef main_windowH
-#define main_windowH
-#include "parser.h"
+#ifndef MAIN_WINDOW_H
+#define MAIN_WINDOW_H
 
-#include <System.Classes.hpp>
+#include "parser.h"
 #include <Vcl.Controls.hpp>
 #include <Vcl.ExtCtrls.hpp>
-#include <Vcl.Forms.hpp>
 #include <Vcl.StdCtrls.hpp>
-
-struct TFormulaConfig
-{
-    double a = 0.0;
-    double b = 0.0;
-};
 
 class TMainWindow : public TForm
 {

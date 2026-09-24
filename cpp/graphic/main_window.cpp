@@ -1,14 +1,13 @@
-#include <vcl.h>
 #pragma hdrstop
 #include "main_window.h"
 #include "project_model.h"
 
+#include <cmath>
+#include <cstdlib>
+
 #ifdef _WIN64
   #include <xmmintrin.h>
 #endif
-
-#define _USE_MATH_DEFINES
-#include <cmath>
 
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -668,10 +667,31 @@ void __fastcall TMainWindow::FormCreate(TObject* Sender)
     // this->Caption = "Ширина холста: " + IntToStr(PaintBox1->Width) + " Высота: " + IntToStr(PaintBox1->Height);
     System::Sysutils::FormatSettings.DecimalSeparator = '.';
 
-    ::loadProgramSettings(this->FGraphLineWidth, this->FAxisLineWidth, this->FGraphColor, this->FAxisColor, this->FBgColor,
-                          this->FFullscreenBtnTop, this->FFullscreenBtnRight, this->FFontName, this->FFontSize, this->FFontColor);
+    TProgramSettings settings;
+    ::load_program_settings(settings);
 
-    ::loadFormulasFromJSON(ComboBox1, this->FFormulaLimits);
+    this->FGraphLineWidth = settings.graph_width;
+    this->FAxisLineWidth = settings.axis_width;
+    this->FGraphColor = settings.graph_color;
+    this->FAxisColor = settings.axis_color;
+    this->FBgColor = settings.bg_color;
+    this->FFullscreenBtnTop = settings.btn_top;
+    this->FFullscreenBtnRight = settings.btn_right;
+    this->FFontName = settings.font_name;
+    this->FFontSize = settings.font_size;
+    this->FFontColor = settings.font_color;
+
+    std::vector<TFormulaItem> formula_items;
+    ::load_formulas_from_json(formula_items);
+
+    ComboBox1->Items->Clear();
+    this->FFormulaLimits.clear();
+
+    for (const auto& item : formula_items)
+    {
+        ComboBox1->Items->Add(item.formula_str);
+        this->FFormulaLimits.push_back(item.config);
+    }
 
     ComboBox1->DropDownCount = ComboBox1->Items->Count;
     ComboBox1->ItemIndex = 0;

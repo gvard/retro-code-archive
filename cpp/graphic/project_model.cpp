@@ -1,163 +1,167 @@
 #include "project_model.h"
-#include "main_window.h"
 #include <System.JSON.hpp>
 #include <filesystem>
 
-void loadFormulasFromJSON(TComboBox* ComboBox, std::vector<TFormulaConfig>& formulaLimits)
+void load_formulas_from_json(std::vector<TFormulaItem>& formula_items)
 {
-    std::filesystem::path exeDir = std::filesystem::path(ParamStr(0).c_str()).parent_path();
-    std::filesystem::path jsonPath = exeDir / "functions.json";
+    std::filesystem::path exe_dir = std::filesystem::path(ParamStr(0).c_str()).parent_path();
+    std::filesystem::path json_path = exe_dir / "functions.json";
 
-    String filePath = jsonPath.c_str();
-    TStringList* fileContent = new TStringList();
+    String file_path = json_path.c_str();
+    TStringList* file_content = new TStringList();
+    TJSONArray* json_array = nullptr;
 
-    formulaLimits.clear();
-    ComboBox->Items->Clear();
+    formula_items.clear();
 
-    if (!std::filesystem::exists(jsonPath))
+    if (!std::filesystem::exists(json_path))
     {
-        TJSONArray* baseArray = new TJSONArray();
+        TJSONArray* base_array = new TJSONArray();
 
-        UnicodeString defaultFormulas[] = {"abs(x) * sin(5*x)", "1 / (1 + x^2)", "ln(x) / sqrt(x)", "(x > 0) * sin(x) + (x <= 0) * cos(x)"};
-        double defaultA[] = {-5.0, -4.0, 0.01, -6.28};
-        double defaultB[] = {5.0,  4.0,  20.0, 6.28};
+        UnicodeString default_formulas[] = {"abs(x) * sin(5*x)", "1 / (1 + x^2)", "ln(x) / sqrt(x)", "(x > 0) * sin(x) + (x <= 0) * cos(x)"};
+        double default_a[] = {-5.0, -4.0, 0.01, -6.28};
+        double default_b[] = {5.0,  4.0,  20.0, 6.28};
 
         for (int i = 0; i < 4; i++)
         {
             TJSONObject* item = new TJSONObject();
-            item->AddPair("formula", defaultFormulas[i]);
-            item->AddPair("a", defaultA[i]);
-            item->AddPair("b", defaultB[i]);
-            baseArray->AddElement(item);
+            item->AddPair("formula", default_formulas[i]);
+            item->AddPair("a", default_a[i]);
+            item->AddPair("b", default_b[i]);
+            base_array->AddElement(item);
         }
 
-        fileContent->Text = baseArray->ToString();
-        fileContent->SaveToFile(filePath, TEncoding::UTF8);
-        delete baseArray;
+        file_content->Text = base_array->ToString();
+        file_content->SaveToFile(file_path, TEncoding::UTF8);
+        delete base_array;
     }
 
-    TJSONArray* jsonArray = nullptr;
     try
     {
-        fileContent->LoadFromFile(filePath, TEncoding::UTF8);
-        jsonArray = (TJSONArray*)TJSONObject::ParseJSONValue(fileContent->Text);
+        file_content->LoadFromFile(file_path, TEncoding::UTF8);
 
-        if (jsonArray != nullptr)
+        TJSONValue* parsed_value = TJSONObject::ParseJSONValue(file_content->Text);
+        if (parsed_value != nullptr)
         {
-            TFormatSettings jsonLocale = TFormatSettings::Create("en-US");
-            jsonLocale.DecimalSeparator = '.';
+            json_array = static_cast<TJSONArray*>(parsed_value);
 
-            for (int i = 0; i < jsonArray->Count; i++)
+            TFormatSettings json_locale = TFormatSettings::Create("en-US");
+            json_locale.DecimalSeparator = '.';
+
+            for (int i = 0; i < json_array->Count; i++)
             {
-                TJSONObject* item = (TJSONObject*)jsonArray->Items[i];
+                TJSONObject* item = static_cast<TJSONObject*>(json_array->Items[i]);
 
-                UnicodeString formula = item->Values["formula"]->Value();
+                TFormulaItem formula_data;
+                formula_data.formula_str = item->Values["formula"]->Value();
+                formula_data.config.a = StrToFloat(item->Values["a"]->Value(), json_locale);
+                formula_data.config.b = StrToFloat(item->Values["b"]->Value(), json_locale);
 
-                double valA = StrToFloat(item->Values["a"]->Value(), jsonLocale);
-                double valB = StrToFloat(item->Values["b"]->Value(), jsonLocale);
-
-                ComboBox->Items->Add(formula);
-
-                TFormulaConfig cfg = {valA, valB};
-                formulaLimits.push_back(cfg); // Наполнение вектора формы
+                formula_items.push_back(formula_data);
             }
         }
     }
     __finally
     {
-        delete fileContent;
-        if (jsonArray != nullptr)
-            delete jsonArray;
+        delete file_content;
+        if (json_array != nullptr)
+        {
+            delete json_array;
+        }
     }
 }
 
-void loadProgramSettings(int& graphWidth, int& axisWidth, int& graphColor, int& axisColor, int& bgColor,
-                         int& btnTop, int& btnRight, UnicodeString& fontName, int& fontSize, int& fontColor)
+void load_program_settings(TProgramSettings& settings)
 {
-    std::filesystem::path exeDir = std::filesystem::path(ParamStr(0).c_str()).parent_path();
-    std::filesystem::path configPath = exeDir / "settings.json";
+    std::filesystem::path exe_dir = std::filesystem::path(ParamStr(0).c_str()).parent_path();
+    std::filesystem::path config_path = exe_dir / "settings.json";
 
-    String filePath = configPath.c_str();
-    TStringList* fileContent = new TStringList();
+    String file_path = config_path.c_str();
+    TStringList* file_content = new TStringList();
+    TJSONObject* json_settings = nullptr;
 
-    graphWidth = 2;
-    axisWidth = 2;
-    graphColor = clBlack;
-    axisColor = clRed;
-    bgColor = clBtnFace;
-    btnTop = 15;
-    btnRight = 15;
-    fontName = "Arial";
-    fontSize = 10;
-    fontColor = clBlack;
+    // Заполнение дефолтных значений структуры
+    settings.graph_width = 2;
+    settings.axis_width = 2;
+    settings.graph_color = clBlack;
+    settings.axis_color = clRed;
+    settings.bg_color = clBtnFace;
+    settings.btn_top = 15;
+    settings.btn_right = 15;
+    settings.font_name = "Arial";
+    settings.font_size = 10;
+    settings.font_color = clBlack;
 
-    if (!std::filesystem::exists(configPath))
+    if (!std::filesystem::exists(config_path))
     {
-        TJSONObject* defaultSettings = new TJSONObject();
-        defaultSettings->AddPair("graph_line_width", graphWidth);
-        defaultSettings->AddPair("axis_line_width", axisWidth);
-        defaultSettings->AddPair("graph_color", "0x" + IntToHex(graphColor, 6));
-        defaultSettings->AddPair("axis_color", "0x" + IntToHex(axisColor, 6));
-        defaultSettings->AddPair("fs_btn_top", btnTop);
-        defaultSettings->AddPair("fs_btn_right", btnRight);
-        defaultSettings->AddPair("font_name", fontName);
-        defaultSettings->AddPair("font_size", fontSize);
-        defaultSettings->AddPair("font_color", "0x" + IntToHex(fontColor, 6));
-        defaultSettings->AddPair("bg_color", "0x" + IntToHex(bgColor, 6));
+        TJSONObject* default_settings = new TJSONObject();
+        default_settings->AddPair("graph_line_width", settings.graph_width);
+        default_settings->AddPair("axis_line_width", settings.axis_width);
+        default_settings->AddPair("graph_color", "0x" + IntToHex(settings.graph_color, 6));
+        default_settings->AddPair("axis_color", "0x" + IntToHex(settings.axis_color, 6));
+        default_settings->AddPair("fs_btn_top", settings.btn_top);
+        default_settings->AddPair("fs_btn_right", settings.btn_right);
+        default_settings->AddPair("font_name", settings.font_name);
+        default_settings->AddPair("font_size", settings.font_size);
+        default_settings->AddPair("font_color", "0x" + IntToHex(settings.font_color, 6));
+        default_settings->AddPair("bg_color", "0x" + IntToHex(settings.bg_color, 6));
 
-        fileContent->Text = defaultSettings->ToString();
-        fileContent->SaveToFile(filePath, TEncoding::UTF8);
-        delete defaultSettings;
+        file_content->Text = default_settings->ToString();
+        file_content->SaveToFile(file_path, TEncoding::UTF8);
+        delete default_settings;
     }
 
-    TJSONObject* jsonSettings = nullptr;
     try
     {
-        fileContent->LoadFromFile(filePath, TEncoding::UTF8);
-        jsonSettings = (TJSONObject*)TJSONObject::ParseJSONValue(fileContent->Text);
+        file_content->LoadFromFile(file_path, TEncoding::UTF8);
 
-        if (jsonSettings != nullptr)
+        // ИСПРАВЛЕНО: Защищенный вызов парсера
+        TJSONValue* parsed_value = TJSONObject::ParseJSONValue(file_content->Text);
+        if (parsed_value != nullptr)
         {
-            if (jsonSettings->Values["graph_line_width"] != nullptr)
+            json_settings = static_cast<TJSONObject*>(parsed_value);
+
+            if (json_settings->Values["graph_line_width"] != nullptr)
             {
-                int raw = jsonSettings->Values["graph_line_width"]->Value().ToInt();
-                graphWidth = (raw > 50 || raw < 1) ? 2 : raw;
+                int raw = json_settings->Values["graph_line_width"]->Value().ToInt();
+                settings.graph_width = (raw > 50 || raw < 1) ? 2 : raw;
             }
-            if (jsonSettings->Values["axis_line_width"] != nullptr)
+            if (json_settings->Values["axis_line_width"] != nullptr)
             {
-                int raw = jsonSettings->Values["axis_line_width"]->Value().ToInt();
-                axisWidth = (raw > 10 || raw < 1) ? 2 : raw;
+                int raw = json_settings->Values["axis_line_width"]->Value().ToInt();
+                settings.axis_width = (raw > 10 || raw < 1) ? 2 : raw;
             }
 
-            if (jsonSettings->Values["graph_color"] != nullptr)
-                graphColor = static_cast<int>(StrToInt64(jsonSettings->Values["graph_color"]->Value()));
+            if (json_settings->Values["graph_color"] != nullptr)
+                settings.graph_color = static_cast<int>(StrToInt64(json_settings->Values["graph_color"]->Value()));
 
-            if (jsonSettings->Values["axis_color"] != nullptr)
-                axisColor = static_cast<int>(StrToInt64(jsonSettings->Values["axis_color"]->Value()));
+            if (json_settings->Values["axis_color"] != nullptr)
+                settings.axis_color = static_cast<int>(StrToInt64(json_settings->Values["axis_color"]->Value()));
 
-            if (jsonSettings->Values["bg_color"] != nullptr)
-                bgColor = static_cast<int>(StrToInt64(jsonSettings->Values["bg_color"]->Value()));
+            if (json_settings->Values["bg_color"] != nullptr)
+                settings.bg_color = static_cast<int>(StrToInt64(json_settings->Values["bg_color"]->Value()));
 
-            if (jsonSettings->Values["fs_btn_top"] != nullptr)
-                btnTop = jsonSettings->Values["fs_btn_top"]->Value().ToInt();
+            if (json_settings->Values["fs_btn_top"] != nullptr)
+                settings.btn_top = json_settings->Values["fs_btn_top"]->Value().ToInt();
 
-            if (jsonSettings->Values["fs_btn_right"] != nullptr)
-                btnRight = jsonSettings->Values["fs_btn_right"]->Value().ToInt();
+            if (json_settings->Values["fs_btn_right"] != nullptr)
+                settings.btn_right = json_settings->Values["fs_btn_right"]->Value().ToInt();
 
-            if (jsonSettings->Values["font_name"] != nullptr)
-                fontName = jsonSettings->Values["font_name"]->Value();
+            if (json_settings->Values["font_name"] != nullptr)
+                settings.font_name = json_settings->Values["font_name"]->Value();
 
-            if (jsonSettings->Values["font_size"] != nullptr)
-                fontSize = jsonSettings->Values["font_size"]->Value().ToInt();
+            if (json_settings->Values["font_size"] != nullptr)
+                settings.font_size = json_settings->Values["font_size"]->Value().ToInt();
 
-            if (jsonSettings->Values["font_color"] != nullptr)
-                fontColor = static_cast<int>(StrToInt64(jsonSettings->Values["font_color"]->Value()));
+            if (json_settings->Values["font_color"] != nullptr)
+                settings.font_color = static_cast<int>(StrToInt64(json_settings->Values["font_color"]->Value()));
         }
     }
     __finally
     {
-        delete fileContent;
-        if (jsonSettings != nullptr)
-            delete jsonSettings;
+        delete file_content;
+        if (json_settings != nullptr)
+        {
+            delete json_settings;
+        }
     }
 }
