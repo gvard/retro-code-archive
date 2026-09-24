@@ -94,6 +94,7 @@ private:
     void DrawGraphCurve(TPoint* v);
     void DrawCoordinateAxes(const RenderContext& ctx);
     void DrawLabelsAndTicksText(const RenderContext& ctx);
+    void SaveGraphToPng();
 
 public:
     __fastcall TMainWindow(TComponent* Owner);

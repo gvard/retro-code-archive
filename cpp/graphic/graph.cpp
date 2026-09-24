@@ -1,9 +1,11 @@
 #include <vcl.h>
 #pragma hdrstop
+
+USEFORM("main_window.cpp", MainWindow);
+
 #include "main_window.h"
 #include <exception>
 
-USEFORM("main_window.cpp", MainWindow);
 
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {
@@ -15,7 +17,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
         Application->Run();
     }
     // Ловим специфичные для VCL/Embarcadero ошибки (ошибки UI, конвертации типов)
-    catch (const Exception& exception)
+    catch (Exception& exception)
     {
         Application->ShowException(&exception);
     }

@@ -1,9 +1,11 @@
 #pragma hdrstop
 #include "main_window.h"
 #include "project_model.h"
+#include "osd_message.h"
 
-#include <cmath>
 #include <cstdlib>
+#include <filesystem>
+#include <Vcl.Imaging.pngimage.hpp>
 
 #ifdef _WIN64
   #include <xmmintrin.h>
@@ -852,6 +854,11 @@ void __fastcall TMainWindow::FormKeyDown(TObject* Sender, WORD& Key, TShiftState
         ToggleFullscreen();
         Key = 0;
     }
+    else if (Key == 'S' && Shift.Contains(ssCtrl))
+    {
+        this->SaveGraphToPng();
+        Key = 0;
+    }
 }
 
 void __fastcall TMainWindow::ComboBox1Change(TObject* Sender)
@@ -877,3 +884,62 @@ void __fastcall TMainWindow::ComboBox1Change(TObject* Sender)
         UpdateGraphView(Button1);
     }
 }
+
+void TMainWindow::SaveGraphToPng()
+{
+    std::filesystem::path exe_dir = std::filesystem::path(ParamStr(0).c_str()).parent_path();
+    std::filesystem::path png_path = exe_dir / "graph.png";
+    String file_path = png_path.c_str();
+
+    // Коэффициент масштабирования: 1, 2 и т.д.
+    const int scale_factor = 2;
+
+    // Создаем экранный буфер (bitmap) один в один с размерами PaintBox1
+    auto screen_bitmap = std::make_unique<TBitmap>();
+    screen_bitmap->Width = PaintBox1->Width;
+    screen_bitmap->Height = PaintBox1->Height;
+
+    // Захватываем пиксели формы в границах расположения PaintBox1 через WinAPI
+    HDC hdc = GetDC(this->WindowHandle);
+    if (hdc)
+    {
+        BitBlt(screen_bitmap->Canvas->Handle, 0, 0, screen_bitmap->Width, screen_bitmap->Height,
+               hdc, PaintBox1->Left, PaintBox1->Top, SRCCOPY);
+        ReleaseDC(this->WindowHandle, hdc);
+    }
+    else
+    {
+        ShowMessage("Критическая ошибка: Не удалось получить контекст графического устройства Windows");
+        return;
+    }
+
+    // Создаем второй буфер повышенного разрешения под экспорт
+    auto high_res_bitmap = std::make_unique<TBitmap>();
+    high_res_bitmap->Width = PaintBox1->Width * scale_factor;
+    high_res_bitmap->Height = PaintBox1->Height * scale_factor;
+
+    // Настраиваем режим сглаживания при растяжении пикселей (Bilinear)
+    SetStretchBltMode(high_res_bitmap->Canvas->Handle, HALFTONE);
+    // Корректируем координаты начала для WinAPI фильтрации
+    SetBrushOrgEx(high_res_bitmap->Canvas->Handle, 0, 0, nullptr);
+
+    // Растягиваем изображение из экранного буфера в HD-буфер с интерполяцией
+    TRect source_rect = TRect(0, 0, screen_bitmap->Width, screen_bitmap->Height);
+    TRect dest_rect = TRect(0, 0, high_res_bitmap->Width, high_res_bitmap->Height);
+    high_res_bitmap->Canvas->CopyRect(dest_rect, screen_bitmap->Canvas, source_rect);
+
+    auto png = std::make_unique<TPngImage>();
+    try
+    {
+        png->Assign(high_res_bitmap.get()); // Переносим HD-изображение в PNG
+        png->SaveToFile(file_path);
+
+        TOsdMessage::Show("График успешно сохранен в graph.png", 2000);
+    }
+    catch (const Exception& e)
+    {
+        ShowMessage("Ошибка файловой системы при записи PNG-файла: " + e.Message);
+    }
+}
+
+
