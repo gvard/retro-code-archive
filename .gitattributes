@@ -3,6 +3,7 @@
 *.cpp linguist-language=C++
 *.h linguist-language=C++
 *.dfm linguist-language=C++
+*.bas linguist-language=QBasic
 
 *.md linguist-documentation
 
