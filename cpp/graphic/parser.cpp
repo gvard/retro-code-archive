@@ -1,158 +1,180 @@
 #include "parser.h"
 #define _USE_MATH_DEFINES
+#include <cctype>
 #include <cmath>
 
 #include "tinyexpr.h"
 
-std::vector<double> initMas(double a_val, double b_val, int n_val, int &errorFlag)
+std::vector<double> init_grid(double a_val, double b_val, int n_val, int& error_code)
 {
     double h = (b_val - a_val) / n_val;
-    std::vector<double> p_mas(n_val + 1);
+    std::vector<double> grid_values(n_val + 1);
 
     if (b_val <= a_val)
     {
-        errorFlag = 1; // Устанавливаем флаг ошибки вместо вызова ShowMessage
-        return p_mas;
+        error_code = 1;
+        return grid_values;
     }
 
-    p_mas[0] = a_val;
+    grid_values[0] = a_val;
     for (int i = 1; i <= n_val; i++)
     {
-        p_mas[i] = p_mas[i - 1] + h;
+        grid_values[i] = grid_values[i - 1] + h;
     }
 
-    return p_mas;
+    return grid_values;
 }
 
-void f(AnsiString &str,
-       std::vector<double> &values,
-       int n_val,
-       int &errorFlag,
-       std::vector<double> &mas_x)
+static void preprocess_formula_string(AnsiString& s)
 {
-    if (errorFlag == 1) return;
+    s = System::Sysutils::StringReplace(s, "lg(", "log10(", TReplaceFlags() << rfReplaceAll << rfIgnoreCase);
+    s = System::Sysutils::StringReplace(s, "arctg(", "atan(", TReplaceFlags() << rfReplaceAll << rfIgnoreCase);
+    s = System::Sysutils::StringReplace(s, "sh(", "sinh(", TReplaceFlags() << rfReplaceAll << rfIgnoreCase);
+    s = System::Sysutils::StringReplace(s, "ch(", "cosh(", TReplaceFlags() << rfReplaceAll << rfIgnoreCase);
+    s = System::Sysutils::StringReplace(s, "th(", "tanh(", TReplaceFlags() << rfReplaceAll << rfIgnoreCase);
 
-    AnsiString modernStr = str;
-
-    // Вспомогательная лямбда-функция для предобработки строк
-    auto preprocessStr = [](AnsiString &s) {
-        s = System::Sysutils::StringReplace(s, "lg(", "log10(", TReplaceFlags() << rfReplaceAll << rfIgnoreCase);
-        s = System::Sysutils::StringReplace(s, "arctg(", "atan(", TReplaceFlags() << rfReplaceAll << rfIgnoreCase);
-        s = System::Sysutils::StringReplace(s, "sh(", "sinh(", TReplaceFlags() << rfReplaceAll << rfIgnoreCase);
-        s = System::Sysutils::StringReplace(s, "ch(", "cosh(", TReplaceFlags() << rfReplaceAll << rfIgnoreCase);
-        s = System::Sysutils::StringReplace(s, "th(", "tanh(", TReplaceFlags() << rfReplaceAll << rfIgnoreCase);
-
-        for (int i = 1; i <= s.Length() - 3; i++)
-        {
-            if (s[i] == '-' && (s[i+1] == 'x' || s[i+1] == 'X' || s[i+1] == 't' || s[i+1] == 'T') && s[i+2] == '^')
-            {
-                s.Insert("(", i + 1);
-                int j = i + 4;
-                while (j <= s.Length() && (isdigit(s[j]) || s[j] == '.' || s[j] == 'x' || s[j] == 'X' || s[j] == 't' || s[j] == 'T'))
-                {
-                    j++;
-                }
-                s.Insert(")", j);
-            }
-        }
-
-        int pipeCount = 0;
-        for (int i = 1; i <= s.Length(); i++) { if (s[i] == '|') pipeCount++; }
-
-        if (pipeCount > 0 && pipeCount % 2 == 0)
-        {
-            bool isOpen = true;
-            for (int i = 1; i <= s.Length(); i++)
-            {
-                if (s[i] == '|')
-                {
-                    if (isOpen) { s.Delete(i, 1); s.Insert("abs(", i); isOpen = false; }
-                    else { s.Delete(i, 1); s.Insert(")", i); isOpen = true; }
-                }
-            }
-        }
-    };
-
-    // Проверяем, является ли уравнение параметрическим (наличие ';')
-    int semiColonPos = modernStr.Pos(";");
-
-    if (semiColonPos > 0)
+    // Автоматическое исправление приоритета степени для унарного минуса: -x^2 -> -(x^2)
+    for (int i = 1; i <= s.Length() - 3; i++)
     {
-        AnsiString strX = modernStr.SubString(1, semiColonPos - 1);
-        AnsiString strY = modernStr.SubString(semiColonPos + 1, modernStr.Length() - semiColonPos);
-
-        preprocessStr(strX);
-        preprocessStr(strY);
-
-        // Исходный mas_x сейчас хранит сетку шагов для параметра t, сохраняем её копию
-        std::vector<double> mas_t = mas_x;
-
-        double t_variable = 0.0;
-        // Регистрируем и x, и t, чтобы пользователь мог писать в уравнениях любую из этих букв
-        te_variable vars[] = { {"x", &t_variable}, {"t", &t_variable} };
-        int compile_errorX = 0;
-        int compile_errorY = 0;
-
-        te_expr* exprX = te_compile(strX.c_str(), vars, 2, &compile_errorX);
-        te_expr* exprY = te_compile(strY.c_str(), vars, 2, &compile_errorY);
-
-        if (!exprX || !exprY)
+        if (s[i] == '-' && (s[i + 1] == 'x' || s[i + 1] == 'X' || s[i + 1] == 't' || s[i + 1] == 'T') && s[i + 2] == '^')
         {
-            if (exprX) te_free(exprX);
-            if (exprY) te_free(exprY);
-            errorFlag = 1;
+            s.Insert("(", i + 1);
+            int j = i + 4;
+            while (j <= s.Length() && (std::isdigit(static_cast<unsigned char>(s[j])) || s[j] == '.' || s[j] == 'x' || s[j] == 'X' || s[j] == 't' || s[j] == 'T'))
+            {
+                j++;
+            }
+            s.Insert(")", j);
+        }
+    }
+
+    // Автоматическая замена модуля |x| на abs(x)
+    int pipe_count = 0;
+    for (int i = 1; i <= s.Length(); i++)
+    {
+        if (s[i] == '|')
+            pipe_count++;
+    }
+
+    if (pipe_count > 0 && pipe_count % 2 == 0)
+    {
+        bool is_open = true;
+        for (int i = 1; i <= s.Length(); i++)
+        {
+            if (s[i] == '|')
+            {
+                if (is_open)
+                {
+                    s.Delete(i, 1);
+                    s.Insert("abs(", i);
+                    is_open = false;
+                }
+                else
+                {
+                    s.Delete(i, 1);
+                    s.Insert(")", i);
+                    is_open = true;
+                }
+            }
+        }
+    }
+}
+
+static void tabulate_grid(te_expr* expr_x, te_expr* expr_y, double& t_var,
+                          int n_val, std::vector<double>& values, std::vector<double>& x_values)
+{
+    if (expr_x == nullptr)
+    {
+        for (int j = 0; j <= n_val; j++)
+        {
+            t_var = x_values[j];
+            double y_val = te_eval(expr_y);
+
+            if (std::isnan(y_val) || std::isinf(y_val))
+                values[j] = 1e300;
+            else
+                values[j] = y_val;
+        }
+    }
+    // Если заданы оба выражения - это параметрический режим x(t); y(t)
+    else
+    {
+        std::vector<double> mas_t = x_values; // Сохраняем копию сетки параметра t
+        for (int j = 0; j <= n_val; j++)
+        {
+            t_var = mas_t[j];
+
+            double x_val = te_eval(expr_x);
+            if (std::isnan(x_val) || std::isinf(x_val))
+                x_values[j] = 1e300;
+            else
+                x_values[j] = x_val;
+
+            double y_val = te_eval(expr_y);
+            if (std::isnan(y_val) || std::isinf(y_val))
+                values[j] = 1e300;
+            else
+                values[j] = y_val;
+        }
+    }
+}
+
+void eval_formula(const AnsiString& formula_str,
+                  std::vector<double>& values,
+                  int n_val,
+                  int& error_code,
+                  std::vector<double>& x_values)
+{
+    if (error_code == 1)
+        return;
+
+    AnsiString modern_str = formula_str;
+    int semi_colon_pos = modern_str.Pos(";");
+
+    double t_variable = 0.0;
+    te_variable vars[] = {{"x", &t_variable}, {"t", &t_variable}};
+
+    if (semi_colon_pos > 0)
+    {
+        AnsiString str_x = modern_str.SubString(1, semi_colon_pos - 1);
+        AnsiString str_y = modern_str.SubString(semi_colon_pos + 1, modern_str.Length() - semi_colon_pos);
+
+        preprocess_formula_string(str_x);
+        preprocess_formula_string(str_y);
+
+        int err_x = 0, err_y = 0;
+        te_expr* expr_x = te_compile(str_x.c_str(), vars, 2, &err_x);
+        te_expr* expr_y = te_compile(str_y.c_str(), vars, 2, &err_y);
+
+        if (!expr_x || !expr_y)
+        {
+            if (expr_x)
+                te_free(expr_x);
+            if (expr_y)
+                te_free(expr_y);
+            error_code = 1;
             return;
         }
 
-        for (int j = 0; j <= n_val; j++)
-        {
-            t_variable = mas_t[j]; // Привязываем текущее значение t
+        tabulate_grid(expr_x, expr_y, t_variable, n_val, values, x_values);
 
-            // Считаем X(t)
-            double x_val = te_eval(exprX);
-            if (std::isnan(x_val) || std::isinf(x_val)) mas_x[j] = 1e300;
-            else mas_x[j] = x_val;
-
-            // Считаем Y(t)
-            double y_val = te_eval(exprY);
-            if (std::isnan(y_val) || std::isinf(y_val)) values[j] = 1e300;
-            else values[j] = y_val;
-        }
-
-        te_free(exprX);
-        te_free(exprY);
+        te_free(expr_x);
+        te_free(expr_y);
     }
     else
     {
-        // Режим 2: обычное уравнение y = f(x)
-        preprocessStr(modernStr);
+        preprocess_formula_string(modern_str);
 
-        double x_variable = 0.0;
-        te_variable vars[] = { {"x", &x_variable}, {"t", &x_variable} };
-        int compile_error = 0;
-
-        te_expr* expr = te_compile(modernStr.c_str(), vars, 2, &compile_error); // Передаем count = 2
+        int err = 0;
+        te_expr* expr = te_compile(modern_str.c_str(), vars, 2, &err);
 
         if (!expr)
         {
-            errorFlag = 1;
+            error_code = 1;
             return;
         }
 
-        for (int j = 0; j <= n_val; j++)
-        {
-            x_variable = mas_x[j];
-            double y_val = te_eval(expr);
-
-            if (std::isnan(y_val) || std::isinf(y_val))
-            {
-                values[j] = 1e300;
-            }
-            else
-            {
-                values[j] = y_val;
-            }
-        }
+        tabulate_grid(nullptr, expr, t_variable, n_val, values, x_values);
 
         te_free(expr);
     }

@@ -69,7 +69,7 @@ private:
     };
 
     int FPointsCount;
-    int FErrorFlag;
+    int FErrorCode;
     double FMinX;
     double FMaxX;
     AnsiString FFormulaString;

@@ -5,11 +5,11 @@
 #include <memory>
 #include <vector>
 
-std::vector<double> initMas(double a_val, double b_val, int n_val, int &errorFlag);
+std::vector<double> init_grid(double a_val, double b_val, int n_val, int& error_code);
 
-void f(AnsiString &str,
-       std::vector<double> &values,
-       int n_val,
-       int &errorFlag,
-       std::vector<double> &mas_x);
+void eval_formula(const AnsiString& formula_str,
+                  std::vector<double>& values,
+                  int n_val,
+                  int& error_code,
+                  std::vector<double>& x_values);
 #endif

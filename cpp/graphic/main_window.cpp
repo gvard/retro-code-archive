@@ -19,7 +19,7 @@ __fastcall TMainWindow::TMainWindow(TComponent* Owner)
     : TForm(Owner)
 {
     FPointsCount = 0;
-    FErrorFlag = 0;
+    FErrorCode = 0;
     FMinX = 0;
     FMaxX = 0;
     FIsFirstGraph = true;
@@ -95,9 +95,9 @@ bool TMainWindow::ValidateInputAndParams(TObject* Sender)
         EditB->Text = FloatToStr(FSavedB);
     }
 
-    if (this->FErrorFlag == 1)
+    if (this->FErrorCode == 1)
     {
-        this->FErrorFlag = 0;
+        this->FErrorCode = 0;
     }
 
     return true;
@@ -111,7 +111,6 @@ void TMainWindow::PrepareCanvas()
         PaintBox1->Canvas->Brush->Color = static_cast<TColor>(this->FBgColor);
         PaintBox1->Canvas->Brush->Style = bsSolid;
         PaintBox1->Canvas->FillRect(PaintBox1->ClientRect);
-
     }
 }
 
@@ -139,17 +138,17 @@ void TMainWindow::CalculateGraphPoints()
     }
 
     // Если включен режим наложения и это не первый график,
-    // восстанавливаем исходные расчетные границы, чтобы initMas не ломался от прошлых перезаписей X
+    // восстанавливаем исходные расчетные границы, чтобы init_grid не ломался от прошлых перезаписей X
     if (CheckBox1->Checked && !FIsFirstGraph)
     {
         this->FMinX = FSavedA;
         this->FMaxX = FSavedB;
     }
 
-    // Вызываем функцию из parser.cpp, передавая FErrorFlag по ссылке
-    this->FValuesX = ::initMas(this->FMinX, this->FMaxX, this->FPointsCount, this->FErrorFlag);
+    // Вызываем функцию из parser.cpp, передавая FErrorCode по ссылке
+    this->FValuesX = ::init_grid(this->FMinX, this->FMaxX, this->FPointsCount, this->FErrorCode);
 
-    if (this->FErrorFlag == 1)
+    if (this->FErrorCode == 1)
     {
         ShowMessage("Левая граница должна быть строго меньше правой!");
         return;
@@ -159,9 +158,9 @@ void TMainWindow::CalculateGraphPoints()
 
     try
     {
-        ::f(this->FFormulaString, this->FValuesY, this->FPointsCount, this->FErrorFlag, this->FValuesX);
+        ::eval_formula(this->FFormulaString, this->FValuesY, this->FPointsCount, this->FErrorCode, this->FValuesX);
 
-        if (this->FErrorFlag == 1)
+        if (this->FErrorCode == 1)
         {
             ShowMessage("Ошибка в записи формулы или расстановке скобок!");
             this->FValuesY.assign(this->FPointsCount + 1, 1e300);
@@ -185,8 +184,8 @@ void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     int posX = 0;
     int rightEdge = 0;
     int corr = -1;
-    double mi = 0, ma = 0;      // Минимум и максимум по Y
-    double minX = 0, maxX = 0;  // Реальные экранные границы по X
+    double mi = 0, ma = 0;     // Минимум и максимум по Y
+    double minX = 0, maxX = 0; // Реальные экранные границы по X
     bool needDrawLabels = (!CheckBox1->Checked || FIsFirstGraph || Sender == nullptr);
 
     // 1. Поиск экстремумов по Y (mi, ma) и по X (minX, maxX)
@@ -245,10 +244,13 @@ void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
         FSavedMi = mi;
         FSavedMa = ma;
 
-        if (isParametric) {
+        if (isParametric)
+        {
             FSavedA = minX;
             FSavedB = maxX;
-        } else {
+        }
+        else
+        {
             FSavedA = this->FMinX;
             FSavedB = this->FMaxX;
         }
@@ -264,8 +266,8 @@ void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
         maxX = FSavedB;
     }
 
-
-    if (ma == 0) corr = 1;
+    if (ma == 0)
+        corr = 1;
 
     int padTop = 20;
     int padBottom = 14;
@@ -276,7 +278,8 @@ void TMainWindow::RenderAxesAndCurves(TObject* Sender, TPoint* v)
     int workWidth = PaintBox1->Width - padLeft - padRight;
 
     // Защита от деления на 0 при сборке пустых/вертикальных графиков
-    if (std::abs(maxX - minX) < 1e-9) maxX = minX + 1.0;
+    if (std::abs(maxX - minX) < 1e-9)
+        maxX = minX + 1.0;
 
     // 2. Цикл перевода координат с поддержкой параметрического массива X
     for (int i = 0; i <= FPointsCount; i++)
@@ -535,7 +538,8 @@ void TMainWindow::DrawCoordinateAxes(const RenderContext& ctx)
     for (double valX = ctx.startX; valX <= ctx.endX && iterationsCountX < 50; valX += ctx.stepX)
     {
         iterationsCountX++;
-        if (std::abs(valX) < 1e-9) continue;
+        if (std::abs(valX) < 1e-9)
+            continue;
 
         int markX = 20 + static_cast<int>(floor(static_cast<double>(ctx.workWidth) * (valX - this->FMinX) / (this->FMaxX - this->FMinX)));
         if (markX >= 20 && markX <= (ctx.rightEdge - 15))
@@ -550,7 +554,8 @@ void TMainWindow::DrawCoordinateAxes(const RenderContext& ctx)
     for (double valY = ctx.startY; valY <= ctx.endY && iterationsCountY < 50; valY += ctx.stepY)
     {
         iterationsCountY++;
-        if (std::abs(valY) < 1e-9) continue;
+        if (std::abs(valY) < 1e-9)
+            continue;
 
         int markY = 20 + static_cast<int>(floor(static_cast<double>(ctx.workHeight) * (ctx.endY - valY) / (ctx.endY - ctx.startY))) + (ctx.startX * ctx.endX == 0 ? ctx.corr : 0);
         if (markY >= 15 && markY <= PaintBox1->Height - 14)
@@ -563,14 +568,16 @@ void TMainWindow::DrawCoordinateAxes(const RenderContext& ctx)
 
 void TMainWindow::DrawLabelsAndTicksText(const RenderContext& ctx)
 {
-    if (!ctx.needDrawLabels) return;
+    if (!ctx.needDrawLabels)
+        return;
 
     // Числовые подписи оси X
     int iterationsCountX = 0;
     for (double valX = ctx.startX; valX <= ctx.endX && iterationsCountX < 50; valX += ctx.stepX)
     {
         iterationsCountX++;
-        if (std::abs(valX) < 1e-9) continue;
+        if (std::abs(valX) < 1e-9)
+            continue;
 
         int markX = 20 + static_cast<int>(floor(static_cast<double>(ctx.workWidth) * (valX - this->FMinX) / (this->FMaxX - this->FMinX)));
 
@@ -588,8 +595,10 @@ void TMainWindow::DrawLabelsAndTicksText(const RenderContext& ctx)
                     AnsiString txtX = FloatToStrF(valX, ffGeneral, 4, 2);
                     if (txtX.AnsiPos(".") > 0)
                     {
-                        while (txtX.Length() > 0 && txtX[txtX.Length()] == '0') txtX.Delete(txtX.Length(), 1);
-                        if (txtX.Length() > 0 && txtX[txtX.Length()] == '.') txtX.Delete(txtX.Length(), 1);
+                        while (txtX.Length() > 0 && txtX[txtX.Length()] == '0')
+                            txtX.Delete(txtX.Length(), 1);
+                        if (txtX.Length() > 0 && txtX[txtX.Length()] == '.')
+                            txtX.Delete(txtX.Length(), 1);
                     }
 
                     int labelY = (ctx.posY + 6 + 14 > (PaintBox1->Height - 14)) ? (ctx.posY - 32) : (ctx.posY + 6);
@@ -605,7 +614,8 @@ void TMainWindow::DrawLabelsAndTicksText(const RenderContext& ctx)
     for (double valY = ctx.startY; valY <= ctx.endY && iterationsCountY < 50; valY += ctx.stepY)
     {
         iterationsCountY++;
-        if (std::abs(valY) < 1e-9) continue;
+        if (std::abs(valY) < 1e-9)
+            continue;
 
         int markY = 20 + static_cast<int>(floor(static_cast<double>(ctx.workHeight) * (ctx.endY - valY) / (ctx.endY - ctx.startY))) + (ctx.startX * ctx.endX == 0 ? ctx.corr : 0);
         if (markY >= 15 && markY <= PaintBox1->Height - 14)
@@ -620,8 +630,10 @@ void TMainWindow::DrawLabelsAndTicksText(const RenderContext& ctx)
                 AnsiString txtY = FloatToStrF(valY, ffFixed, 7, 2);
                 if (txtY.AnsiPos(".") > 0)
                 {
-                    while (txtY.Length() > 0 && txtY[txtY.Length()] == '0') txtY.Delete(txtY.Length(), 1);
-                    if (txtY.Length() > 0 && txtY[txtY.Length()] == '.') txtY.Delete(txtY.Length(), 1);
+                    while (txtY.Length() > 0 && txtY[txtY.Length()] == '0')
+                        txtY.Delete(txtY.Length(), 1);
+                    if (txtY.Length() > 0 && txtY[txtY.Length()] == '.')
+                        txtY.Delete(txtY.Length(), 1);
                 }
 
                 int realTextWidth = PaintBox1->Canvas->TextWidth(txtY);
