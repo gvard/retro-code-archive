@@ -277,3 +277,8 @@ void __fastcall TfrmChapt::ustype1Click(TObject *Sender)
     }
     frmUType->Show();
 }
+void __fastcall TfrmChapt::FormResize(TObject *Sender)
+{
+    Button1->Left = (ClientWidth - Button1->Width) / 2;
+}
+

@@ -43,6 +43,7 @@ __published:    // IDE-managed Components
     void __fastcall InvClick(TObject *Sender);
 	void __fastcall ustype1Click(TObject *Sender);
 	void __fastcall ListBox1DblClick(TObject *Sender);
+	void __fastcall FormResize(TObject *Sender);
 
 private:        // User declarations
     TStringList* chapter;
