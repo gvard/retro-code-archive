@@ -10,7 +10,7 @@
 #include <Vcl.Graphics.hpp>
 #include <Vcl.Dialogs.hpp>
 
-const String APP_VERSION = L"0.1.4";
+const String APP_VERSION = L"0.1.5";
 
 class TfrmFirst : public TForm
 {

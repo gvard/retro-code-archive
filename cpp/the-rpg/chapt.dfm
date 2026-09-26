@@ -5,8 +5,8 @@ object frmChapt: TfrmChapt
   ClientHeight = 250
   ClientWidth = 434
   Color = clBtnFace
-  Constraints.MinHeight = 300
-  Constraints.MinWidth = 420
+  Constraints.MinHeight = 260
+  Constraints.MinWidth = 390
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

@@ -17,6 +17,7 @@ object frmFight: TfrmFight
   Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
+  OnResize = FormResize
   OnShow = FormShow
   DesignSize = (
     410
@@ -32,17 +33,16 @@ object frmFight: TfrmFight
     DefaultRowHeight = 17
     FixedCols = 0
     RowCount = 2
-    Options = [goFixedVertLine, goFixedHorzLine, goHorzLine]
+    Options = [goFixedVertLine, goFixedHorzLine, goHorzLine, goColSizing]
     TabOrder = 0
     OnKeyDown = grEnemyKeyDown
     OnSelectCell = grEnemySelectCell
-    ExplicitWidth = 391
     ColWidths = (
       20
-      104
-      157
-      54
-      53)
+      108
+      164
+      52
+      39)
   end
   object grWeapon: TStringGrid
     Left = 8
@@ -53,23 +53,24 @@ object frmFight: TfrmFight
     DefaultRowHeight = 17
     FixedCols = 0
     RowCount = 2
-    Options = [goFixedVertLine, goFixedHorzLine, goHorzLine]
+    Options = [goFixedVertLine, goFixedHorzLine, goHorzLine, goColSizing]
     TabOrder = 1
     OnKeyDown = grWeaponKeyDown
     OnSelectCell = grWeaponSelectCell
-    ExplicitWidth = 391
     ColWidths = (
       20
-      181
-      64
-      69
-      69)
+      191
+      62
+      61
+      50)
   end
   object sbBar: TStatusBar
     Left = 0
     Top = 396
     Width = 410
     Height = 19
+    Align = alNone
+    Anchors = [akBottom]
     Panels = <
       item
         Text = 'Health: '
@@ -93,6 +94,7 @@ object frmFight: TfrmFight
     Top = 368
     Width = 74
     Height = 25
+    Anchors = [akBottom]
     Caption = #1040#1090#1072#1082#1086#1074#1072#1090#1100'!'
     TabOrder = 2
     OnClick = btnAttackClick

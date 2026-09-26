@@ -28,10 +28,6 @@ void __fastcall TfrmFight::FormCreate(TObject *Sender)
     grEnemy->Cells[2][0] = "Имя";
     grEnemy->Cells[3][0] = "Жизнь";
     grEnemy->Cells[4][0] = "Хиты";
-
-    // Увеличиваем ширину 3-й колонки, чтобы текст не обрезался
-    grEnemy->ColWidths[3] = 70;
-
     grWeapon->Cells[1][0] = "Оружие";
     grWeapon->Cells[2][0] = "Хиты";
     grWeapon->Cells[3][0] = "Мана";
@@ -311,3 +307,8 @@ void __fastcall TfrmFight::FormClose(TObject *Sender, TCloseAction &Action)
 {
     frmFirst->Show();
 }
+void __fastcall TfrmFight::FormResize(TObject *Sender)
+{
+	btnAttack->Left = (ClientWidth - btnAttack->Width) / 2;
+}
+

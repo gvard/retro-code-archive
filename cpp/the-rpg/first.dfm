@@ -1,6 +1,7 @@
 object frmFirst: TfrmFirst
   Left = 351
   Top = 337
+  Align = alCustom
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'The RPG'
@@ -16,13 +17,19 @@ object frmFirst: TfrmFirst
   OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = frmFirstCreate
+  DesignSize = (
+    432
+    110)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 144
+    Left = 0
     Top = 0
-    Width = 146
+    Width = 432
     Height = 17
+    Align = alTop
+    Alignment = taCenter
+    AutoSize = False
     Caption = 'Hellcome toThe RPG!'
     Font.Charset = RUSSIAN_CHARSET
     Font.Color = clWindowText
@@ -30,19 +37,25 @@ object frmFirst: TfrmFirst
     Font.Name = 'Times New Roman'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitLeft = 145
+    ExplicitTop = 2
+    ExplicitWidth = 146
   end
   object Label2: TLabel
-    Left = 368
+    Left = 374
     Top = 96
     Width = 53
     Height = 13
+    Alignment = taRightJustify
+    Anchors = [akRight, akBottom]
     Caption = 'Version 0.1'
   end
   object Image1: TImage
-    Left = 168
-    Top = 24
-    Width = 105
-    Height = 81
+    Left = 0
+    Top = 17
+    Width = 432
+    Height = 93
+    Align = alClient
     Center = True
     Picture.Data = {
       07544269746D6170363F0000424D363F00000000000036000000280000005300
@@ -552,6 +565,10 @@ object frmFirst: TfrmFirst
       0D45800D45810D45810D45800D45800D46800D46810D45810D45800D46810D46
       810D46810D47810D45810D47820D47810D47810D47820D46820D47830D478304
       0506}
+    ExplicitLeft = 168
+    ExplicitTop = 24
+    ExplicitWidth = 105
+    ExplicitHeight = 81
   end
   object MainMenu1: TMainMenu
     object File: TMenuItem

@@ -24,6 +24,7 @@ __published:    // IDE-managed Components
     void __fastcall grWeaponSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect);
     void __fastcall grEnemyKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
     void __fastcall grWeaponKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
+	void __fastcall FormResize(TObject *Sender);
 
 private:        // User declarations
     int apt;
@@ -38,11 +39,11 @@ private:        // User declarations
     void opponentAttack();
     bool check();
 
-public:         // User declarations
+public:
     int qptr;
 
     __fastcall TfrmFight(TComponent* Owner);
-    __fastcall virtual ~TfrmFight() {} // Добавлен пустой виртуальный деструктор по стандарту C++
+    __fastcall virtual ~TfrmFight() {}
 };
 
 extern PACKAGE TfrmFight *frmFight;
