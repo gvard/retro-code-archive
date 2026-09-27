@@ -15,10 +15,12 @@ object frmFight: TfrmFight
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
+  KeyPreview = True
   OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
   OnResize = FormResize
   OnShow = FormShow
   DesignSize = (
@@ -39,7 +41,6 @@ object frmFight: TfrmFight
     TabOrder = 0
     OnKeyDown = grEnemyKeyDown
     OnSelectCell = grEnemySelectCell
-    ExplicitWidth = 401
     ColWidths = (
       20
       108
@@ -60,7 +61,6 @@ object frmFight: TfrmFight
     TabOrder = 1
     OnKeyDown = grWeaponKeyDown
     OnSelectCell = grWeaponSelectCell
-    ExplicitWidth = 395
     ColWidths = (
       20
       191
@@ -90,8 +90,6 @@ object frmFight: TfrmFight
         Text = 'Action points: '
         Width = 96
       end>
-    ExplicitTop = 396
-    ExplicitWidth = 410
   end
   object btnAttack: TButton
     Left = 171
@@ -102,7 +100,5 @@ object frmFight: TfrmFight
     Caption = #1040#1090#1072#1082#1086#1074#1072#1090#1100'!'
     TabOrder = 2
     OnClick = btnAttackClick
-    ExplicitLeft = 176
-    ExplicitTop = 368
   end
 end

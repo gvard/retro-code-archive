@@ -280,3 +280,32 @@ void __fastcall TfrmChapt::FormResize(TObject *Sender)
     Button1->Left = (ClientWidth - Button1->Width) / 2;
 }
 
+void __fastcall TfrmChapt::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+
+{
+    if (frmFirst != nullptr && frmFirst->ActionList1 != nullptr)
+    {
+        if (Key == 'L' && Shift.Contains(ssCtrl))
+        {
+            this->LoadClick(Sender);
+            Key = 0;
+            return;
+        }
+        if (Key == 'S' && Shift.Contains(ssCtrl))
+        {
+            this->SaveClick(Sender);
+            Key = 0;
+            return;
+        }
+
+        TWMKey msg;
+        msg.Msg = WM_KEYDOWN;
+        msg.CharCode = Key;
+        msg.KeyData = 0;
+
+        if (frmFirst->ActionList1->IsShortCut(msg))
+        {
+            Key = 0;
+        }
+    }
+}

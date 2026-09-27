@@ -572,17 +572,20 @@ object frmFirst: TfrmFirst
   end
   object MainMenu1: TMainMenu
     object File: TMenuItem
-      Caption = #1060'&'#1072#1081#1083
+      Caption = '&'#1060#1072#1081#1083
       object New: TMenuItem
         Caption = #1053#1086#1074#1072#1103' '#1080#1075#1088#1072
+        ShortCut = 16462
         OnClick = NewClick
       end
       object Load: TMenuItem
         Caption = #1047#1072#1075#1088#1091#1079#1080#1090#1100
+        ShortCut = 16460
         OnClick = LoadClick
       end
       object Exit: TMenuItem
         Caption = '&'#1042#1099#1093#1086#1076
+        ShortCut = 32883
         OnClick = ExitClick
       end
     end
@@ -599,6 +602,23 @@ object frmFirst: TfrmFirst
     Filter = #1042#1072#1096#1080' '#1089#1086#1093#1088#1072#1085#1077#1085#1080#1103'|*.sav'
     Options = [ofHideReadOnly, ofNoChangeDir]
     Title = #1047#1072#1075#1088#1091#1079#1080#1090#1100
-    Left = 40
+    Left = 32
+  end
+  object ActionList1: TActionList
+    Left = 64
+    object actNewGame: TAction
+      Caption = 'actNewGame'
+      ShortCut = 16462
+      OnExecute = NewClick
+    end
+    object actSaveGame: TAction
+      Caption = 'actSaveGame'
+      ShortCut = 16467
+    end
+    object actLoadGame: TAction
+      Caption = 'actLoadGame'
+      ShortCut = 16460
+      OnExecute = LoadClick
+    end
   end
 end

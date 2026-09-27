@@ -19,7 +19,7 @@ void TDualListDlg::UpdateWeightDisplay()
 
     for (int i = 0; i < SrcList->Items->Count; i++)
     {
-        totalWeight += (int)(SrcList->Items->Objects[i]);
+        totalWeight += static_cast<int>(reinterpret_cast<intptr_t>(SrcList->Items->Objects[i]));
     }
 
     Label1->Caption = L"Вес: " + IntToStr(totalWeight);
@@ -168,7 +168,7 @@ void __fastcall TDualListDlg::FormShow(TObject *Sender)
                     int itemWeight = StrToIntDef(itemWeightStr, 1);
 
                     // Загружаем в визуальный рюкзак на экране
-                    SrcList->Items->AddObject(itemName, (TObject*)itemWeight);
+                    SrcList->Items->AddObject(itemName, reinterpret_cast<TObject*>(static_cast<intptr_t>(itemWeight)));
                 }
             }
         }
@@ -180,8 +180,7 @@ void __fastcall TDualListDlg::FormShow(TObject *Sender)
 
         for (int i = 0; i < SrcList->Items->Count; i++)
         {
-            int itemWeight = (int)(SrcList->Items->Objects[i]);
-            User->UserItems->AddObject(SrcList->Items->Strings[i], (TObject*)itemWeight);
+            User->UserItems->AddObject(SrcList->Items->Strings[i], SrcList->Items->Objects[i]);
         }
     }
     else
@@ -191,14 +190,12 @@ void __fastcall TDualListDlg::FormShow(TObject *Sender)
         // и заново отрисовываем их на экране.
         for (int i = 0; i < User->UserItems->Count; i++)
         {
-            int itemWeight = (int)(User->UserItems->Objects[i]);
-            SrcList->Items->AddObject(User->UserItems->Strings[i], (TObject*)itemWeight);
+            SrcList->Items->AddObject(User->UserItems->Strings[i], User->UserItems->Objects[i]);
         }
 
         for (int i = 0; i < User->EnvironmentItems->Count; i++)
         {
-            int itemWeight = (int)(User->EnvironmentItems->Objects[i]);
-            DstList->Items->AddObject(User->EnvironmentItems->Strings[i], (TObject*)itemWeight);
+            DstList->Items->AddObject(User->EnvironmentItems->Strings[i], User->EnvironmentItems->Objects[i]);
         }
     }
 
@@ -211,15 +208,13 @@ void __fastcall TDualListDlg::OKBtnClick(TObject *Sender)
     User->UserItems->Clear();
     for (int i = 0; i < SrcList->Items->Count; i++)
     {
-        int itemWeight = (int)(SrcList->Items->Objects[i]);
-        User->UserItems->AddObject(SrcList->Items->Strings[i], (TObject*)itemWeight);
+        User->UserItems->AddObject(SrcList->Items->Strings[i], SrcList->Items->Objects[i]);
     }
 
     User->EnvironmentItems->Clear();
     for (int i = 0; i < DstList->Items->Count; i++)
     {
-        int itemWeight = (int)(DstList->Items->Objects[i]);
-        User->EnvironmentItems->AddObject(DstList->Items->Strings[i], (TObject*)itemWeight);
+        User->EnvironmentItems->AddObject(DstList->Items->Strings[i], DstList->Items->Objects[i]);
     }
 
     ModalResult = mrOk;

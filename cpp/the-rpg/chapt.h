@@ -44,6 +44,7 @@ __published:
 	void __fastcall ustype1Click(TObject *Sender);
 	void __fastcall ListBox1DblClick(TObject *Sender);
 	void __fastcall FormResize(TObject *Sender);
+	void __fastcall FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
 
 private:
     TStringList* chapter;

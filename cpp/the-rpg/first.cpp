@@ -6,6 +6,7 @@
 #include "chapt.h"
 #include "invent.h"
 #include "utype.h"
+#include "fight.h"
 
 #pragma resource "*.dfm"
 
@@ -17,6 +18,21 @@ String ExePath;
 
 void TUser::Clear()
 {
+    if (frmFight != nullptr && frmFight->Visible)
+    {
+        frmFight->Hide();
+    }
+
+    if (frmChapt != nullptr && frmChapt->Visible)
+    {
+        frmChapt->Hide();
+    }
+
+    if (frmUType != nullptr && frmUType->Visible)
+    {
+        frmUType->Hide();
+    }
+
     Name = L"";
     CrType = L"";
     SexType = L"";
@@ -29,8 +45,10 @@ void TUser::Clear()
     maxWeight = 0;
 
     // Безопасное выделение памяти под списки предметов, если они еще не созданы
-    if (UserItems == nullptr)   UserItems = new TStringList;
-    if (EnvironmentItems == nullptr) EnvironmentItems = new TStringList;
+    if (UserItems == nullptr)
+        UserItems = new TStringList;
+    if (EnvironmentItems == nullptr)
+        EnvironmentItems = new TStringList;
 
     UserItems->Clear();
     EnvironmentItems->Clear();
@@ -129,7 +147,7 @@ bool TUser::LoadGame(const String& AFileName)
                         String itemWeightStr = currentLine.SubString(lastSpace + 1, currentLine.Length() - lastSpace).Trim();
                         int itemWeight = StrToIntDef(itemWeightStr, 1);
 
-                        currentTargetList->AddObject(itemName, (TObject*)itemWeight);
+                        currentTargetList->AddObject(itemName, reinterpret_cast<TObject*>(static_cast<intptr_t>(itemWeight)));
                     }
                 }
             }
@@ -144,6 +162,11 @@ bool TUser::LoadGame(const String& AFileName)
             // Если внутри LoadNext или сопутствующих VCL-методов сработает скрытый сброс Clear(),
             // он сотрет только пустые дефолтные списки TUser, но не временные массивы
             frmChapt->LoadNext(nextChapter);
+
+            if (frmFight != nullptr && frmFight->Visible)
+            {
+                frmFight->Hide();
+            }
 
             // Все скрытые формы инициализировались и затихли.
             // Очищаем списки TUser от любого мусора (включая строку __INIT_NEW_GAME__)

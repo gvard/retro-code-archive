@@ -25,6 +25,7 @@ __published:
     void __fastcall grEnemyKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
     void __fastcall grWeaponKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
 	void __fastcall FormResize(TObject *Sender);
+	void __fastcall FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
 
 private:
     int apt;

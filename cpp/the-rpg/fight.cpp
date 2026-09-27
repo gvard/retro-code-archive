@@ -37,9 +37,9 @@ void __fastcall TfrmFight::FormCreate(TObject *Sender)
         swscanf(lWeapon->Strings[i].c_str(), L"%d%d%d", &hit, &mana, &apt);
 
         grWeapon->Cells[1][i / 2 + 1] = lWeapon->Strings[i + 1];
-        grWeapon->Cells[2][i / 2 + 1] = hit;
-        grWeapon->Cells[3][i / 2 + 1] = mana;
-        grWeapon->Cells[4][i / 2 + 1] = apt;
+        grWeapon->Cells[2][i / 2 + 1] = IntToStr(hit);
+    grWeapon->Cells[3][i / 2 + 1] = IntToStr(mana);
+    grWeapon->Cells[4][i / 2 + 1] = IntToStr(apt);
     }
 
     delete lWeapon;
@@ -310,3 +310,19 @@ void __fastcall TfrmFight::FormResize(TObject *Sender)
 	btnAttack->Left = (ClientWidth - btnAttack->Width) / 2;
 }
 
+void __fastcall TfrmFight::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+
+{
+    if (frmFirst != nullptr && frmFirst->ActionList1 != nullptr)
+    {
+        TWMKey msg;
+        msg.Msg = WM_KEYDOWN;
+        msg.CharCode = Key;
+        msg.KeyData = 0;
+
+        if (frmFirst->ActionList1->IsShortCut(msg))
+        {
+            Key = 0;
+        }
+    }
+}

@@ -9,6 +9,8 @@
 #include <Vcl.ExtCtrls.hpp>
 #include <Vcl.Graphics.hpp>
 #include <Vcl.Dialogs.hpp>
+#include <Vcl.ActnList.hpp>
+#include <System.Actions.hpp>
 
 const String APP_VERSION = L"0.1.5";
 
@@ -26,6 +28,10 @@ __published:
     TLabel *Label2;
     TImage *Image1;
     TOpenDialog *OpenDialog1;
+	TActionList *ActionList1;
+	TAction *actNewGame;
+	TAction *actSaveGame;
+	TAction *actLoadGame;
 
     void __fastcall NewClick(TObject *Sender);
     void __fastcall ExitClick(TObject *Sender);

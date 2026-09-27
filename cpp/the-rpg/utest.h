@@ -8,7 +8,7 @@
 
 class TfrmUTest : public TForm
 {
-__published:    // IDE-managed Components
+__published:
     TMemo *Memo1;
     TListBox *ListBox1;
     TButton *Button1;

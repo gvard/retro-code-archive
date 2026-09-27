@@ -12,11 +12,13 @@ object frmChapt: TfrmChapt
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
+  KeyPreview = True
   Menu = MainMenu1
   OldCreateOrder = False
   Position = poScreenCenter
   OnCloseQuery = frmChaptCloseQuery
   OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
   OnResize = FormResize
   DesignSize = (
     434
@@ -78,6 +80,7 @@ object frmChapt: TfrmChapt
       Caption = '&'#1060#1072#1081#1083
       object Exit: TMenuItem
         Caption = '&'#1042#1099#1093#1086#1076
+        ShortCut = 32883
         OnClick = ExitClick
       end
     end
@@ -85,10 +88,12 @@ object frmChapt: TfrmChapt
       Caption = '&'#1048#1075#1088#1072
       object Save: TMenuItem
         Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100
+        ShortCut = 16467
         OnClick = SaveClick
       end
       object Load: TMenuItem
         Caption = #1047#1072#1075#1088#1091#1079#1080#1090#1100
+        ShortCut = 16460
         OnClick = LoadClick
       end
       object ustype1: TMenuItem
