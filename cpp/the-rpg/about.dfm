@@ -16,9 +16,9 @@ object AboutBox: TAboutBox
   OnDeactivate = FrmDeactivate
   PixelsPerInch = 96
   TextHeight = 13
-  object Label5: TLabel
-    Left = 21
-    Top = 104
+  object lblEmail1: TLabel
+    Left = 26
+    Top = 106
     Width = 89
     Height = 13
     Caption = 'gvard@email.ru'
@@ -31,8 +31,8 @@ object AboutBox: TAboutBox
     ParentColor = False
     ParentFont = False
   end
-  object Label1: TLabel
-    Left = 232
+  object lblEmail2: TLabel
+    Left = 231
     Top = 106
     Width = 116
     Height = 13
@@ -53,6 +53,9 @@ object AboutBox: TAboutBox
     BevelOuter = bvLowered
     ParentColor = True
     TabOrder = 0
+    DesignSize = (
+      325
+      93)
     object Ico: TImage
       Left = 16
       Top = 20
@@ -464,10 +467,12 @@ object AboutBox: TAboutBox
       IsControl = True
     end
     object Version: TLabel
-      Left = 259
+      Left = 265
       Top = 72
       Width = 53
       Height = 13
+      Alignment = taRightJustify
+      Anchors = [akTop, akRight]
       Caption = 'Version 0.1'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText

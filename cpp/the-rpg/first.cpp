@@ -1,5 +1,4 @@
 #include <vcl.h>
-#pragma hdrstop
 
 #include "first.h"
 #include "about.h"
@@ -8,16 +7,13 @@
 #include "invent.h"
 #include "utype.h"
 
-#pragma package(smart_init)
 #pragma resource "*.dfm"
 
 TfrmFirst *frmFirst;
 TUser *User;
 String ExePath;
 
-// =========================================================================
 // КЛАСС СУЩНОСТИ ИГРОКА (TUser)
-// =========================================================================
 
 void TUser::Clear()
 {
@@ -241,9 +237,7 @@ bool TUser::SaveGame(const String& AFileName, int ACurrentQid)
     return success;
 }
 
-// =========================================================================
 // ГЛАВНОЕ МЕНЮ ИГРЫ (TfrmFirst)
-// =========================================================================
 
 __fastcall TfrmFirst::TfrmFirst(TComponent* Owner)
     : TForm(Owner)

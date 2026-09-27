@@ -14,7 +14,7 @@ struct TRaceData
 
 class TfrmUInfo : public TForm
 {
-__published:    // IDE-managed Components
+__published:
     TButton *Button1;
     TEdit *Edit1;
     TComboBox *ComboBox1;
@@ -32,12 +32,12 @@ __published:    // IDE-managed Components
 	void __fastcall FormDestroy(TObject *Sender);
     void __fastcall FormShow(TObject *Sender);
 
-private:        // User declarations
+private:
     TRaceData ParseRaceLine(const String& ALine);
 
-public:         // User declarations
+public:
     __fastcall TfrmUInfo(TComponent* Owner);
-    __fastcall virtual ~TfrmUInfo() {} // Добавлен деструктор для соблюдения единого стиля проекта
+    __fastcall virtual ~TfrmUInfo() {}
 };
 
 extern PACKAGE TfrmUInfo *frmUInfo;

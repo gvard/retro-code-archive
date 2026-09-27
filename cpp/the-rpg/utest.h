@@ -21,17 +21,17 @@ __published:    // IDE-managed Components
 	void __fastcall ListBox1DblClick(TObject *Sender);
 	void __fastcall FormDestroy(TObject *Sender);
 
-private:        // User declarations
+private:
     TStringList* test;
     int qptr;
     int aptr;
 
     void LoadNext();
-    void ProcessSelection(); // Добавлен метод для исключения дублирования кода
+    void ProcessSelection();
 
-public:         // User declarations
+public:
     __fastcall TfrmUTest(TComponent* Owner);
-    __fastcall virtual ~TfrmUTest(); // Добавлен деструктор для предотвращения утечек памяти
+    __fastcall virtual ~TfrmUTest();
 };
 
 extern PACKAGE TfrmUTest *frmUTest;

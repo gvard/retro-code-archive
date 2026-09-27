@@ -1,6 +1,5 @@
 #include <vcl.h>
 #include <Winapi.Mmsystem.hpp>
-#pragma hdrstop
 
 #include "chapt.h"
 #include "first.h"
@@ -9,7 +8,6 @@
 #include "utype.h"
 #include "invent.h"
 
-#pragma package(smart_init)
 #pragma resource "*.dfm"
 
 TfrmChapt *frmChapt;
@@ -50,7 +48,7 @@ void TfrmChapt::LoadNext(int qid)
         User->EnvironmentItems->Clear();
     }
 
-    // ИСПРАВЛЕНО: Визуальный список на экране тоже очищаем строго при реальной смене глав,
+    // Визуальный список на экране тоже очищаем строго при реальной смене глав,
     // чтобы этот вызов не затирал данные сохранения во время повторных загрузок файлов .sav
     if (this->currentQid != qid && DualListDlg != nullptr)
     {

@@ -1,10 +1,8 @@
 #include <vcl.h>
-#pragma hdrstop
 
 #include "about.h"
 #include "first.h"
 
-#pragma package(smart_init)
 #pragma resource "*.dfm"
 
 TAboutBox *AboutBox;
@@ -14,7 +12,6 @@ __fastcall TAboutBox::TAboutBox(TComponent* AOwner)
 {
     Version->Caption = L"Version " + APP_VERSION;
     // Version->ParentFont = false;
-    // Используем Tahoma для имитации классического пиксельного стиля
     // Version->Font->Name = L"Tahoma";
     // Version->Font->Size = 8;
     // Принудительно отключаем сглаживание Windows ClearType для этой метки

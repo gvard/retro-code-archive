@@ -10,7 +10,7 @@
 
 class TfrmFight : public TForm
 {
-__published:    // IDE-managed Components
+__published:
     TStringGrid *grEnemy;
     TStringGrid *grWeapon;
     TStatusBar *sbBar;
@@ -26,7 +26,7 @@ __published:    // IDE-managed Components
     void __fastcall grWeaponKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
 	void __fastcall FormResize(TObject *Sender);
 
-private:        // User declarations
+private:
     int apt;
     int jump;
     int selWeapon;

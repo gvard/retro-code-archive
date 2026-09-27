@@ -13,7 +13,7 @@
 
 class TAboutBox : public TForm
 {
-__published:    // IDE-managed Components
+__published:
     TPanel *Panel1;
     TImage *Ico;
     TLabel *ProductName;
@@ -21,17 +21,17 @@ __published:    // IDE-managed Components
     TLabel *Copyright;
     TLabel *Comments;
     TButton *OKButton;
-    TLabel *Label5;
-    TLabel *Label1;
+	TLabel *lblEmail1;
+	TLabel *lblEmail2;
 
     void __fastcall OKButtonClick(TObject *Sender);
     void __fastcall FrmDeactivate(TObject *Sender);
 
-private:        // User declarations
+private:
 
-public:         // User declarations
+public:
     __fastcall TAboutBox(TComponent* AOwner) override;
-    __fastcall virtual ~TAboutBox() {} // Добавлен деструктор для соблюдения единого стиля проекта
+    __fastcall virtual ~TAboutBox() {}
 };
 
 extern PACKAGE TAboutBox *AboutBox;

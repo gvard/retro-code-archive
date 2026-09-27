@@ -1,13 +1,11 @@
 #include <vcl.h>
 #include <Winapi.Mmsystem.hpp>
-#pragma hdrstop
 
 #include <algorithm>
 #include "fight.h"
 #include "first.h"
 #include "chapt.h"
 
-#pragma package(smart_init)
 #pragma resource "*.dfm"
 
 TfrmFight *frmFight;

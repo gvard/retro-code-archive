@@ -14,7 +14,7 @@ const String APP_VERSION = L"0.1.5";
 
 class TfrmFirst : public TForm
 {
-__published:    // IDE-managed Components
+__published:
     TMainMenu *MainMenu1;
     TMenuItem *File;
     TMenuItem *Help;
@@ -33,12 +33,12 @@ __published:    // IDE-managed Components
     void __fastcall frmFirstCreate(TObject *Sender);
     void __fastcall LoadClick(TObject *Sender);
 
-private:        // User declarations
+private:
     TStringList* save;
 
-public:         // User declarations
+public:
     __fastcall TfrmFirst(TComponent* Owner);
-    __fastcall virtual ~TfrmFirst(); // Добавлен деструктор для очистки памяти
+    __fastcall virtual ~TfrmFirst();
 };
 
 class TUser

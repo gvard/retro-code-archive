@@ -1,10 +1,8 @@
 #include <vcl.h>
-#pragma hdrstop
 
 #include "first.h"
 #include "utype.h"
 
-#pragma package(smart_init)
 #pragma resource "*.dfm"
 
 TfrmUType *frmUType;

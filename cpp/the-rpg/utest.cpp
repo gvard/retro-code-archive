@@ -1,11 +1,9 @@
 #include <vcl.h>
-#pragma hdrstop
 
 #include "utest.h"
 #include "first.h"
 #include "chapt.h"
 
-#pragma package(smart_init)
 #pragma resource "*.dfm"
 
 TfrmUTest *frmUTest;

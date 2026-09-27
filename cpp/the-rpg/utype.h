@@ -13,7 +13,7 @@
 
 class TfrmUType : public TForm
 {
-__published:    // IDE-managed Components
+__published:
     TButton *OKBtn;
     TBevel *Bvl1;
     TLabel *Lbl1;
@@ -31,11 +31,11 @@ __published:    // IDE-managed Components
     void __fastcall OKBtnClick(TObject *Sender);
     void __fastcall frmDeactiv(TObject *Sender);
 
-private:        // User declarations
+private:
 
-public:         // User declarations
+public:
     __fastcall TfrmUType(TComponent* AOwner) override;
-    __fastcall virtual ~TfrmUType() {} // Добавлен деструктор для соблюдения единого стиля проекта
+    __fastcall virtual ~TfrmUType() {}
     void UpdateStaminaDisplay();
 };
 

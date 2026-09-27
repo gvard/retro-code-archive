@@ -1,10 +1,8 @@
 #include <vcl.h>
-#pragma hdrstop
 
 #include "invent.h"
 #include "first.h"
 
-#pragma package(smart_init)
 #pragma resource "*.dfm"
 
 extern bool isFirstInventoryLaunch;
@@ -140,7 +138,6 @@ void __fastcall TDualListDlg::SetItem(TListBox *List, int Index)
 
 void __fastcall TDualListDlg::FormShow(TObject *Sender)
 {
-    // Очищаем экран перед отрисовкой
     SrcList->Items->Clear();
     DstList->Items->Clear();
 

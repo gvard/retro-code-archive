@@ -12,7 +12,7 @@
 
 class TDualListDlg : public TForm
 {
-__published:    // IDE-managed Components
+__published:
     TButton *OKBtn;
     TListBox *SrcList;
     TListBox *DstList;
@@ -36,10 +36,10 @@ __published:    // IDE-managed Components
     void __fastcall FormShow(TObject *Sender);
     void __fastcall OKBtnClick(TObject *Sender);
 
-private:        // User declarations
+private:
     void UpdateWeightDisplay();
 
-public:         // User declarations
+public:
     __fastcall TDualListDlg(TComponent* AOwner) override;
     __fastcall virtual ~TDualListDlg() {} // Добавлен деструктор для соблюдения единого стиля проекта
 };

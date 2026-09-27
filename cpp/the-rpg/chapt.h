@@ -13,7 +13,7 @@
 
 class TfrmChapt : public TForm
 {
-__published:    // IDE-managed Components
+__published:
     TMainMenu *MainMenu1;
     TMenuItem *File;
     TMenuItem *Game;
@@ -45,16 +45,16 @@ __published:    // IDE-managed Components
 	void __fastcall ListBox1DblClick(TObject *Sender);
 	void __fastcall FormResize(TObject *Sender);
 
-private:        // User declarations
+private:
     TStringList* chapter;
     TStringList* save;
     int aptr;
     int qid;
     int currentQid;
 
-public:         // User declarations
+public:
     __fastcall TfrmChapt(TComponent* Owner);
-    __fastcall virtual ~TfrmChapt(); // Добавлен деструктор для очистки памяти
+    __fastcall virtual ~TfrmChapt();
 
     void LoadNext(int qid);
 };

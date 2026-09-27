@@ -1,11 +1,9 @@
 #include <vcl.h>
-#pragma hdrstop
 
 #include "uinfo.h"
 #include "first.h"
 #include "utest.h"
 
-#pragma package(smart_init)
 #pragma resource "*.dfm"
 
 TfrmUInfo *frmUInfo;
