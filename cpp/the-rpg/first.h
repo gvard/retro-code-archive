@@ -1,16 +1,14 @@
 #ifndef firstH
 #define firstH
 
+#include <System.hpp>
 #include <System.Classes.hpp>
-#include <Vcl.Controls.hpp>
 #include <Vcl.StdCtrls.hpp>
 #include <Vcl.Forms.hpp>
 #include <Vcl.Menus.hpp>
 #include <Vcl.ExtCtrls.hpp>
-#include <Vcl.Graphics.hpp>
 #include <Vcl.Dialogs.hpp>
 #include <Vcl.ActnList.hpp>
-#include <System.Actions.hpp>
 
 const String APP_VERSION = L"0.1.5";
 

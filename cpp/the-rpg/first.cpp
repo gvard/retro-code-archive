@@ -1,4 +1,5 @@
-#include <vcl.h>
+#include <cstdio>
+#include <Winapi.Windows.hpp>
 
 #include "first.h"
 #include "about.h"
@@ -117,6 +118,7 @@ bool TUser::LoadGame(const String& AFileName)
             hlth    = StrToInt(saveList->Strings[7]);
             man     = StrToInt(saveList->Strings[8]);
             s       = StrToInt(saveList->Strings[9]);
+            maxWeight = static_cast<int>(std::lround(str * 7.5));
 
             int nextChapter = StrToInt(saveList->Strings[10]);
 

@@ -1,4 +1,4 @@
-#include <vcl.h>
+#include <cstdio>
 #include <Winapi.Mmsystem.hpp>
 
 #include "chapt.h"

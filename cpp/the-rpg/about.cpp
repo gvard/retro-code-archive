@@ -1,4 +1,4 @@
-#include <vcl.h>
+#include <Winapi.Windows.hpp>
 
 #include "about.h"
 #include "first.h"

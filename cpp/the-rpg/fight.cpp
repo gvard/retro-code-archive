@@ -1,7 +1,11 @@
-#include <vcl.h>
-#include <Winapi.Mmsystem.hpp>
-
 #include <algorithm>
+#include <cstdio>
+#include <cstring>
+#include <cwchar>
+
+#include <Winapi.MMSystem.hpp>
+#include <Winapi.Messages.hpp>
+
 #include "fight.h"
 #include "first.h"
 #include "chapt.h"

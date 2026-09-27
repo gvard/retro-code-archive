@@ -1,10 +1,8 @@
 #ifndef uinfoH
 #define uinfoH
 
-#include <System.Classes.hpp>
-#include <Vcl.Controls.hpp>
-#include <Vcl.StdCtrls.hpp>
 #include <Vcl.Forms.hpp>
+#include <Vcl.StdCtrls.hpp>
 
 struct TRaceData
 {

@@ -1,4 +1,6 @@
-#include <vcl.h>
+#include <cstdio>
+#include <cwchar>
+#include <Winapi.Windows.hpp>
 
 #include "utest.h"
 #include "first.h"
@@ -15,7 +17,6 @@ __fastcall TfrmUTest::TfrmUTest(TComponent* Owner)
     qptr = 0;
 }
 
-// Добавлен деструктор для очистки памяти и предотвращения утечек
 __fastcall TfrmUTest::~TfrmUTest()
 {
     delete test;
@@ -69,7 +70,7 @@ void __fastcall TfrmUTest::FormShow(TObject *Sender)
 
 void __fastcall TfrmUTest::FormClose(TObject *Sender, TCloseAction &Action)
 {
-    User->maxWeight = round(User->str * 7.5);
+    User->maxWeight = static_cast<int>(std::lround(User->str * 7.5));
     User->s = User->GetMaxStamina();
 
     wchar_t debugBuf[1024];

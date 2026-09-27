@@ -1,10 +1,8 @@
 #ifndef fightH
 #define fightH
 
-#include <System.Classes.hpp>
-#include <Vcl.Controls.hpp>
-#include <Vcl.StdCtrls.hpp>
 #include <Vcl.Forms.hpp>
+#include <Vcl.StdCtrls.hpp>
 #include <Vcl.Grids.hpp>
 #include <Vcl.ComCtrls.hpp>
 

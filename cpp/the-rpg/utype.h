@@ -1,14 +1,8 @@
 #ifndef utypeH
 #define utypeH
 
-#include <Winapi.Windows.hpp>
-#include <System.SysUtils.hpp>
-#include <System.Classes.hpp>
-#include <Vcl.Graphics.hpp>
-#include <Vcl.StdCtrls.hpp>
 #include <Vcl.Forms.hpp>
-#include <Vcl.Controls.hpp>
-#include <Vcl.Buttons.hpp>
+#include <Vcl.StdCtrls.hpp>
 #include <Vcl.ExtCtrls.hpp>
 
 class TfrmUType : public TForm

@@ -19,12 +19,12 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
         // Главная форма инициализируется строго первой
         Application->CreateForm(__classid(TfrmFirst), &frmFirst);
         Application->CreateForm(__classid(TfrmChapt), &frmChapt);
-        Application->CreateForm(__classid(TDualListDlg), &DualListDlg);
-        Application->CreateForm(__classid(TfrmUInfo), &frmUInfo);
-        Application->CreateForm(__classid(TfrmUTest), &frmUTest);
-        Application->CreateForm(__classid(TfrmUType), &frmUType);
-        Application->CreateForm(__classid(TAboutBox), &AboutBox);
-        Application->CreateForm(__classid(TfrmFight), &frmFight);
+        // Application->CreateForm(__classid(TDualListDlg), &DualListDlg);
+        // Application->CreateForm(__classid(TfrmUInfo), &frmUInfo);
+        // Application->CreateForm(__classid(TfrmUTest), &frmUTest);
+        // Application->CreateForm(__classid(TfrmUType), &frmUType);
+        // Application->CreateForm(__classid(TAboutBox), &AboutBox);
+        // Application->CreateForm(__classid(TfrmFight), &frmFight);
         Application->Run();
     }
     catch (Exception &exception)

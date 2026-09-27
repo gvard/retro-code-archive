@@ -1,5 +1,3 @@
-#include <vcl.h>
-
 #include "first.h"
 #include "utype.h"
 

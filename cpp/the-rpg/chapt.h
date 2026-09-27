@@ -1,15 +1,10 @@
 #ifndef chaptH
 #define chaptH
 
-#include <System.Classes.hpp>
-#include <Vcl.Controls.hpp>
-#include <Vcl.StdCtrls.hpp>
 #include <Vcl.Forms.hpp>
+#include <Vcl.StdCtrls.hpp>
 #include <Vcl.Menus.hpp>
 #include <Vcl.Dialogs.hpp>
-
-#include <cstdio>
-#include <Winapi.MMSystem.hpp>
 
 class TfrmChapt : public TForm
 {

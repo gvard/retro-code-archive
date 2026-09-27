@@ -1,4 +1,5 @@
-#include <vcl.h>
+#include <cstdio>
+#include <Winapi.Windows.hpp>
 
 #include "uinfo.h"
 #include "first.h"
