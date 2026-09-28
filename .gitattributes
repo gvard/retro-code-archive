@@ -12,6 +12,7 @@
 *.py text eol=lf
 *.pas text eol=lf
 *.bas text eol=lf
+*.bat text eol=crlf
 
 *.jpg -text
 *.png -text
