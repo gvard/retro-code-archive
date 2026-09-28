@@ -32,13 +32,12 @@ __published:
     void __fastcall OKBtnClick(TObject *Sender);
 
 private:
-    void UpdateWeightDisplay();
+    void update_weight_display();
 
 public:
-    __fastcall TDualListDlg(TComponent* AOwner) override;
-    __fastcall virtual ~TDualListDlg() {} // Добавлен деструктор для соблюдения единого стиля проекта
-};
+    explicit __fastcall TDualListDlg(TComponent* owner) override;
 
-extern PACKAGE TDualListDlg *DualListDlg;
+    virtual __fastcall ~TDualListDlg() override = default;
+};
 
 #endif

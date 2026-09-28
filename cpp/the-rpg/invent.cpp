@@ -7,54 +7,50 @@
 #pragma resource "*.dfm"
 
 extern bool isFirstInventoryLaunch;
-TDualListDlg *DualListDlg;
 
 __fastcall TDualListDlg::TDualListDlg(TComponent* AOwner)
     : TForm(AOwner)
 {
 }
 
-void TDualListDlg::UpdateWeightDisplay()
+void TDualListDlg::update_weight_display()
 {
-    int totalWeight = 0;
+    int total_weight = 0;
 
-    for (int i = 0; i < SrcList->Items->Count; i++)
+    for (int i = 0; i < SrcList->Items->Count; ++i)
     {
-        totalWeight += static_cast<int>(reinterpret_cast<intptr_t>(SrcList->Items->Objects[i]));
+        total_weight += static_cast<int>(reinterpret_cast<intptr_t>(SrcList->Items->Objects[i]));
     }
 
-    Label1->Caption = L"Вес: " + IntToStr(totalWeight);
+    Label1->Caption = L"Вес: " + IntToStr(total_weight);
     Label2->Caption = L"Из возможных: " + IntToStr(User->maxWeight);
 
-    User->RecalculateStamina(totalWeight);
+    User->RecalculateStamina(total_weight);
 
-    if (totalWeight > User->maxWeight)
-    {
-        Label1->Font->Color = clRed;
-    }
-    else
-    {
-        Label1->Font->Color = clWindowText;
-    }
-    wchar_t weightLog[512];
-    swprintf(weightLog, 512,
+    // total_weight > User->maxWeight вынесено в константу для читаемости
+    const bool is_overloaded = total_weight > User->maxWeight;
+    Label1->Font->Color = is_overloaded ? clRed : clWindowText;
+
+    wchar_t weight_log[512];
+    std::swprintf(weight_log, 512,
         L"[ОТЛАДКА ВЕСА] Текущий вес рюкзака: %d | Макс. вес: %d | "
         L"Статус: %s | Выносливость персонажа (User->s): %d (Макс: %d)",
-        totalWeight,
+        total_weight,
         User->maxWeight,
-        (totalWeight > User->maxWeight) ? L"ПЕРЕГРУЗ!" : L"Норма",
+        is_overloaded ? L"ПЕРЕГРУЗ!" : L"Норма",
         User->s,
         User->GetMaxStamina()
     );
-    OutputDebugString(weightLog);
+    OutputDebugString(weight_log);
 }
 
-void __fastcall TDualListDlg::IncludeBtnClick(TObject *Sender)
+void __fastcall TDualListDlg::IncludeBtnClick(TObject* /*Sender*/)
 {
-    int Index = GetFirstSelection(SrcList);
+    const int index = GetFirstSelection(SrcList);
     MoveSelected(SrcList, DstList->Items);
-    SetItem(SrcList, Index);
-    UpdateWeightDisplay();
+    SetItem(SrcList, index);
+
+    this->update_weight_display();
 }
 
 void __fastcall TDualListDlg::ExcludeBtnClick(TObject *Sender)
@@ -62,7 +58,7 @@ void __fastcall TDualListDlg::ExcludeBtnClick(TObject *Sender)
     int Index = GetFirstSelection(DstList);
     MoveSelected(DstList, SrcList->Items);
     SetItem(DstList, Index);
-    UpdateWeightDisplay();
+    update_weight_display();
 }
 
 void __fastcall TDualListDlg::IncAllBtnClick(TObject *Sender)
@@ -70,7 +66,7 @@ void __fastcall TDualListDlg::IncAllBtnClick(TObject *Sender)
     DstList->Items->AddStrings(SrcList->Items);
     SrcList->Items->Clear();
     SetItem(SrcList, 0);
-    UpdateWeightDisplay();
+    update_weight_display();
 }
 
 void __fastcall TDualListDlg::ExcAllBtnClick(TObject *Sender)
@@ -78,7 +74,7 @@ void __fastcall TDualListDlg::ExcAllBtnClick(TObject *Sender)
     SrcList->Items->AddStrings(DstList->Items);
     DstList->Items->Clear();
     SetItem(DstList, 0);
-    UpdateWeightDisplay();
+    update_weight_display();
 }
 
 void __fastcall TDualListDlg::MoveSelected(TCustomListBox *List, TStrings *Items)
@@ -200,7 +196,7 @@ void __fastcall TDualListDlg::FormShow(TObject *Sender)
         }
     }
 
-    UpdateWeightDisplay();
+    update_weight_display();
     SetButtons();
 }
 

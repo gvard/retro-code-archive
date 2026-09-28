@@ -51,14 +51,6 @@ void TfrmChapt::LoadNext(int qid)
         User->EnvironmentItems->Clear();
     }
 
-    // Визуальный список на экране тоже очищаем строго при реальной смене глав,
-    // чтобы этот вызов не затирал данные сохранения во время повторных загрузок файлов .sav
-    if (this->currentQid != qid && DualListDlg != nullptr)
-    {
-        DualListDlg->DstList->Items->Clear();
-    }
-
-    // И только теперь безопасно обновляем ID текущей сюжетной главы
     this->currentQid = qid;
 
     wchar_t ch = 0;
@@ -276,18 +268,15 @@ void __fastcall TfrmChapt::SaveClick(TObject* Sender)
     }
 }
 
-void __fastcall TfrmChapt::InvClick(TObject* Sender)
+void __fastcall TfrmChapt::InvClick(TObject* /*Sender*/)
 {
-    if (DualListDlg == nullptr)
+    auto inventory_dialog = std::make_unique<TDualListDlg>(this);
+    if (inventory_dialog->ShowModal() == mrOk)
     {
-        Application->CreateForm(__classid(TDualListDlg), &DualListDlg);
-    }
-
-    DualListDlg->ShowModal();
-
-    if (frmUType != nullptr && frmUType->Visible)
-    {
-        frmUType->UpdateStaminaDisplay();
+        if (frmUType != nullptr && frmUType->Visible)
+        {
+            frmUType->UpdateStaminaDisplay();
+        }
     }
 }
 
