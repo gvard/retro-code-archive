@@ -13,7 +13,6 @@ object AboutBox: TAboutBox
   Font.Style = []
   OldCreateOrder = True
   Position = poScreenCenter
-  OnDeactivate = FrmDeactivate
   PixelsPerInch = 96
   TextHeight = 13
   object lblEmail1: TLabel
@@ -45,7 +44,7 @@ object AboutBox: TAboutBox
     ParentFont = False
   end
   object Panel1: TPanel
-    Left = 12
+    Left = 13
     Top = 4
     Width = 325
     Height = 93

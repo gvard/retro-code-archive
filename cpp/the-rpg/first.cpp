@@ -1,5 +1,6 @@
-#include <cstdio>
 #include <Winapi.Windows.hpp>
+#include <cstdio>
+#include <memory>
 
 #include "first.h"
 #include "about.h"
@@ -11,8 +12,8 @@
 
 #pragma resource "*.dfm"
 
-TfrmFirst *frmFirst;
-TUser *User;
+TfrmFirst* frmFirst;
+TUser* User;
 String ExePath;
 
 // КЛАСС СУЩНОСТИ ИГРОКА (TUser)
@@ -66,11 +67,14 @@ void TUser::Refresh()
     man += 5;
     s += 5;
 
-    if (hlth > 100) hlth = 100;
-    if (man > 100)  man = 100;
+    if (hlth > 100)
+        hlth = 100;
+    if (man > 100)
+        man = 100;
 
     int maxStamina = GetMaxStamina();
-    if (s > maxStamina) s = maxStamina;
+    if (s > maxStamina)
+        s = maxStamina;
 }
 
 int TUser::GetMaxStamina()
@@ -108,16 +112,16 @@ bool TUser::LoadGame(const String& AFileName)
             TStringList* tempUserItems = new TStringList;
             TStringList* tempEnvironmentItems = new TStringList;
 
-            Name    = saveList->Strings[0];
-            CrType  = saveList->Strings[1];
+            Name = saveList->Strings[0];
+            CrType = saveList->Strings[1];
             SexType = saveList->Strings[2];
-            age     = StrToInt(saveList->Strings[3]);
-            str     = StrToInt(saveList->Strings[4]);
-            dex     = StrToInt(saveList->Strings[5]);
-            mag     = StrToInt(saveList->Strings[6]);
-            hlth    = StrToInt(saveList->Strings[7]);
-            man     = StrToInt(saveList->Strings[8]);
-            s       = StrToInt(saveList->Strings[9]);
+            age = StrToInt(saveList->Strings[3]);
+            str = StrToInt(saveList->Strings[4]);
+            dex = StrToInt(saveList->Strings[5]);
+            mag = StrToInt(saveList->Strings[6]);
+            hlth = StrToInt(saveList->Strings[7]);
+            man = StrToInt(saveList->Strings[8]);
+            s = StrToInt(saveList->Strings[9]);
             maxWeight = static_cast<int>(std::lround(str * 7.5));
 
             int nextChapter = StrToInt(saveList->Strings[10]);
@@ -127,7 +131,8 @@ bool TUser::LoadGame(const String& AFileName)
             for (int i = 11; i < saveList->Count; i++)
             {
                 String currentLine = saveList->Strings[i].Trim();
-                if (currentLine.IsEmpty()) continue;
+                if (currentLine.IsEmpty())
+                    continue;
 
                 if (currentLine.UpperCase() == L"[INVENTORY]")
                 {
@@ -172,12 +177,16 @@ bool TUser::LoadGame(const String& AFileName)
 
             // Все скрытые формы инициализировались и затихли.
             // Очищаем списки TUser от любого мусора (включая строку __INIT_NEW_GAME__)
-            if (UserItems != nullptr)        UserItems->Clear();
-            if (EnvironmentItems != nullptr) EnvironmentItems->Clear();
+            if (UserItems != nullptr)
+                UserItems->Clear();
+            if (EnvironmentItems != nullptr)
+                EnvironmentItems->Clear();
 
             // Переносим вещи из временной безопасной памяти в постоянные структуры TUser
-            if (UserItems != nullptr)        UserItems->AddStrings(tempUserItems);
-            if (EnvironmentItems != nullptr) EnvironmentItems->AddStrings(tempEnvironmentItems);
+            if (UserItems != nullptr)
+                UserItems->AddStrings(tempUserItems);
+            if (EnvironmentItems != nullptr)
+                EnvironmentItems->AddStrings(tempEnvironmentItems);
 
             // Удаляем временные контейнеры, закрывая утечки памяти Windows
             delete tempUserItems;
@@ -189,6 +198,11 @@ bool TUser::LoadGame(const String& AFileName)
             if (frmUType != nullptr && frmUType->Visible)
             {
                 frmUType->UpdateStaminaDisplay();
+            }
+
+            if (frmChapt != nullptr)
+            {
+                frmChapt->ResetUnsavedChanges();
             }
 
             success = true;
@@ -239,15 +253,15 @@ bool TUser::SaveGame(const String& AFileName, int ACurrentQid)
         saveList->Add(L"[INVENTORY]");
         for (int i = 0; i < UserItems->Count; i++)
         {
-            int itemWeight = (int)(UserItems->Objects[i]);
+            int itemWeight = reinterpret_cast<intptr_t>(UserItems->Objects[i]);
             saveList->Add(UserItems->Strings[i] + L" " + IntToStr(itemWeight));
         }
 
         saveList->Add(L"[ENVIRONMENT]");
         for (int i = 0; i < EnvironmentItems->Count; i++)
         {
-            int itemWeight = (int)(EnvironmentItems->Objects[i]);
-            saveList->Add(EnvironmentItems->Strings[i] + L" " + IntToStr(itemWeight));
+            int envWeight = reinterpret_cast<intptr_t>(EnvironmentItems->Objects[i]);
+            saveList->Add(EnvironmentItems->Strings[i] + L" " + IntToStr(envWeight));
         }
 
         saveList->SaveToFile(AFileName, TEncoding::UTF8);
@@ -289,7 +303,7 @@ __fastcall TfrmFirst::~TfrmFirst()
     delete User;
 }
 
-void __fastcall TfrmFirst::NewClick(TObject *Sender)
+void __fastcall TfrmFirst::NewClick(TObject* Sender)
 {
     User->Clear();
     frmFirst->Hide();
@@ -304,7 +318,7 @@ void __fastcall TfrmFirst::NewClick(TObject *Sender)
     frmUInfo->Show();
 }
 
-void __fastcall TfrmFirst::LoadClick(TObject *Sender)
+void __fastcall TfrmFirst::LoadClick(TObject* Sender)
 {
     OpenDialog1->FileName = L"";
     OpenDialog1->InitialDir = ExePath;
@@ -319,17 +333,18 @@ void __fastcall TfrmFirst::LoadClick(TObject *Sender)
     }
 }
 
-void __fastcall TfrmFirst::frmFirstCreate(TObject *Sender)
+void __fastcall TfrmFirst::frmFirstCreate(TObject* Sender)
 {
     Label2->Caption = L"Version " + APP_VERSION;
 }
 
-void __fastcall TfrmFirst::ExitClick(TObject *Sender)
+void __fastcall TfrmFirst::ExitClick(TObject* Sender)
 {
     this->Close();
 }
 
-void __fastcall TfrmFirst::AboutClick(TObject *Sender)
+void __fastcall TfrmFirst::AboutClick(TObject* Sender)
 {
-    AboutBox->Show();
+    auto temporaryAbout = std::make_unique<TAboutBox>(nullptr);
+    temporaryAbout->ShowModal();
 }

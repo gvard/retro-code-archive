@@ -1,5 +1,7 @@
-#include <cstdio>
 #include <Winapi.Mmsystem.hpp>
+#include <string_view>
+#include <memory>
+#include <cstdio>
 
 #include "chapt.h"
 #include "first.h"
@@ -10,13 +12,14 @@
 
 #pragma resource "*.dfm"
 
-TfrmChapt *frmChapt;
+TfrmChapt* frmChapt;
 
 __fastcall TfrmChapt::TfrmChapt(TComponent* Owner)
     : TForm(Owner)
 {
     save = new TStringList;
     chapter = new TStringList;
+    hasUnsavedChanges = false;
 }
 
 __fastcall TfrmChapt::~TfrmChapt()
@@ -25,17 +28,17 @@ __fastcall TfrmChapt::~TfrmChapt()
     delete chapter;
 }
 
-void __fastcall TfrmChapt::FormCreate(TObject *Sender)
+void __fastcall TfrmChapt::FormCreate(TObject* Sender)
 {
     chapter->LoadFromFile(ExePath + L"data\\chapt.txt", TEncoding::UTF8);
 }
 
-void __fastcall TfrmChapt::ExitClick(TObject *Sender)
+void __fastcall TfrmChapt::ExitClick(TObject* Sender)
 {
     frmChapt->Close();
 }
 
-void __fastcall TfrmChapt::ListBox1DblClick(TObject *Sender)
+void __fastcall TfrmChapt::ListBox1DblClick(TObject* Sender)
 {
     Button1Click(Sender);
 }
@@ -176,7 +179,7 @@ void TfrmChapt::LoadNext(int qid)
     }
 }
 
-void __fastcall TfrmChapt::Button1Click(TObject *Sender)
+void __fastcall TfrmChapt::Button1Click(TObject* Sender)
 {
     int jump;
     for (int i = 0; i < ListBox1->Items->Count; i++)
@@ -185,48 +188,68 @@ void __fastcall TfrmChapt::Button1Click(TObject *Sender)
         {
             swscanf(chapter->Strings[aptr + i].c_str(), L"%d ", &jump);
             User->Refresh();
+            this->hasUnsavedChanges = true;
             LoadNext(jump);
             return;
         }
     }
 }
 
-void __fastcall TfrmChapt::Help1Click(TObject *Sender)
+void __fastcall TfrmChapt::Help1Click(TObject* Sender)
 {
     ShowMessage(L"Сами разберетесь!");
 }
 
-void __fastcall TfrmChapt::AboutClick(TObject *Sender)
+void __fastcall TfrmChapt::AboutClick(TObject* Sender)
 {
-    AboutBox->Show();
+    auto temporaryAbout = std::make_unique<TAboutBox>(nullptr);
+    temporaryAbout->ShowModal();
 }
 
-void __fastcall TfrmChapt::ListBox1KeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+void __fastcall TfrmChapt::ListBox1KeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
 {
     if (Key == VK_RETURN)
     {
-        Button1Click(Sender); // Устранено дублирование кода переходов
+        Button1Click(Sender);
     }
 }
 
-void __fastcall TfrmChapt::frmChaptCloseQuery(TObject *Sender, bool &CanClose)
+void __fastcall TfrmChapt::frmChaptCloseQuery(TObject* Sender, bool& CanClose)
 {
-    switch (Application->MessageBox(L"Вы уверены?!", L"The RPG", MB_YESNOCANCEL + MB_ICONQUESTION))
+    if (!this->hasUnsavedChanges)
     {
-        case IDYES:
+        if (frmFirst)
+        {
             frmFirst->Show();
-            frmChapt->Hide();
-            CanClose = true;
-            break;
+        }
+        this->Hide();
+        CanClose = true;
+        return;
+    }
 
-        case IDCANCEL:
-        case IDNO:
-            CanClose = false;
-            break;
+    using namespace std::string_view_literals;
+
+    constexpr auto title = L"The RPG: выход из приключения"sv;
+    constexpr auto msg = L"Покинуть игру?\nВесь несохраненный прогресс будет безвозвратно потерян."sv;
+
+    const int result = ::MessageBoxW(this->Handle, msg.data(), title.data(), MB_OKCANCEL | MB_ICONQUESTION);
+
+    if (result == IDOK)
+    {
+        if (frmFirst)
+        {
+            frmFirst->Show();
+        }
+        this->Hide();
+        CanClose = true;
+    }
+    else
+    {
+        CanClose = false;
     }
 }
 
-void __fastcall TfrmChapt::LoadClick(TObject *Sender)
+void __fastcall TfrmChapt::LoadClick(TObject* Sender)
 {
     OpenDialog1->FileName = L"";
     OpenDialog1->InitialDir = ExpandFileName(ExePath);
@@ -238,7 +261,7 @@ void __fastcall TfrmChapt::LoadClick(TObject *Sender)
     }
 }
 
-void __fastcall TfrmChapt::SaveClick(TObject *Sender)
+void __fastcall TfrmChapt::SaveClick(TObject* Sender)
 {
     SaveDialog1->InitialDir = ExpandFileName(ExePath);
     SaveDialog1->FileName = L"save1.sav";
@@ -247,12 +270,13 @@ void __fastcall TfrmChapt::SaveClick(TObject *Sender)
     {
         if (User->SaveGame(SaveDialog1->FileName, this->currentQid))
         {
+            this->hasUnsavedChanges = false;
             Application->MessageBox(L"Игра успешно сохранена!", L"The RPG", MB_OK | MB_ICONINFORMATION);
         }
     }
 }
 
-void __fastcall TfrmChapt::InvClick(TObject *Sender)
+void __fastcall TfrmChapt::InvClick(TObject* Sender)
 {
     if (DualListDlg == nullptr)
     {
@@ -267,7 +291,7 @@ void __fastcall TfrmChapt::InvClick(TObject *Sender)
     }
 }
 
-void __fastcall TfrmChapt::ustype1Click(TObject *Sender)
+void __fastcall TfrmChapt::ustype1Click(TObject* Sender)
 {
     if (frmUType == nullptr)
     {
@@ -275,12 +299,12 @@ void __fastcall TfrmChapt::ustype1Click(TObject *Sender)
     }
     frmUType->Show();
 }
-void __fastcall TfrmChapt::FormResize(TObject *Sender)
+void __fastcall TfrmChapt::FormResize(TObject* Sender)
 {
     Button1->Left = (ClientWidth - Button1->Width) / 2;
 }
 
-void __fastcall TfrmChapt::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+void __fastcall TfrmChapt::FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
 
 {
     if (frmFirst != nullptr && frmFirst->ActionList1 != nullptr)
