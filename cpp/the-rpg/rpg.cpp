@@ -16,11 +16,11 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
         Application->MainFormOnTaskBar = true;
 
         // Главная форма инициализируется строго первой
-		Application->CreateForm(__classid(TfrmFirst), &frmFirst);
-		Application->CreateForm(__classid(TfrmChapt), &frmChapt);
-		Application->Run();
+        Application->CreateForm(__classid(TfrmFirst), &frmFirst);
+        Application->CreateForm(__classid(TfrmChapt), &frmChapt);
+        Application->Run();
     }
-    catch (Exception &exception)
+    catch (Exception& exception)
     {
         Application->ShowException(&exception);
     }
@@ -30,7 +30,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
         {
             throw Exception(L"Unknown Error");
         }
-        catch (Exception &exception)
+        catch (Exception& exception)
         {
             Application->ShowException(&exception);
         }

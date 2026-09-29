@@ -19,7 +19,8 @@ TRaceData TfrmUInfo::parse_race_line(const String& ALine)
     data.Modifier = 0;
 
     String currentLine = ALine.Trim();
-    if (currentLine.IsEmpty()) return data;
+    if (currentLine.IsEmpty())
+        return data;
 
     int lastSpace = currentLine.LastDelimiter(L" ");
     if (lastSpace > 0)
@@ -76,7 +77,7 @@ void __fastcall TfrmUInfo::Button1Click(TObject* /*Sender*/)
     User->CrType = ComboBox1->Text;
     User->SexType = ComboBox2->Text;
 
-    TStringList *lCrType = new TStringList;
+    TStringList* lCrType = new TStringList;
     String CrtPath = ExePath + L"data\\crt.txt";
 
     if (FileExists(CrtPath))
@@ -106,7 +107,7 @@ void __fastcall TfrmUInfo::Button1Click(TObject* /*Sender*/)
     this->ModalResult = mrOk;
 }
 
-void __fastcall TfrmUInfo::Edit1KeyDown(TObject* /*Sender*/, WORD &Key, TShiftState /*Shift*/)
+void __fastcall TfrmUInfo::Edit1KeyDown(TObject* /*Sender*/, WORD& Key, TShiftState /*Shift*/)
 {
     if (Key == VK_RETURN)
     {
@@ -114,7 +115,7 @@ void __fastcall TfrmUInfo::Edit1KeyDown(TObject* /*Sender*/, WORD &Key, TShiftSt
     }
 }
 
-void __fastcall TfrmUInfo::Edit2KeyDown(TObject* /*Sender*/, WORD &Key, TShiftState /*Shift*/)
+void __fastcall TfrmUInfo::Edit2KeyDown(TObject* /*Sender*/, WORD& Key, TShiftState /*Shift*/)
 {
     if (Key == VK_RETURN)
     {
@@ -126,7 +127,7 @@ void __fastcall TfrmUInfo::FormShow(TObject* /*Sender*/)
 {
     ComboBox1->Items->Clear();
 
-    TStringList *lCrType = new TStringList;
+    TStringList* lCrType = new TStringList;
     String CrtPath = ExePath + L"data\\crt.txt";
 
     if (FileExists(CrtPath))

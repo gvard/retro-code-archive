@@ -53,7 +53,7 @@ void __fastcall TDualListDlg::IncludeBtnClick(TObject* /*Sender*/)
     this->update_weight_display();
 }
 
-void __fastcall TDualListDlg::ExcludeBtnClick(TObject *Sender)
+void __fastcall TDualListDlg::ExcludeBtnClick(TObject* Sender)
 {
     int Index = GetFirstSelection(DstList);
     MoveSelected(DstList, SrcList->Items);
@@ -61,7 +61,7 @@ void __fastcall TDualListDlg::ExcludeBtnClick(TObject *Sender)
     update_weight_display();
 }
 
-void __fastcall TDualListDlg::IncAllBtnClick(TObject *Sender)
+void __fastcall TDualListDlg::IncAllBtnClick(TObject* Sender)
 {
     DstList->Items->AddStrings(SrcList->Items);
     SrcList->Items->Clear();
@@ -69,7 +69,7 @@ void __fastcall TDualListDlg::IncAllBtnClick(TObject *Sender)
     update_weight_display();
 }
 
-void __fastcall TDualListDlg::ExcAllBtnClick(TObject *Sender)
+void __fastcall TDualListDlg::ExcAllBtnClick(TObject* Sender)
 {
     SrcList->Items->AddStrings(DstList->Items);
     DstList->Items->Clear();
@@ -77,7 +77,7 @@ void __fastcall TDualListDlg::ExcAllBtnClick(TObject *Sender)
     update_weight_display();
 }
 
-void __fastcall TDualListDlg::MoveSelected(TCustomListBox *List, TStrings *Items)
+void __fastcall TDualListDlg::MoveSelected(TCustomListBox* List, TStrings* Items)
 {
     for (int i = List->Items->Count - 1; i >= 0; i--)
     {
@@ -100,7 +100,7 @@ void __fastcall TDualListDlg::SetButtons()
     ExAllBtn->Enabled = (!DstEmpty);
 }
 
-int __fastcall TDualListDlg::GetFirstSelection(TCustomListBox *List)
+int __fastcall TDualListDlg::GetFirstSelection(TCustomListBox* List)
 {
     for (int i = 0; i < List->Items->Count; i++)
     {
@@ -112,7 +112,7 @@ int __fastcall TDualListDlg::GetFirstSelection(TCustomListBox *List)
     return LB_ERR;
 }
 
-void __fastcall TDualListDlg::SetItem(TListBox *List, int Index)
+void __fastcall TDualListDlg::SetItem(TListBox* List, int Index)
 {
     int MaxIndex = List->Items->Count - 1;
     List->SetFocus();
@@ -133,7 +133,7 @@ void __fastcall TDualListDlg::SetItem(TListBox *List, int Index)
     SetButtons();
 }
 
-void __fastcall TDualListDlg::FormShow(TObject *Sender)
+void __fastcall TDualListDlg::FormShow(TObject* Sender)
 {
     SrcList->Items->Clear();
     DstList->Items->Clear();
@@ -146,7 +146,7 @@ void __fastcall TDualListDlg::FormShow(TObject *Sender)
         // Очищаем маркер, чтобы этот блок больше никогда не сработал
         User->UserItems->Clear();
 
-        TStringList *lInvent = new TStringList;
+        TStringList* lInvent = new TStringList;
         String InventPath = ExePath + L"data\\invent.txt";
 
         if (FileExists(InventPath))
@@ -155,7 +155,8 @@ void __fastcall TDualListDlg::FormShow(TObject *Sender)
             for (int i = 0; i < lInvent->Count; i++)
             {
                 String currentLine = lInvent->Strings[i].Trim();
-                if (currentLine.IsEmpty()) continue;
+                if (currentLine.IsEmpty())
+                    continue;
 
                 int lastSpace = currentLine.LastDelimiter(L" ");
                 if (lastSpace > 0)
@@ -200,7 +201,7 @@ void __fastcall TDualListDlg::FormShow(TObject *Sender)
     SetButtons();
 }
 
-void __fastcall TDualListDlg::OKBtnClick(TObject *Sender)
+void __fastcall TDualListDlg::OKBtnClick(TObject* Sender)
 {
     User->UserItems->Clear();
     for (int i = 0; i < SrcList->Items->Count; i++)

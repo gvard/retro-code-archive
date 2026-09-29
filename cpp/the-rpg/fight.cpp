@@ -12,18 +12,18 @@
 
 #pragma resource "*.dfm"
 
-TfrmFight *frmFight;
+TfrmFight* frmFight;
 
 __fastcall TfrmFight::TfrmFight(TComponent* Owner)
     : TForm(Owner)
 {
 }
 
-void __fastcall TfrmFight::FormCreate(TObject *Sender)
+void __fastcall TfrmFight::FormCreate(TObject* Sender)
 {
     int i;
     int hit, mana, apt;
-    TStringList *lWeapon = new TStringList;
+    TStringList* lWeapon = new TStringList;
     lWeapon->LoadFromFile(ExePath + L"data\\weap.txt", TEncoding::UTF8);
 
     grEnemy->Cells[1][0] = "Вид противника";
@@ -42,23 +42,23 @@ void __fastcall TfrmFight::FormCreate(TObject *Sender)
 
         grWeapon->Cells[1][i / 2 + 1] = lWeapon->Strings[i + 1];
         grWeapon->Cells[2][i / 2 + 1] = IntToStr(hit);
-    grWeapon->Cells[3][i / 2 + 1] = IntToStr(mana);
-    grWeapon->Cells[4][i / 2 + 1] = IntToStr(apt);
+        grWeapon->Cells[3][i / 2 + 1] = IntToStr(mana);
+        grWeapon->Cells[4][i / 2 + 1] = IntToStr(apt);
     }
 
     delete lWeapon;
 }
 
-void __fastcall TfrmFight::FormShow(TObject *Sender)
+void __fastcall TfrmFight::FormShow(TObject* Sender)
 {
     AnsiString str;
     int i, j, qid, count, type, h;
     char ch;
     char buf[256];
-    char *tmp = nullptr;
+    char* tmp = nullptr;
 
-    TStringList *lChapter = new TStringList;
-    TStringList *lCrType = new TStringList;
+    TStringList* lChapter = new TStringList;
+    TStringList* lCrType = new TStringList;
     lChapter->LoadFromFile(ExePath + L"data\\chapt.txt", TEncoding::UTF8);
     lCrType->LoadFromFile(ExePath + L"data\\crt.txt", TEncoding::UTF8);
 
@@ -243,7 +243,7 @@ bool TfrmFight::check()
     return false;
 }
 
-void __fastcall TfrmFight::btnAttackClick(TObject *Sender)
+void __fastcall TfrmFight::btnAttackClick(TObject* Sender)
 {
     grEnemy->Cells[3][selEnemy + 1] = grEnemy->Cells[3][selEnemy + 1].ToInt() - grWeapon->Cells[2][selWeapon + 1].ToInt();
     User->man -= grWeapon->Cells[3][selWeapon + 1].ToInt();
@@ -265,7 +265,7 @@ void __fastcall TfrmFight::btnAttackClick(TObject *Sender)
     }
 }
 
-void __fastcall TfrmFight::grEnemySelectCell(TObject *Sender, int ACol, int Row, bool &CanSelect)
+void __fastcall TfrmFight::grEnemySelectCell(TObject* Sender, int ACol, int Row, bool& CanSelect)
 {
     int i;
     for (i = 0; i < grEnemy->RowCount; i++)
@@ -277,7 +277,7 @@ void __fastcall TfrmFight::grEnemySelectCell(TObject *Sender, int ACol, int Row,
     check();
 }
 
-void __fastcall TfrmFight::grWeaponSelectCell(TObject *Sender, int ACol, int Row, bool &CanSelect)
+void __fastcall TfrmFight::grWeaponSelectCell(TObject* Sender, int ACol, int Row, bool& CanSelect)
 {
     int i;
     for (i = 0; i < grWeapon->RowCount; i++)
@@ -289,7 +289,7 @@ void __fastcall TfrmFight::grWeaponSelectCell(TObject *Sender, int ACol, int Row
     check();
 }
 
-void __fastcall TfrmFight::grEnemyKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+void __fastcall TfrmFight::grEnemyKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
 {
     if (Key == VK_RETURN)
     {
@@ -297,7 +297,7 @@ void __fastcall TfrmFight::grEnemyKeyDown(TObject *Sender, WORD &Key, TShiftStat
     }
 }
 
-void __fastcall TfrmFight::grWeaponKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+void __fastcall TfrmFight::grWeaponKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
 {
     if (Key == VK_RETURN)
     {
@@ -305,16 +305,16 @@ void __fastcall TfrmFight::grWeaponKeyDown(TObject *Sender, WORD &Key, TShiftSta
     }
 }
 
-void __fastcall TfrmFight::FormClose(TObject *Sender, TCloseAction &Action)
+void __fastcall TfrmFight::FormClose(TObject* Sender, TCloseAction& Action)
 {
     frmFirst->Show();
 }
-void __fastcall TfrmFight::FormResize(TObject *Sender)
+void __fastcall TfrmFight::FormResize(TObject* Sender)
 {
-	btnAttack->Left = (ClientWidth - btnAttack->Width) / 2;
+    btnAttack->Left = (ClientWidth - btnAttack->Width) / 2;
 }
 
-void __fastcall TfrmFight::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+void __fastcall TfrmFight::FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
 
 {
     if (frmFirst != nullptr && frmFirst->ActionList1 != nullptr)
