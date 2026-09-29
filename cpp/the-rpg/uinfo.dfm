@@ -14,8 +14,6 @@ object frmUInfo: TfrmUInfo
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
-  OnClose = frmUInfoClose
-  OnDestroy = FormDestroy
   OnShow = FormShow
   PixelsPerInch = 116
   TextHeight = 16

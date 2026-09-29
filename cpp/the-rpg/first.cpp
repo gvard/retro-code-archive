@@ -293,19 +293,24 @@ __fastcall TfrmFirst::~TfrmFirst()
     delete User;
 }
 
-void __fastcall TfrmFirst::NewClick(TObject* Sender)
+void __fastcall TfrmFirst::NewClick(TObject* /*Sender*/)
 {
     User->Clear();
-    frmFirst->Hide();
 
-    if (frmUInfo != nullptr)
+    auto info_form = std::make_unique<TfrmUInfo>(this);
+
+    if (info_form->ShowModal() == mrOk)
     {
-        delete frmUInfo;
-        frmUInfo = nullptr;
-    }
+        frmFirst->Hide();
 
-    Application->CreateForm(__classid(TfrmUInfo), &frmUInfo);
-    frmUInfo->Show();
+        if (frmChapt == nullptr)
+        {
+            Application->CreateForm(__classid(TfrmChapt), &frmChapt);
+        }
+
+        frmChapt->Show();
+        frmChapt->start_character_test();
+    }
 }
 
 void __fastcall TfrmFirst::LoadClick(TObject* Sender)

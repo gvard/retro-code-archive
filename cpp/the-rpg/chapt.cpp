@@ -20,6 +20,7 @@ __fastcall TfrmChapt::TfrmChapt(TComponent* Owner)
     save = new TStringList;
     chapter = new TStringList;
     hasUnsavedChanges = false;
+    is_test_mode = false;
 }
 
 __fastcall TfrmChapt::~TfrmChapt()
@@ -45,6 +46,60 @@ void __fastcall TfrmChapt::ListBox1DblClick(TObject* Sender)
 
 void TfrmChapt::LoadNext(int qid)
 {
+    if (this->is_test_mode)
+    {
+        Memo1->Lines->Clear();
+        ListBox1->Items->Clear();
+
+        if (!((test_qptr < chapter->Count) && (chapter->Strings[test_qptr].Length() > 0)))
+        {
+            test_qptr++;
+            return;
+        }
+
+        wchar_t ch = chapter->Strings[test_qptr][1];
+        if (ch == L'{')
+        {
+            while ((++test_qptr < chapter->Count) && (chapter->Strings[test_qptr].Length() > 0))
+            {
+                if (chapter->Strings[test_qptr][1] == L'}')
+                {
+                    break;
+                }
+                Memo1->Lines->Add(chapter->Strings[test_qptr]);
+            }
+        }
+        else
+        {
+            Memo1->Lines->Add(chapter->Strings[test_qptr]);
+        }
+
+        aptr = test_qptr + 1;
+        while ((++test_qptr < chapter->Count) && (chapter->Strings[test_qptr].Length() > 0))
+        {
+            String str = chapter->Strings[test_qptr];
+            int istr, idex, imag;
+            swscanf(str.c_str(), L"%d %d %d", &istr, &idex, &imag);
+            str = str.Trim();
+
+            // Выделяем текст ответа, идущий после трех чисел модификаторов
+            wchar_t buf[255];
+            wcscpy(buf, str.c_str());
+            wchar_t* tmp = nullptr;
+            for (size_t i = 0, j = 0; i < wcslen(buf); ++i)
+            {
+                if ((buf[i] == L' ') && (j < 3))
+                {
+                    tmp = &buf[i + 1];
+                    j++;
+                }
+            }
+            ListBox1->Items->Add(tmp);
+        }
+        test_qptr++;
+        return;
+    }
+
     // Глава изменилась — сбрасываем состояние вещей на земле
     if (this->currentQid != qid && User->EnvironmentItems != nullptr)
     {
@@ -171,20 +226,68 @@ void TfrmChapt::LoadNext(int qid)
     }
 }
 
-void __fastcall TfrmChapt::Button1Click(TObject* Sender)
+void __fastcall TfrmChapt::Button1Click(TObject* /*Sender*/)
 {
-    int jump;
-    for (int i = 0; i < ListBox1->Items->Count; i++)
+    int selected_index = -1;
+    for (int i = 0; i < ListBox1->Items->Count; ++i)
     {
         if (ListBox1->Selected[i])
         {
-            swscanf(chapter->Strings[aptr + i].c_str(), L"%d ", &jump);
-            User->Refresh();
-            this->hasUnsavedChanges = true;
-            LoadNext(jump);
-            return;
+            selected_index = i;
+            break;
         }
     }
+
+    if (selected_index == -1)
+        return;
+
+    // Режим 1: обработка внутри теста создания персонажа
+    if (this->is_test_mode)
+    {
+        int istr = 0, idex = 0, imag = 0;
+
+        // Читаем модификаторы параметров из оригинальной строки
+        swscanf(chapter->Strings[aptr + selected_index].c_str(), L"%d %d %d", &istr, &idex, &imag);
+        User->str += istr;
+        User->dex += idex;
+        User->mag += imag;
+
+        // Проверяем: закончился ли файл теста?
+        if (aptr + ListBox1->Items->Count >= chapter->Count)
+        {
+            // Тест завершен, фиксируем производные характеристики персонажа
+            User->maxWeight = static_cast<int>(std::lround(User->str * 7.5));
+            User->s = User->GetMaxStamina();
+
+            // Показываем модальное окно характеристик
+            auto stats_form = std::make_unique<TfrmUType>(this);
+            stats_form->ShowModal();
+
+            // Выходим из режима теста и переключаемся на сюжет игры
+            this->is_test_mode = false;
+
+            this->Menu = this->MainMenu1;
+
+            // Загружаем основной файл сюжета и сбрасываем флаг dirty-состояния
+            chapter->LoadFromFile(ExePath + L"data\\chapt.txt", TEncoding::UTF8);
+            this->ResetUnsavedChanges();
+
+            // Переходим к Главе 1 сюжета
+            this->LoadNext(1);
+            return;
+        }
+
+        // Если тест не кончился, парсим следующий вопрос
+        this->LoadNext(0);
+        return;
+    }
+
+    // Режим 2: стандартный игровой процесс
+    int jump = 0;
+    swscanf(chapter->Strings[aptr + selected_index].c_str(), L"%d ", &jump);
+    User->Refresh();
+    this->hasUnsavedChanges = true;
+    this->LoadNext(jump);
 }
 
 void __fastcall TfrmChapt::Help1Click(TObject* Sender)
@@ -206,7 +309,7 @@ void __fastcall TfrmChapt::ListBox1KeyDown(TObject* Sender, WORD& Key, TShiftSta
     }
 }
 
-void __fastcall TfrmChapt::frmChaptCloseQuery(TObject* Sender, bool& CanClose)
+void __fastcall TfrmChapt::frmChaptCloseQuery(TObject* /*Sender*/, bool& CanClose)
 {
     if (!this->hasUnsavedChanges)
     {
@@ -313,4 +416,19 @@ void __fastcall TfrmChapt::FormKeyDown(TObject* Sender, WORD& Key, TShiftState S
             Key = 0;
         }
     }
+}
+
+void TfrmChapt::start_character_test()
+{
+    this->is_test_mode = true;
+    this->test_qptr = 0;
+    this->hasUnsavedChanges = false;
+
+    this->Menu = nullptr;
+
+    // Загружаем файл вступительного теста вместо основного сюжета
+    chapter->LoadFromFile(ExePath + L"data\\test.txt", TEncoding::UTF8);
+
+    // Запускаем итерацию парсинга теста
+    this->LoadNext(0);
 }

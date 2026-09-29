@@ -47,12 +47,15 @@ private:
     int aptr;
     int qid;
     int currentQid;
+    bool is_test_mode = false;
+    int test_qptr = 0;
 
 public:
     __fastcall TfrmChapt(TComponent* Owner);
     __fastcall virtual ~TfrmChapt();
 
     void LoadNext(int qid);
+    void start_character_test();
     bool hasUnsavedChanges = false;
     void ResetUnsavedChanges() { hasUnsavedChanges = false; }
 };
