@@ -271,23 +271,15 @@ void __fastcall TfrmChapt::SaveClick(TObject* Sender)
 void __fastcall TfrmChapt::InvClick(TObject* /*Sender*/)
 {
     auto inventory_dialog = std::make_unique<TDualListDlg>(this);
-    if (inventory_dialog->ShowModal() == mrOk)
-    {
-        if (frmUType != nullptr && frmUType->Visible)
-        {
-            frmUType->UpdateStaminaDisplay();
-        }
-    }
+    inventory_dialog->ShowModal();
 }
 
-void __fastcall TfrmChapt::ustype1Click(TObject* Sender)
+void __fastcall TfrmChapt::ustype1Click(TObject* /*Sender*/)
 {
-    if (frmUType == nullptr)
-    {
-        Application->CreateForm(__classid(TfrmUType), &frmUType);
-    }
-    frmUType->Show();
+    auto stats_form = std::make_unique<TfrmUType>(this);
+    stats_form->ShowModal();
 }
+
 void __fastcall TfrmChapt::FormResize(TObject* Sender)
 {
     Button1->Left = (ClientWidth - Button1->Width) / 2;

@@ -3,14 +3,12 @@
 
 #pragma resource "*.dfm"
 
-TfrmUType *frmUType;
-
 __fastcall TfrmUType::TfrmUType(TComponent* AOwner)
     : TForm(AOwner)
 {
 }
 
-void __fastcall TfrmUType::frmShow(TObject *Sender)
+void __fastcall TfrmUType::frmShow(TObject* /*Sender*/)
 {
     Lbl1->Caption = L"Имя: " + User->Name;
     Lbl2->Caption = L"Раса: " + User->CrType;
@@ -21,25 +19,21 @@ void __fastcall TfrmUType::frmShow(TObject *Sender)
     Lbl7->Caption = L"Магия: " + IntToStr(User->mag);
     Lbl8->Caption = L"Здоровье: " + IntToStr(User->hlth);
     Lbl9->Caption = L"Мана: " + IntToStr(User->man);
-    UpdateStaminaDisplay();
+
+    this->update_stamina_display();
 }
 
-void __fastcall TfrmUType::OKBtnClick(TObject *Sender)
+void __fastcall TfrmUType::OKBtnClick(TObject* /*Sender*/)
 {
-    this->Close();
+    this->ModalResult = mrOk;
 }
 
-void __fastcall TfrmUType::frmDeactiv(TObject *Sender)
+void TfrmUType::update_stamina_display()
 {
-    this->Hide();
-}
+    const int max_stamina = User->GetMaxStamina();
+    lblStamina->Caption = L"Выносливость: " + IntToStr(User->s) + L" / " + IntToStr(max_stamina);
 
-void TfrmUType::UpdateStaminaDisplay()
-{
-    int maxStamina = User->GetMaxStamina();
-    lblStamina->Caption = L"Выносливость: " + IntToStr(User->s) + L" / " + IntToStr(maxStamina);
-
-    if (User->s < maxStamina)
+    if (User->s < max_stamina)
     {
         lblStamina->Font->Color = clRed;
     }

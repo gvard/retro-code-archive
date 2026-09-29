@@ -9,7 +9,6 @@ object frmUType: TfrmUType
   ParentFont = True
   OldCreateOrder = True
   Position = poScreenCenter
-  OnDeactivate = frmDeactiv
   OnShow = frmShow
   PixelsPerInch = 116
   TextHeight = 13

@@ -1,14 +1,16 @@
+#include <Winapi.Windows.hpp>
 #include <cstdio>
 #include <cwchar>
-#include <Winapi.Windows.hpp>
+#include <memory>
 
 #include "utest.h"
+#include "utype.h"
 #include "first.h"
 #include "chapt.h"
 
 #pragma resource "*.dfm"
 
-TfrmUTest *frmUTest;
+TfrmUTest* frmUTest;
 
 __fastcall TfrmUTest::TfrmUTest(TComponent* Owner)
     : TForm(Owner)
@@ -25,9 +27,8 @@ __fastcall TfrmUTest::~TfrmUTest()
 void TfrmUTest::ProcessSelection()
 {
     int istr = 0, idex = 0, imag = 0;
-    wchar_t buf[255];
 
-    for (int i = 0; i < ListBox1->Items->Count; i++)
+    for (int i = 0; i < ListBox1->Items->Count; ++i)
     {
         if (ListBox1->Selected[i])
         {
@@ -38,10 +39,19 @@ void TfrmUTest::ProcessSelection()
 
             if (aptr + ListBox1->Items->Count >= test->Count)
             {
-                swprintf(buf, 255, L"Сила = %d\nЛовкость = %d\nМагия = %d", User->str, User->dex, User->mag);
-                Application->MessageBox(buf, L"Ваши умения", MB_OK);
-                frmChapt->LoadNext(1);
-                frmChapt->Show();
+                User->maxWeight = static_cast<int>(std::lround(User->str * 7.5));
+                User->s = User->GetMaxStamina();
+
+                auto stats_form = std::make_unique<TfrmUType>(this);
+                stats_form->ShowModal();
+
+                if (frmChapt != nullptr)
+                {
+                    frmChapt->LoadNext(1);
+                    frmChapt->Show();
+                    frmChapt->ResetUnsavedChanges();
+                }
+
                 this->Close();
                 return;
             }
@@ -52,23 +62,23 @@ void TfrmUTest::ProcessSelection()
     }
 }
 
-void __fastcall TfrmUTest::Button1Click(TObject *Sender)
+void __fastcall TfrmUTest::Button1Click(TObject* Sender)
 {
     ProcessSelection();
 }
 
-void __fastcall TfrmUTest::FormCreate(TObject *Sender)
+void __fastcall TfrmUTest::FormCreate(TObject* Sender)
 {
     qptr = 0;
     test->LoadFromFile(ExePath + L"data\\test.txt", TEncoding::UTF8);
 }
 
-void __fastcall TfrmUTest::FormShow(TObject *Sender)
+void __fastcall TfrmUTest::FormShow(TObject* Sender)
 {
     LoadNext();
 }
 
-void __fastcall TfrmUTest::FormClose(TObject *Sender, TCloseAction &Action)
+void __fastcall TfrmUTest::FormClose(TObject* Sender, TCloseAction& Action)
 {
     User->maxWeight = static_cast<int>(std::lround(User->str * 7.5));
     User->s = User->GetMaxStamina();
@@ -104,7 +114,7 @@ void TfrmUTest::LoadNext()
 {
     wchar_t ch;
     wchar_t buf[255];
-    wchar_t *tmp = nullptr;
+    wchar_t* tmp = nullptr;
     int istr, idex, imag;
     int i, j;
     String str;
@@ -157,19 +167,18 @@ void TfrmUTest::LoadNext()
     qptr++;
 }
 
-void __fastcall TfrmUTest::ListBox1KeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+void __fastcall TfrmUTest::ListBox1KeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
 {
     if (Key == VK_RETURN)
     {
         ProcessSelection();
     }
 }
-void __fastcall TfrmUTest::ListBox1DblClick(TObject *Sender)
+void __fastcall TfrmUTest::ListBox1DblClick(TObject* Sender)
 {
-    // При двойном клике по элементу списка запускаем ту же логику, что и при нажатии Enter/кнопки OK
     ProcessSelection();
 }
-void __fastcall TfrmUTest::FormDestroy(TObject *Sender)
+void __fastcall TfrmUTest::FormDestroy(TObject* Sender)
 {
     frmUTest = nullptr;
 }

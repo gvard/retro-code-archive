@@ -30,11 +30,6 @@ void TUser::Clear()
         frmChapt->Hide();
     }
 
-    if (frmUType != nullptr && frmUType->Visible)
-    {
-        frmUType->Hide();
-    }
-
     Name = L"";
     CrType = L"";
     SexType = L"";
@@ -194,11 +189,6 @@ bool TUser::LoadGame(const String& AFileName)
 
             // Инвентарь для текущей сессии официально и успешно восстановлен
             this->isInventoryLoaded = true;
-
-            if (frmUType != nullptr && frmUType->Visible)
-            {
-                frmUType->UpdateStaminaDisplay();
-            }
 
             if (frmChapt != nullptr)
             {
