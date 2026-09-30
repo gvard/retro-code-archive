@@ -12,7 +12,7 @@ __fastcall TfrmUInfo::TfrmUInfo(TComponent* Owner)
 {
 }
 
-TRaceData TfrmUInfo::parse_race_line(const String& ALine)
+auto TfrmUInfo::parse_race_line(const String& ALine) -> TRaceData
 {
     TRaceData data;
     data.Name = L"";
@@ -77,7 +77,7 @@ void __fastcall TfrmUInfo::Button1Click(TObject* /*Sender*/)
     User->CrType = ComboBox1->Text;
     User->SexType = ComboBox2->Text;
 
-    TStringList* lCrType = new TStringList;
+    auto* lCrType = new TStringList;
     String CrtPath = ExePath + L"data\\crt.txt";
 
     if (FileExists(CrtPath))
@@ -127,7 +127,7 @@ void __fastcall TfrmUInfo::FormShow(TObject* /*Sender*/)
 {
     ComboBox1->Items->Clear();
 
-    TStringList* lCrType = new TStringList;
+    auto* lCrType = new TStringList;
     String CrtPath = ExePath + L"data\\crt.txt";
 
     if (FileExists(CrtPath))

@@ -36,13 +36,13 @@ private:
     void updateApt();
     void update();
     void opponentAttack();
-    bool check();
+    auto check() -> bool;
 
 public:
     int qptr;
 
-    __fastcall TfrmFight(TComponent* Owner);
-    __fastcall virtual ~TfrmFight() {}
+    __fastcall TfrmFight(TComponent* Owner) override;
+    __fastcall ~TfrmFight() = default;
 };
 
 extern PACKAGE TfrmFight* frmFight;

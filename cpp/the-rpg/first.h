@@ -41,8 +41,8 @@ private:
     TStringList* save;
 
 public:
-    __fastcall TfrmFirst(TComponent* Owner);
-    __fastcall virtual ~TfrmFirst();
+    __fastcall TfrmFirst(TComponent* Owner) override;
+    __fastcall ~TfrmFirst();
 };
 
 class TUser
@@ -50,10 +50,10 @@ class TUser
 public:
     void Clear();
     void Refresh();
-    bool LoadGame(const String& AFileName);
-    bool SaveGame(const String& AFileName, int ACurrentQid);
+    auto LoadGame(const String& AFileName) -> bool;
+    auto SaveGame(const String& AFileName, int ACurrentQid) -> bool;
 
-    int GetMaxStamina();
+    auto GetMaxStamina() -> int;
     void RecalculateStamina(int totalWeight);
 
     TStringList* UserItems;

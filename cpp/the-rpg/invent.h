@@ -26,7 +26,7 @@ __published:
     void __fastcall ExcAllBtnClick(TObject* Sender);
     void __fastcall MoveSelected(TCustomListBox* List, TStrings* Items);
     void __fastcall SetItem(TListBox* List, int Index);
-    int __fastcall GetFirstSelection(TCustomListBox* List);
+    auto __fastcall GetFirstSelection(TCustomListBox* List) -> int;
     void __fastcall SetButtons();
     void __fastcall FormShow(TObject* Sender);
     void __fastcall OKBtnClick(TObject* Sender);
@@ -37,7 +37,7 @@ private:
 public:
     explicit __fastcall TDualListDlg(TComponent* owner) override;
 
-    virtual __fastcall ~TDualListDlg() override = default;
+    __fastcall ~TDualListDlg() override = default;
 };
 
 #endif

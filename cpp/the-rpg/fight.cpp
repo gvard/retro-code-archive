@@ -23,7 +23,7 @@ void __fastcall TfrmFight::FormCreate(TObject* Sender)
 {
     int i;
     int hit, mana, apt;
-    TStringList* lWeapon = new TStringList;
+    auto* lWeapon = new TStringList;
     lWeapon->LoadFromFile(ExePath + L"data\\weap.txt", TEncoding::UTF8);
 
     grEnemy->Cells[1][0] = "Вид противника";
@@ -57,8 +57,8 @@ void __fastcall TfrmFight::FormShow(TObject* Sender)
     char buf[256];
     char* tmp = nullptr;
 
-    TStringList* lChapter = new TStringList;
-    TStringList* lCrType = new TStringList;
+    auto* lChapter = new TStringList;
+    auto* lCrType = new TStringList;
     lChapter->LoadFromFile(ExePath + L"data\\chapt.txt", TEncoding::UTF8);
     lCrType->LoadFromFile(ExePath + L"data\\crt.txt", TEncoding::UTF8);
 
@@ -191,7 +191,7 @@ void TfrmFight::opponentAttack()
     this->update();
 }
 
-bool TfrmFight::check()
+auto TfrmFight::check() -> bool
 {
     int i;
     bool endFight = true;

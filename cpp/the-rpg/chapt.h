@@ -51,8 +51,8 @@ private:
     int test_qptr = 0;
 
 public:
-    __fastcall TfrmChapt(TComponent* Owner);
-    __fastcall virtual ~TfrmChapt();
+    __fastcall TfrmChapt(TComponent* Owner) override;
+    __fastcall ~TfrmChapt();
 
     void LoadNext(int qid);
     void start_character_test();

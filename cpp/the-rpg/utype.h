@@ -29,7 +29,7 @@ private:
 
 public:
     explicit __fastcall TfrmUType(TComponent* AOwner) override;
-    virtual __fastcall ~TfrmUType() override = default;
+    __fastcall ~TfrmUType() override = default;
 };
 
 #endif

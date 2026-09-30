@@ -72,7 +72,7 @@ void TUser::Refresh()
         s = maxStamina;
 }
 
-int TUser::GetMaxStamina()
+auto TUser::GetMaxStamina() -> int
 {
     // [Core Mechanic] Returns maximum stamina based on Strength and Dexterity
     return 50 + (str * 4) + (dex * 2);
@@ -92,9 +92,9 @@ void TUser::RecalculateStamina(int totalWeight)
     }
 }
 
-bool TUser::LoadGame(const String& AFileName)
+auto TUser::LoadGame(const String& AFileName) -> bool
 {
-    TStringList* saveList = new TStringList;
+    auto* saveList = new TStringList;
     bool success = false;
 
     try
@@ -221,9 +221,9 @@ bool TUser::LoadGame(const String& AFileName)
     return success;
 }
 
-bool TUser::SaveGame(const String& AFileName, int ACurrentQid)
+auto TUser::SaveGame(const String& AFileName, int ACurrentQid) -> bool
 {
-    TStringList* saveList = new TStringList;
+    auto* saveList = new TStringList;
     bool success = false;
 
     try

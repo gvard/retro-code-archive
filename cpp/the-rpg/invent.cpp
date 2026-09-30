@@ -100,7 +100,7 @@ void __fastcall TDualListDlg::SetButtons()
     ExAllBtn->Enabled = (!DstEmpty);
 }
 
-int __fastcall TDualListDlg::GetFirstSelection(TCustomListBox* List)
+auto __fastcall TDualListDlg::GetFirstSelection(TCustomListBox* List) -> int
 {
     for (int i = 0; i < List->Items->Count; i++)
     {
@@ -146,7 +146,7 @@ void __fastcall TDualListDlg::FormShow(TObject* Sender)
         // Очищаем маркер, чтобы этот блок больше никогда не сработал
         User->UserItems->Clear();
 
-        TStringList* lInvent = new TStringList;
+        auto* lInvent = new TStringList;
         String InventPath = ExePath + L"data\\invent.txt";
 
         if (FileExists(InventPath))

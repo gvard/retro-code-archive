@@ -26,7 +26,7 @@ private:
 
 public:
     __fastcall TAboutBox(TComponent* AOwner) override;
-    virtual __fastcall ~TAboutBox() = default;
+    __fastcall ~TAboutBox() = default;
 };
 
 #endif

@@ -29,11 +29,11 @@ __published:
     void __fastcall FormShow(TObject* Sender);
 
 private:
-    TRaceData parse_race_line(const String& ALine);
+    auto parse_race_line(const String& ALine) -> TRaceData;
 
 public:
     explicit __fastcall TfrmUInfo(TComponent* Owner) override;
-    virtual __fastcall ~TfrmUInfo() override = default;
+    __fastcall ~TfrmUInfo() override = default;
 };
 
 #endif
