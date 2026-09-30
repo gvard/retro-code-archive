@@ -19,10 +19,9 @@ __fastcall TfrmFight::TfrmFight(TComponent* Owner)
 {
 }
 
-void __fastcall TfrmFight::FormCreate(TObject* Sender)
+void __fastcall TfrmFight::FormCreate(TObject* /*Sender*/)
 {
-    int i;
-    int hit, mana, apt;
+    int hit, mana;
     auto* lWeapon = new TStringList;
     lWeapon->LoadFromFile(ExePath + L"data\\weap.txt", TEncoding::UTF8);
 
@@ -35,21 +34,22 @@ void __fastcall TfrmFight::FormCreate(TObject* Sender)
     grWeapon->Cells[3][0] = "Мана";
     grWeapon->Cells[4][0] = "ActPts";
 
-    grWeapon->RowCount = std::max(2, lWeapon->Count / 2 + 1);
-    for (i = 0; i < lWeapon->Count; i += 2)
+    const int weapon_count = static_cast<int>(lWeapon->Count);
+    grWeapon->RowCount = std::max(2, weapon_count / 2 + 1);
+    for (int idx = 0; idx < weapon_count; idx += 2)
     {
-        swscanf(lWeapon->Strings[i].c_str(), L"%d%d%d", &hit, &mana, &apt);
+        swscanf(lWeapon->Strings[idx].c_str(), L"%d%d%d", &hit, &mana, &apt);
 
-        grWeapon->Cells[1][i / 2 + 1] = lWeapon->Strings[i + 1];
-        grWeapon->Cells[2][i / 2 + 1] = IntToStr(hit);
-        grWeapon->Cells[3][i / 2 + 1] = IntToStr(mana);
-        grWeapon->Cells[4][i / 2 + 1] = IntToStr(apt);
+        grWeapon->Cells[1][idx / 2 + 1] = lWeapon->Strings[idx + 1];
+        grWeapon->Cells[2][idx / 2 + 1] = IntToStr(hit);
+        grWeapon->Cells[3][idx / 2 + 1] = IntToStr(mana);
+        grWeapon->Cells[4][idx / 2 + 1] = IntToStr(apt);
     }
 
     delete lWeapon;
 }
 
-void __fastcall TfrmFight::FormShow(TObject* Sender)
+void __fastcall TfrmFight::FormShow(TObject* /*Sender*/)
 {
     AnsiString str;
     int i, j, qid, count, type, h;
@@ -72,7 +72,7 @@ void __fastcall TfrmFight::FormShow(TObject* Sender)
     strcpy(buf, str.c_str());
     sscanf(buf, "%d%c %d", &qid, &ch, &jump);
 
-    for (i = 0, j = 0; i < strlen(buf); i++)
+    for (i = 0, j = 0; i < strlen(buf); ++i)
     {
         if (buf[i] == ' ')
         {
@@ -96,7 +96,7 @@ void __fastcall TfrmFight::FormShow(TObject* Sender)
         }
 
         sscanf(buf, "%d %d", &type, &h);
-        for (i = 0, j = 0; i < strlen(buf); i++)
+        for (i = 0, j = 0; i < strlen(buf); ++i)
         {
             if (buf[i] == ' ')
             {
@@ -117,7 +117,7 @@ void __fastcall TfrmFight::FormShow(TObject* Sender)
     }
 
     grEnemy->RowCount = count + 1;
-    for (i = 1; i < grWeapon->RowCount; i++)
+    for (i = 1; i < grWeapon->RowCount; ++i)
     {
         grWeapon->Cells[0][i] = " ";
     }
@@ -166,7 +166,7 @@ void TfrmFight::opponentAttack()
     }
 
     hit = 0;
-    for (i = 1; i < grEnemy->RowCount; i++)
+    for (i = 1; i < grEnemy->RowCount; ++i)
     {
         if (grEnemy->Cells[3][i].ToInt() > 0)
         {
@@ -212,7 +212,7 @@ auto TfrmFight::check() -> bool
         btnAttack->Enabled = true;
     }
 
-    for (i = 1; i < grEnemy->RowCount; i++)
+    for (i = 1; i < grEnemy->RowCount; ++i)
     {
         if (grEnemy->Cells[3][i].ToInt() > 0)
         {
@@ -223,7 +223,7 @@ auto TfrmFight::check() -> bool
     if (User->hlth <= 0)
     {
         Application->MessageBox(L"Вы потерпели поражение в бою!", frmFight->Caption.c_str(), MB_OK | MB_ICONHAND);
-        PlaySound((ExePath + L"sound\\death.wav").c_str(), NULL, SND_ASYNC);
+        PlaySound((ExePath + L"sound\\death.wav").c_str(), nullptr, SND_ASYNC);
 
         frmFight->Hide();
         frmFirst->Show();
@@ -243,7 +243,7 @@ auto TfrmFight::check() -> bool
     return false;
 }
 
-void __fastcall TfrmFight::btnAttackClick(TObject* Sender)
+void __fastcall TfrmFight::btnAttackClick(TObject* /*Sender*/)
 {
     grEnemy->Cells[3][selEnemy + 1] = grEnemy->Cells[3][selEnemy + 1].ToInt() - grWeapon->Cells[2][selWeapon + 1].ToInt();
     User->man -= grWeapon->Cells[3][selWeapon + 1].ToInt();
@@ -265,10 +265,10 @@ void __fastcall TfrmFight::btnAttackClick(TObject* Sender)
     }
 }
 
-void __fastcall TfrmFight::grEnemySelectCell(TObject* Sender, int ACol, int Row, bool& CanSelect)
+void __fastcall TfrmFight::grEnemySelectCell(TObject* /*Sender*/, int /*ACol*/, int Row, bool& /*CanSelect*/)
 {
     int i;
-    for (i = 0; i < grEnemy->RowCount; i++)
+    for (i = 0; i < grEnemy->RowCount; ++i)
     {
         grEnemy->Cells[0][i] = "";
     }
@@ -277,10 +277,10 @@ void __fastcall TfrmFight::grEnemySelectCell(TObject* Sender, int ACol, int Row,
     check();
 }
 
-void __fastcall TfrmFight::grWeaponSelectCell(TObject* Sender, int ACol, int Row, bool& CanSelect)
+void __fastcall TfrmFight::grWeaponSelectCell(TObject* /*Sender*/, int /*ACol*/, int Row, bool& /*CanSelect*/)
 {
     int i;
-    for (i = 0; i < grWeapon->RowCount; i++)
+    for (i = 0; i < grWeapon->RowCount; ++i)
     {
         grWeapon->Cells[0][i] = "";
     }
@@ -289,7 +289,7 @@ void __fastcall TfrmFight::grWeaponSelectCell(TObject* Sender, int ACol, int Row
     check();
 }
 
-void __fastcall TfrmFight::grEnemyKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
+void __fastcall TfrmFight::grEnemyKeyDown(TObject* /*Sender*/, WORD& Key, TShiftState /*Shift*/)
 {
     if (Key == VK_RETURN)
     {
@@ -297,7 +297,7 @@ void __fastcall TfrmFight::grEnemyKeyDown(TObject* Sender, WORD& Key, TShiftStat
     }
 }
 
-void __fastcall TfrmFight::grWeaponKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
+void __fastcall TfrmFight::grWeaponKeyDown(TObject* /*Sender*/, WORD& Key, TShiftState /*Shift*/)
 {
     if (Key == VK_RETURN)
     {
@@ -305,17 +305,16 @@ void __fastcall TfrmFight::grWeaponKeyDown(TObject* Sender, WORD& Key, TShiftSta
     }
 }
 
-void __fastcall TfrmFight::FormClose(TObject* Sender, TCloseAction& Action)
+void __fastcall TfrmFight::FormClose(TObject* /*Sender*/, TCloseAction& Action)
 {
     frmFirst->Show();
 }
-void __fastcall TfrmFight::FormResize(TObject* Sender)
+void __fastcall TfrmFight::FormResize(TObject* /*Sender*/)
 {
     btnAttack->Left = (ClientWidth - btnAttack->Width) / 2;
 }
 
-void __fastcall TfrmFight::FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
-
+void __fastcall TfrmFight::FormKeyDown(TObject* /*Sender*/, WORD& Key, TShiftState /*Shift*/)
 {
     if (frmFirst != nullptr && frmFirst->ActionList1 != nullptr)
     {

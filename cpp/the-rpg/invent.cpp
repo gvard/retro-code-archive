@@ -53,7 +53,7 @@ void __fastcall TDualListDlg::IncludeBtnClick(TObject* /*Sender*/)
     this->update_weight_display();
 }
 
-void __fastcall TDualListDlg::ExcludeBtnClick(TObject* Sender)
+void __fastcall TDualListDlg::ExcludeBtnClick(TObject* /*Sender*/)
 {
     int Index = GetFirstSelection(DstList);
     MoveSelected(DstList, SrcList->Items);
@@ -61,7 +61,7 @@ void __fastcall TDualListDlg::ExcludeBtnClick(TObject* Sender)
     update_weight_display();
 }
 
-void __fastcall TDualListDlg::IncAllBtnClick(TObject* Sender)
+void __fastcall TDualListDlg::IncAllBtnClick(TObject* /*Sender*/)
 {
     DstList->Items->AddStrings(SrcList->Items);
     SrcList->Items->Clear();
@@ -69,7 +69,7 @@ void __fastcall TDualListDlg::IncAllBtnClick(TObject* Sender)
     update_weight_display();
 }
 
-void __fastcall TDualListDlg::ExcAllBtnClick(TObject* Sender)
+void __fastcall TDualListDlg::ExcAllBtnClick(TObject* /*Sender*/)
 {
     SrcList->Items->AddStrings(DstList->Items);
     DstList->Items->Clear();
@@ -133,7 +133,7 @@ void __fastcall TDualListDlg::SetItem(TListBox* List, int Index)
     SetButtons();
 }
 
-void __fastcall TDualListDlg::FormShow(TObject* Sender)
+void __fastcall TDualListDlg::FormShow(TObject* /*Sender*/)
 {
     SrcList->Items->Clear();
     DstList->Items->Clear();
@@ -201,7 +201,7 @@ void __fastcall TDualListDlg::FormShow(TObject* Sender)
     SetButtons();
 }
 
-void __fastcall TDualListDlg::OKBtnClick(TObject* Sender)
+void __fastcall TDualListDlg::OKBtnClick(TObject* /*Sender*/)
 {
     User->UserItems->Clear();
     for (int i = 0; i < SrcList->Items->Count; i++)

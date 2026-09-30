@@ -313,7 +313,7 @@ void __fastcall TfrmFirst::NewClick(TObject* /*Sender*/)
     }
 }
 
-void __fastcall TfrmFirst::LoadClick(TObject* Sender)
+void __fastcall TfrmFirst::LoadClick(TObject* /*Sender*/)
 {
     OpenDialog1->FileName = L"";
     OpenDialog1->InitialDir = ExePath;
@@ -328,17 +328,17 @@ void __fastcall TfrmFirst::LoadClick(TObject* Sender)
     }
 }
 
-void __fastcall TfrmFirst::frmFirstCreate(TObject* Sender)
+void __fastcall TfrmFirst::frmFirstCreate(TObject* /*Sender*/)
 {
     Label2->Caption = L"Version " + APP_VERSION;
 }
 
-void __fastcall TfrmFirst::ExitClick(TObject* Sender)
+void __fastcall TfrmFirst::ExitClick(TObject* /*Sender*/)
 {
     this->Close();
 }
 
-void __fastcall TfrmFirst::AboutClick(TObject* Sender)
+void __fastcall TfrmFirst::AboutClick(TObject* /*Sender*/)
 {
     auto temporaryAbout = std::make_unique<TAboutBox>(nullptr);
     temporaryAbout->ShowModal();

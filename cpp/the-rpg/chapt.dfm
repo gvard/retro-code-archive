@@ -2,8 +2,8 @@ object frmChapt: TfrmChapt
   Left = 230
   Top = 285
   Caption = 'The RPG - Chapter'
-  ClientHeight = 250
-  ClientWidth = 434
+  ClientHeight = 296
+  ClientWidth = 438
   Color = clBtnFace
   Constraints.MinHeight = 260
   Constraints.MinWidth = 390
@@ -21,15 +21,15 @@ object frmChapt: TfrmChapt
   OnKeyDown = FormKeyDown
   OnResize = FormResize
   DesignSize = (
-    434
-    250)
+    438
+    296)
   PixelsPerInch = 96
   TextHeight = 13
   object Memo1: TMemo
     Left = 6
     Top = 0
-    Width = 423
-    Height = 136
+    Width = 427
+    Height = 182
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -49,8 +49,8 @@ object frmChapt: TfrmChapt
   end
   object ListBox1: TListBox
     Left = 6
-    Top = 142
-    Width = 423
+    Top = 188
+    Width = 427
     Height = 74
     Align = alCustom
     Anchors = [akLeft, akRight, akBottom]
@@ -65,8 +65,8 @@ object frmChapt: TfrmChapt
     OnKeyDown = ListBox1KeyDown
   end
   object Button1: TButton
-    Left = 170
-    Top = 222
+    Left = 172
+    Top = 268
     Width = 97
     Height = 25
     Anchors = [akBottom]

@@ -1,4 +1,4 @@
-#include <Winapi.Mmsystem.hpp>
+#include <Winapi.MMSystem.hpp>
 #include <string_view>
 #include <memory>
 #include <cstdio>
@@ -29,12 +29,12 @@ __fastcall TfrmChapt::~TfrmChapt()
     delete chapter;
 }
 
-void __fastcall TfrmChapt::FormCreate(TObject* Sender)
+void __fastcall TfrmChapt::FormCreate(TObject* /*Sender*/)
 {
     chapter->LoadFromFile(ExePath + L"data\\chapt.txt", TEncoding::UTF8);
 }
 
-void __fastcall TfrmChapt::ExitClick(TObject* Sender)
+void __fastcall TfrmChapt::ExitClick(TObject* /*Sender*/)
 {
     frmChapt->Close();
 }
@@ -44,7 +44,7 @@ void __fastcall TfrmChapt::ListBox1DblClick(TObject* Sender)
     Button1Click(Sender);
 }
 
-void TfrmChapt::LoadNext(int qid)
+void TfrmChapt::LoadNext(int target_qid)
 {
     if (this->is_test_mode)
     {
@@ -101,12 +101,12 @@ void TfrmChapt::LoadNext(int qid)
     }
 
     // Глава изменилась — сбрасываем состояние вещей на земле
-    if (this->currentQid != qid && User->EnvironmentItems != nullptr)
+    if (this->currentQid != target_qid && User->EnvironmentItems != nullptr)
     {
         User->EnvironmentItems->Clear();
     }
 
-    this->currentQid = qid;
+    this->currentQid = target_qid;
 
     wchar_t ch = 0;
     int q = 0;
@@ -123,7 +123,7 @@ void TfrmChapt::LoadNext(int qid)
 
         swscanf(chapter->Strings[i].c_str(), L"%d%c", &q, &ch);
 
-        if (q == qid)
+        if (q == target_qid)
         {
             qptr = i;
             break;
@@ -191,7 +191,7 @@ void TfrmChapt::LoadNext(int qid)
         case L'f':
             Application->CreateForm(__classid(TfrmFight), &frmFight);
             frmFight->qptr = qptr;
-            PlaySound((ExePath + L"sound\\fight.wav").c_str(), NULL, SND_ASYNC);
+            PlaySound((ExePath + L"sound\\fight.wav").c_str(), nullptr, SND_ASYNC);
             frmChapt->Hide();
             frmFight->Show();
             return;
@@ -290,12 +290,12 @@ void __fastcall TfrmChapt::Button1Click(TObject* /*Sender*/)
     this->LoadNext(jump);
 }
 
-void __fastcall TfrmChapt::Help1Click(TObject* Sender)
+void __fastcall TfrmChapt::Help1Click(TObject* /*Sender*/)
 {
     ShowMessage(L"Сами разберетесь!");
 }
 
-void __fastcall TfrmChapt::AboutClick(TObject* Sender)
+void __fastcall TfrmChapt::AboutClick(TObject* /*Sender*/)
 {
     auto temporaryAbout = std::make_unique<TAboutBox>(nullptr);
     temporaryAbout->ShowModal();
@@ -344,7 +344,7 @@ void __fastcall TfrmChapt::frmChaptCloseQuery(TObject* /*Sender*/, bool& CanClos
     }
 }
 
-void __fastcall TfrmChapt::LoadClick(TObject* Sender)
+void __fastcall TfrmChapt::LoadClick(TObject* /*Sender*/)
 {
     OpenDialog1->FileName = L"";
     OpenDialog1->InitialDir = ExpandFileName(ExePath);
@@ -356,7 +356,7 @@ void __fastcall TfrmChapt::LoadClick(TObject* Sender)
     }
 }
 
-void __fastcall TfrmChapt::SaveClick(TObject* Sender)
+void __fastcall TfrmChapt::SaveClick(TObject* /*Sender*/)
 {
     SaveDialog1->InitialDir = ExpandFileName(ExePath);
     SaveDialog1->FileName = L"save1.sav";
@@ -383,7 +383,7 @@ void __fastcall TfrmChapt::ustype1Click(TObject* /*Sender*/)
     stats_form->ShowModal();
 }
 
-void __fastcall TfrmChapt::FormResize(TObject* Sender)
+void __fastcall TfrmChapt::FormResize(TObject* /*Sender*/)
 {
     Button1->Left = (ClientWidth - Button1->Width) / 2;
 }

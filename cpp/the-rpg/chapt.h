@@ -45,7 +45,6 @@ private:
     TStringList* chapter;
     TStringList* save;
     int aptr;
-    int qid;
     int currentQid;
     bool is_test_mode = false;
     int test_qptr = 0;
@@ -54,7 +53,7 @@ public:
     __fastcall TfrmChapt(TComponent* Owner) override;
     __fastcall ~TfrmChapt();
 
-    void LoadNext(int qid);
+    void LoadNext(int target_qid);
     void start_character_test();
     bool hasUnsavedChanges = false;
     void ResetUnsavedChanges() { hasUnsavedChanges = false; }

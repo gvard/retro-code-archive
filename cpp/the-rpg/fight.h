@@ -30,8 +30,6 @@ private:
     int jump;
     int selWeapon;
     int selEnemy;
-    int countWeapon;
-    int countEnemy;
 
     void updateApt();
     void update();

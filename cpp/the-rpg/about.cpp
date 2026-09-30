@@ -9,7 +9,7 @@ __fastcall TAboutBox::TAboutBox(TComponent* AOwner)
     Version->Caption = L"Version " + APP_VERSION;
 }
 
-void __fastcall TAboutBox::OKButtonClick(TObject* Sender)
+void __fastcall TAboutBox::OKButtonClick(TObject* /*Sender*/)
 {
     ModalResult = mrOk;
 }

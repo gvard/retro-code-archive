@@ -1,12 +1,12 @@
 #include <vcl.h>
 
-USEFORM("uinfo.cpp", frmUInfo);
-USEFORM("utype.cpp", frmUType);
-USEFORM("about.cpp", AboutBox);
-USEFORM("chapt.cpp", frmChapt);
-USEFORM("fight.cpp", frmFight);
-USEFORM("first.cpp", frmFirst);
-USEFORM("invent.cpp", DualListDlg);
+USEFORM("uinfo.cpp", frmUInfo)
+USEFORM("utype.cpp", frmUType)
+USEFORM("about.cpp", AboutBox)
+USEFORM("chapt.cpp", frmChapt)
+USEFORM("fight.cpp", frmFight)
+USEFORM("first.cpp", frmFirst)
+USEFORM("invent.cpp", DualListDlg)
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {
     try
