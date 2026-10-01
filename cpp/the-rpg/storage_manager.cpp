@@ -69,6 +69,11 @@ public:
         return read_file_internal(data_path / "invent.txt");
     }
 
+    GameResourceData load_race_file() override
+    {
+        return read_file_internal(data_path / "crt.txt");
+    }
+
     bool save_game_file(const std::string& save_name, const GameResourceData& data) override {
         try {
             auto file_saver = std::make_unique<TStringList>();

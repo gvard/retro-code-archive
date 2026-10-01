@@ -307,13 +307,12 @@ __fastcall TfrmFirst::~TfrmFirst()
 void __fastcall TfrmFirst::NewClick(TObject* /*Sender*/)
 {
     User->Clear();
+    this->Hide();
 
     auto info_form = std::make_unique<TfrmUInfo>(this);
 
     if (info_form->ShowModal() == mrOk)
     {
-        frmFirst->Hide();
-
         if (frmChapt == nullptr)
         {
             Application->CreateForm(__classid(TfrmChapt), &frmChapt);
@@ -321,6 +320,10 @@ void __fastcall TfrmFirst::NewClick(TObject* /*Sender*/)
 
         frmChapt->Show();
         frmChapt->start_character_test();
+    }
+    else
+    {
+        this->Show();
     }
 }
 

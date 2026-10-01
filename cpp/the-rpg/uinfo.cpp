@@ -1,22 +1,19 @@
+#include <charconv>
+#include <string>
+#include <string_view>
+#include <system_error>
+
 #include <Winapi.Windows.hpp>
-#include <cstdio>
-#include <cwchar>
 
 #include "uinfo.h"
 #include "first.h"
+#include "storage_manager.h"
 
 #pragma resource "*.dfm"
 
-__fastcall TfrmUInfo::TfrmUInfo(TComponent* Owner)
-    : TForm(Owner)
+static auto parse_race_line(const String& ALine) -> race_data
 {
-}
-
-auto TfrmUInfo::parse_race_line(const String& ALine) -> TRaceData
-{
-    TRaceData data;
-    data.Name = L"";
-    data.Modifier = 0;
+    race_data data{.name = L"", .modifier = 0};
 
     String currentLine = ALine.Trim();
     if (currentLine.IsEmpty())
@@ -25,85 +22,122 @@ auto TfrmUInfo::parse_race_line(const String& ALine) -> TRaceData
     int lastSpace = currentLine.LastDelimiter(L" ");
     if (lastSpace > 0)
     {
-        data.Name = currentLine.SubString(1, lastSpace - 1).Trim();
+        data.name = currentLine.SubString(1, lastSpace - 1).Trim();
         String modStr = currentLine.SubString(lastSpace + 1, currentLine.Length() - lastSpace).Trim();
 
         if (modStr.Pos(L"+") == 1)
         {
             modStr = modStr.SubString(2, modStr.Length() - 1);
         }
-        data.Modifier = StrToIntDef(modStr, 0);
+        data.modifier = StrToIntDef(modStr, 0);
     }
     else
     {
-        data.Name = currentLine;
+        data.name = currentLine;
     }
     return data;
 }
 
+__fastcall TfrmUInfo::TfrmUInfo(TComponent* Owner)
+    : TForm(Owner)
+{
+}
+
 void __fastcall TfrmUInfo::Button1Click(TObject* /*Sender*/)
 {
-    try
+    using namespace std::string_view_literals;
+    constexpr auto title = L"The RPG"sv;
+
+    const String user_name = Edit1->Text.Trim();
+    if (user_name.IsEmpty())
     {
-        User->age = StrToInt(Edit2->Text);
+        constexpr auto msg = L"Имя персонажа не может быть пустым!"sv;
+        ::MessageBoxW(this->Handle, msg.data(), title.data(), MB_OK | MB_ICONWARNING);
+        Edit1->SetFocus();
+        return;
     }
-    catch (EConvertError&)
+
+    if (user_name.Length() > 25)
     {
-        Application->MessageBox(L"Возраст задается в ДЕСЯТИЧНОЙ системе исчисления!", L"The RPG", MB_OK | MB_ICONWARNING);
+        constexpr auto msg = L"Имя персонажа не может быть длиннее 25 символов!"sv;
+        ::MessageBoxW(this->Handle, msg.data(), title.data(), MB_OK | MB_ICONWARNING);
+        Edit1->SetFocus();
+        return;
+    }
+
+    std::wstring_view edit_text_view = Edit2->Text.Trim().c_str();
+
+    std::string age_str;
+    age_str.reserve(edit_text_view.size());
+    for (wchar_t ch : edit_text_view)
+    {
+        age_str.push_back(static_cast<char>(ch));
+    }
+
+    int parsed_age = 0;
+    auto [ptr, ec] = std::from_chars(age_str.data(), age_str.data() + age_str.size(), parsed_age);
+
+    // Проверка на корректность числа (исключаем буквы, знаки препинания, пустоту)
+    if (ec != std::errc{} || ptr != age_str.data() + age_str.size())
+    {
+        constexpr auto msg = L"Возраст задается в ДЕСЯТИЧНОЙ системе исчисления!"sv;
+        ::MessageBoxW(this->Handle, msg.data(), title.data(), MB_OK | MB_ICONWARNING);
         Edit2->SetFocus();
         return;
     }
 
-    if (User->age > 100)
+    if (parsed_age > 100)
     {
-        Application->MessageBox(L"Столько не живут!", L"The RPG", MB_OK | MB_ICONWARNING);
+        constexpr auto msg = L"Столько не живут!"sv;
+        ::MessageBoxW(this->Handle, msg.data(), title.data(), MB_OK | MB_ICONWARNING);
         Edit2->SetFocus();
         return;
     }
-    if (User->age < 15)
+    if (parsed_age < 15)
     {
-        Application->MessageBox(L"Такой маленький, а уже ноги чешутся из дому смотаться?!", L"The RPG", MB_OK | MB_ICONWARNING);
+        constexpr auto msg = L"Такой маленький, а уже ноги чешутся из дому смотаться?!"sv;
+        ::MessageBoxW(this->Handle, msg.data(), title.data(), MB_OK | MB_ICONWARNING);
         Edit2->SetFocus();
         return;
     }
-    if (User->age > 70)
+    if (parsed_age > 70)
     {
-        Application->MessageBox(L"А по дороге не развалишься?!", L"The RPG", MB_OK | MB_ICONWARNING);
+        constexpr auto msg = L"А по дороге не развалишься?"sv;
+        ::MessageBoxW(this->Handle, msg.data(), title.data(), MB_OK | MB_ICONWARNING);
         Edit2->SetFocus();
         return;
     }
 
-    User->Name = Edit1->Text;
+    User->age = parsed_age;
+    User->Name = user_name;
     User->CrType = ComboBox1->Text;
     User->SexType = ComboBox2->Text;
 
-    auto* lCrType = new TStringList;
-    String CrtPath = ExePath + L"data\\crt.txt";
-
-    if (FileExists(CrtPath))
+    // Чтение модификаторов расы из хранилища ресурсов
+    const auto res = storage_system::get().load_race_file();
+    if (res.is_loaded)
     {
-        lCrType->LoadFromFile(CrtPath, TEncoding::UTF8);
+        const String user_race_lower = User->CrType.LowerCase();
 
-        for (int i = 0; i < lCrType->Count; ++i)
+        for (const auto& raw_line : res.lines)
         {
-            String fileLineLower = LowerCase(lCrType->Strings[i]);
-            String userRaceLower = LowerCase(User->CrType);
+            const String file_line = String(raw_line.c_str());
 
-            if (fileLineLower.Pos(userRaceLower) > 0)
+            if (file_line.LowerCase().Pos(user_race_lower) > 0)
             {
-                TRaceData race = parse_race_line(lCrType->Strings[i]);
-                User->str += race.Modifier;
+                const race_data race = parse_race_line(file_line);
+                User->str += race.modifier;
 
-                wchar_t logBuf[256];
-                swprintf(logBuf, 256, L"Отладка (uinfo): Раса: %s, Модификатор силы: %d, Итоговая сила: %d",
-                         User->CrType.c_str(), race.Modifier, User->str);
-                OutputDebugString(logBuf);
+                const String log_msg = L"[ОТЛАДКА uinfo] Раса: " + User->CrType +
+                                       L" | Модификатор: " + IntToStr(race.modifier) +
+                                       L" | Итоговая сила: " + IntToStr(User->str);
+                OutputDebugString(log_msg.c_str());
                 break;
             }
         }
     }
-    delete lCrType;
 
+    // Проверки пройдены успешно — только ТЕПЕРЬ закрываем модальное окно
     this->ModalResult = mrOk;
 }
 
@@ -127,25 +161,22 @@ void __fastcall TfrmUInfo::FormShow(TObject* /*Sender*/)
 {
     ComboBox1->Items->Clear();
 
-    auto* lCrType = new TStringList;
-    String CrtPath = ExePath + L"data\\crt.txt";
+    // Загрузка через лаконичный и безопасный storage_manager
+    const auto res = storage_system::get().load_race_file();
 
-    if (FileExists(CrtPath))
+    if (res.is_loaded)
     {
-        lCrType->LoadFromFile(CrtPath, TEncoding::UTF8);
-
-        for (int i = 0; i < lCrType->Count; ++i)
+        for (const auto& raw_line : res.lines)
         {
-            TRaceData race = parse_race_line(lCrType->Strings[i]);
-
-            if (!race.Name.IsEmpty())
+            const race_data race = parse_race_line(String(raw_line.c_str()));
+            if (!race.name.IsEmpty())
             {
-                ComboBox1->Items->Add(race.Name);
+                ComboBox1->Items->Add(race.name);
             }
         }
     }
-    delete lCrType;
 
+    // Дефолтный фоллбек, если файл пуст или отсутствует
     if (ComboBox1->Items->Count == 0)
     {
         ComboBox1->Items->Add(L"Человек");

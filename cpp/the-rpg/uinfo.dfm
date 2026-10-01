@@ -1,6 +1,7 @@
 object frmUInfo: TfrmUInfo
   Left = 312
   Top = 196
+  ActiveControl = Edit1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'The RPG - new game'
@@ -40,7 +41,7 @@ object frmUInfo: TfrmUInfo
   end
   object Label4: TLabel
     Left = 29
-    Top = 98
+    Top = 101
     Width = 86
     Height = 16
     Caption = #1042#1072#1096' '#1074#1086#1079#1088#1072#1089#1090':'
@@ -51,7 +52,6 @@ object frmUInfo: TfrmUInfo
     Width = 90
     Height = 31
     Caption = 'OK'
-    ModalResult = 1
     TabOrder = 4
     OnClick = Button1Click
   end
@@ -69,6 +69,8 @@ object frmUInfo: TfrmUInfo
     Top = 69
     Width = 169
     Height = 24
+    Style = csDropDownList
+    ItemIndex = 0
     TabOrder = 2
     Text = #1084#1091#1078#1089#1082#1086#1081
     Items.Strings = (
@@ -93,6 +95,8 @@ object frmUInfo: TfrmUInfo
     Top = 39
     Width = 169
     Height = 24
+    Style = csDropDownList
+    ItemIndex = 0
     TabOrder = 1
     Text = #1095#1077#1083#1086#1074#1077#1082
     Items.Strings = (

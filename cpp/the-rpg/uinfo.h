@@ -4,10 +4,10 @@
 #include <Vcl.Forms.hpp>
 #include <Vcl.StdCtrls.hpp>
 
-struct TRaceData
+struct race_data
 {
-    String Name;
-    int Modifier;
+    String name;
+    int modifier;
 };
 
 class TfrmUInfo : public TForm
@@ -27,9 +27,6 @@ __published:
     void __fastcall Edit1KeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
     void __fastcall Edit2KeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
     void __fastcall FormShow(TObject* Sender);
-
-private:
-    auto parse_race_line(const String& ALine) -> TRaceData;
 
 public:
     explicit __fastcall TfrmUInfo(TComponent* Owner) override;
