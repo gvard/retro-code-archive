@@ -1,5 +1,5 @@
 #include "first.h"
-#include "utype.h"
+#include "character_view.h"
 
 #pragma resource "*.dfm"
 

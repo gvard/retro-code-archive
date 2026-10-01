@@ -8,7 +8,7 @@
 #include "first.h"
 #include "about.h"
 #include "fight.h"
-#include "utype.h"
+#include "character_view.h"
 #include "invent.h"
 #include "storage_manager.h"
 

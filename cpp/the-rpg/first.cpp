@@ -7,7 +7,7 @@
 #include "chargen_view.h"
 #include "chapt.h"
 #include "invent.h"
-#include "utype.h"
+#include "character_view.h"
 #include "fight.h"
 #include "storage_manager.h"
 

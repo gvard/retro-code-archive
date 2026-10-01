@@ -198,6 +198,18 @@
             <DependentOn>chapt.h</DependentOn>
             <BuildOrder>4</BuildOrder>
         </CppCompile>
+        <CppCompile Include="character_view.cpp">
+            <Form>frmUType</Form>
+            <FormType>dfm</FormType>
+            <DependentOn>character_view.h</DependentOn>
+            <BuildOrder>10</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="chargen_view.cpp">
+            <Form>frmUInfo</Form>
+            <FormType>dfm</FormType>
+            <DependentOn>chargen_view.h</DependentOn>
+            <BuildOrder>8</BuildOrder>
+        </CppCompile>
         <CppCompile Include="fight.cpp">
             <Form>frmFight</Form>
             <FormType>dfm</FormType>
@@ -226,25 +238,13 @@
         <CppCompile Include="storage_manager.cpp">
             <BuildOrder>9</BuildOrder>
         </CppCompile>
-        <CppCompile Include="uinfo.cpp">
-            <Form>frmUInfo</Form>
-            <FormType>dfm</FormType>
-            <DependentOn>uinfo.h</DependentOn>
-            <BuildOrder>8</BuildOrder>
-        </CppCompile>
-        <CppCompile Include="utype.cpp">
-            <Form>frmUType</Form>
-            <FormType>dfm</FormType>
-            <DependentOn>utype.h</DependentOn>
-            <BuildOrder>10</BuildOrder>
-        </CppCompile>
-        <FormResources Include="uinfo.dfm"/>
-        <FormResources Include="utype.dfm"/>
-        <FormResources Include="invent.dfm"/>
+        <FormResources Include="chargen_view.dfm"/>
+        <FormResources Include="character_view.dfm"/>
         <FormResources Include="about.dfm"/>
         <FormResources Include="chapt.dfm"/>
         <FormResources Include="fight.dfm"/>
         <FormResources Include="first.dfm"/>
+        <FormResources Include="invent.dfm"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -282,7 +282,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32c270.dll" Class="DependencyModule">
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32c270mt.dll" Class="DependencyModule">
                     <Platform Name="Win32">
                         <Overwrite>true</Overwrite>
                     </Platform>
@@ -297,13 +297,13 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true'" LocalName="$(BDS)\Redist\osx32\libcgcrtl.dylib" Class="DependencyModule">
-                    <Platform Name="OSX32">
+                <DeployFile Condition="'$(UsingDelphiRTL)'=='true'" LocalName="$(BDS)\bin\borlndmm.dll" Class="DependencyModule">
+                    <Platform Name="Win32">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(UsingDelphiRTL)'=='true'" LocalName="$(BDS)\bin\borlndmm.dll" Class="DependencyModule">
-                    <Platform Name="Win32">
+                <DeployFile Condition="'$(DynamicRTL)'=='true'" LocalName="$(BDS)\Redist\osx32\libcgcrtl.dylib" Class="DependencyModule">
+                    <Platform Name="OSX32">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -351,7 +351,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32c270mt.dll" Class="DependencyModule">
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32c270.dll" Class="DependencyModule">
                     <Platform Name="Win32">
                         <Overwrite>true</Overwrite>
                     </Platform>

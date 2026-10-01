@@ -1,7 +1,7 @@
 #include <vcl.h>
 
 USEFORM("chargen_view.cpp", frmUInfo)
-USEFORM("utype.cpp", frmUType)
+USEFORM("character_view.cpp", frmUType)
 USEFORM("about.cpp", AboutBox)
 USEFORM("chapt.cpp", frmChapt)
 USEFORM("fight.cpp", frmFight)

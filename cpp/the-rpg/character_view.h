@@ -1,5 +1,5 @@
-#ifndef utypeH
-#define utypeH
+#ifndef character_viewH
+#define character_viewH
 
 #include <Vcl.Forms.hpp>
 #include <Vcl.StdCtrls.hpp>
