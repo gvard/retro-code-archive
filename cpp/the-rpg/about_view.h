@@ -1,5 +1,5 @@
-#ifndef aboutH
-#define aboutH
+#ifndef about_viewH
+#define about_viewH
 
 #include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>

@@ -1,4 +1,4 @@
-#include "about.h"
+#include "about_view.h"
 #include "first.h"
 
 #pragma resource "*.dfm"
