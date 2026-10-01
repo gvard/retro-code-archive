@@ -4,7 +4,7 @@
 
 #include "first.h"
 #include "about.h"
-#include "uinfo.h"
+#include "chargen_view.h"
 #include "chapt.h"
 #include "invent.h"
 #include "utype.h"

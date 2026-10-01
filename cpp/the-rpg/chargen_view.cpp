@@ -5,7 +5,7 @@
 
 #include <Winapi.Windows.hpp>
 
-#include "uinfo.h"
+#include "chargen_view.h"
 #include "first.h"
 #include "storage_manager.h"
 

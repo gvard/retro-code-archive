@@ -1,5 +1,5 @@
-#ifndef uinfoH
-#define uinfoH
+#ifndef chargen_viewH
+#define chargen_viewH
 
 #include <Vcl.Forms.hpp>
 #include <Vcl.StdCtrls.hpp>

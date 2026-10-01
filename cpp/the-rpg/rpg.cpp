@@ -1,6 +1,6 @@
 #include <vcl.h>
 
-USEFORM("uinfo.cpp", frmUInfo)
+USEFORM("chargen_view.cpp", frmUInfo)
 USEFORM("utype.cpp", frmUType)
 USEFORM("about.cpp", AboutBox)
 USEFORM("chapt.cpp", frmChapt)
