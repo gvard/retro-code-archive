@@ -96,13 +96,13 @@ object frmChapt: TfrmChapt
         ShortCut = 16460
         OnClick = LoadClick
       end
-      object ustype1: TMenuItem
-        Caption = #1051#1080#1095#1085#1099#1077' '#1076#1072#1085#1085#1099#1077
-        OnClick = ustype1Click
+      object menuCharacterStats: TMenuItem
+        Caption = #1051#1080#1095#1085#1099#1077' '#1076#1072#1085#1085#1099#1077' (C)'
+        OnClick = menuCharacterStatsClick
       end
-      object N1: TMenuItem
-        Caption = #1048#1085#1074#1077#1085#1090#1072#1088#1100
-        OnClick = InvClick
+      object menuInventory: TMenuItem
+        Caption = #1048#1085#1074#1077#1085#1090#1072#1088#1100' (I)'
+        OnClick = menuInventoryClick
       end
     end
     object Help: TMenuItem

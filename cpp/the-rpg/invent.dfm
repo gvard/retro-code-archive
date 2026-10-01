@@ -7,8 +7,10 @@ object DualListDlg: TDualListDlg
   ClientWidth = 425
   Color = clBtnFace
   ParentFont = True
+  KeyPreview = True
   OldCreateOrder = True
   Position = poScreenCenter
+  OnKeyDown = FormKeyDown
   OnShow = FormShow
   PixelsPerInch = 116
   TextHeight = 13

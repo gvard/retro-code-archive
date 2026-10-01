@@ -9,6 +9,7 @@
 #include "invent.h"
 #include "utype.h"
 #include "fight.h"
+#include "storage_manager.h"
 
 #pragma resource "*.dfm"
 
@@ -266,13 +267,23 @@ auto TUser::SaveGame(const String& AFileName, int ACurrentQid) -> bool
     return success;
 }
 
-// ГЛАВНОЕ МЕНЮ ИГРЫ (TfrmFirst)
-
 __fastcall TfrmFirst::TfrmFirst(TComponent* Owner)
     : TForm(Owner)
 {
-    save = new TStringList;
+    storage_system::initialize();
 
+    if (!storage_system::get().validate_required_resources())
+    {
+        Application->MessageBox(
+            L"Критические ресурсы игры отсутствуют или повреждены! Приложение будет закрыто.",
+            L"Ошибка запуска",
+            MB_OK | MB_ICONERROR
+        );
+        Application->Terminate();
+        return;
+    }
+
+    save = new TStringList;
     User = new TUser;
     User->UserItems = new TStringList;
     User->EnvironmentItems = new TStringList;

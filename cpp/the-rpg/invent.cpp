@@ -27,7 +27,6 @@ void TDualListDlg::update_weight_display()
 
     User->RecalculateStamina(total_weight);
 
-    // total_weight > User->maxWeight вынесено в константу для читаемости
     const bool is_overloaded = total_weight > User->maxWeight;
     Label1->Font->Color = is_overloaded ? clRed : clWindowText;
 
@@ -79,7 +78,7 @@ void __fastcall TDualListDlg::ExcAllBtnClick(TObject* /*Sender*/)
 
 void __fastcall TDualListDlg::MoveSelected(TCustomListBox* List, TStrings* Items)
 {
-    for (int i = List->Items->Count - 1; i >= 0; i--)
+    for (int i = List->Items->Count - 1; i >= 0; --i)
     {
         if (List->Selected[i])
         {
@@ -102,7 +101,7 @@ void __fastcall TDualListDlg::SetButtons()
 
 auto __fastcall TDualListDlg::GetFirstSelection(TCustomListBox* List) -> int
 {
-    for (int i = 0; i < List->Items->Count; i++)
+    for (int i = 0; i < List->Items->Count; ++i)
     {
         if (List->Selected[i])
         {
@@ -138,62 +137,22 @@ void __fastcall TDualListDlg::FormShow(TObject* /*Sender*/)
     SrcList->Items->Clear();
     DstList->Items->Clear();
 
-    // Проверяем оперативную память игрока. Если там лежит стартовый маркер новой игры -
-    // это означает, что файл invent.txt еще ни разу не считывался в этой сессии.
-    if (User->UserItems->Count == 1 && User->UserItems->Strings[0] == L"__INIT_NEW_GAME__")
+    if (User != nullptr)
     {
-        // Маркер найден! Значит это самый первый запуск рюкзака в этой игре.
-        // Очищаем маркер, чтобы этот блок больше никогда не сработал
-        User->UserItems->Clear();
-
-        auto* lInvent = new TStringList;
-        String InventPath = ExePath + L"data\\invent.txt";
-
-        if (FileExists(InventPath))
+        if (User->UserItems != nullptr)
         {
-            lInvent->LoadFromFile(InventPath, TEncoding::UTF8);
-            for (int i = 0; i < lInvent->Count; i++)
+            for (int i = 0; i < User->UserItems->Count; ++i)
             {
-                String currentLine = lInvent->Strings[i].Trim();
-                if (currentLine.IsEmpty())
-                    continue;
-
-                int lastSpace = currentLine.LastDelimiter(L" ");
-                if (lastSpace > 0)
-                {
-                    String itemName = currentLine.SubString(1, lastSpace - 1).Trim();
-                    String itemWeightStr = currentLine.SubString(lastSpace + 1, currentLine.Length() - lastSpace).Trim();
-                    int itemWeight = StrToIntDef(itemWeightStr, 1);
-
-                    // Загружаем в визуальный рюкзак на экране
-                    SrcList->Items->AddObject(itemName, reinterpret_cast<TObject*>(static_cast<intptr_t>(itemWeight)));
-                }
+                SrcList->Items->AddObject(User->UserItems->Strings[i], User->UserItems->Objects[i]);
             }
         }
-        else
-        {
-            SrcList->Items->AddObject(L"Старый кухонный нож", (TObject*)2);
-        }
-        delete lInvent;
 
-        for (int i = 0; i < SrcList->Items->Count; i++)
+        if (User->EnvironmentItems != nullptr)
         {
-            User->UserItems->AddObject(SrcList->Items->Strings[i], SrcList->Items->Objects[i]);
-        }
-    }
-    else
-    {
-        // Будь то переход на новую главу сюжета или загрузка из .sav файла в LoadGame.
-        // Мы берем чистые строки и независимые числовые веса предметов напрямую из TUser
-        // и заново отрисовываем их на экране.
-        for (int i = 0; i < User->UserItems->Count; i++)
-        {
-            SrcList->Items->AddObject(User->UserItems->Strings[i], User->UserItems->Objects[i]);
-        }
-
-        for (int i = 0; i < User->EnvironmentItems->Count; i++)
-        {
-            DstList->Items->AddObject(User->EnvironmentItems->Strings[i], User->EnvironmentItems->Objects[i]);
+            for (int i = 0; i < User->EnvironmentItems->Count; ++i)
+            {
+                DstList->Items->AddObject(User->EnvironmentItems->Strings[i], User->EnvironmentItems->Objects[i]);
+            }
         }
     }
 
@@ -204,16 +163,29 @@ void __fastcall TDualListDlg::FormShow(TObject* /*Sender*/)
 void __fastcall TDualListDlg::OKBtnClick(TObject* /*Sender*/)
 {
     User->UserItems->Clear();
-    for (int i = 0; i < SrcList->Items->Count; i++)
+    for (int i = 0; i < SrcList->Items->Count; ++i)
     {
         User->UserItems->AddObject(SrcList->Items->Strings[i], SrcList->Items->Objects[i]);
     }
 
     User->EnvironmentItems->Clear();
-    for (int i = 0; i < DstList->Items->Count; i++)
+    for (int i = 0; i < DstList->Items->Count; ++i)
     {
         User->EnvironmentItems->AddObject(DstList->Items->Strings[i], DstList->Items->Objects[i]);
     }
 
     ModalResult = mrOk;
 }
+
+void __fastcall TDualListDlg::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+{
+    if (Shift == TShiftState{})
+    {
+		if (Key == 'I' || Key == VK_ESCAPE)
+        {
+            Key = 0;
+            this->ModalResult = mrOk;
+        }
+	}
+}
+

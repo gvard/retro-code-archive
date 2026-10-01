@@ -2,6 +2,7 @@
 #include <string_view>
 #include <memory>
 #include <cstdio>
+#include <filesystem>
 
 #include "chapt.h"
 #include "first.h"
@@ -9,6 +10,7 @@
 #include "fight.h"
 #include "utype.h"
 #include "invent.h"
+#include "storage_manager.h"
 
 #pragma resource "*.dfm"
 
@@ -31,7 +33,13 @@ __fastcall TfrmChapt::~TfrmChapt()
 
 void __fastcall TfrmChapt::FormCreate(TObject* /*Sender*/)
 {
-    chapter->LoadFromFile(ExePath + L"data\\chapt.txt", TEncoding::UTF8);
+    GameResourceData res = storage_system::get().load_chapter_file();
+    if (res.is_loaded) {
+        chapter->Clear();
+        for (const auto& line : res.lines) {
+            chapter->Add(line.c_str());
+        }
+    }
 }
 
 void __fastcall TfrmChapt::ExitClick(TObject* /*Sender*/)
@@ -191,7 +199,7 @@ void TfrmChapt::LoadNext(int target_qid)
         case L'f':
             Application->CreateForm(__classid(TfrmFight), &frmFight);
             frmFight->qptr = qptr;
-            PlaySound((ExePath + L"sound\\fight.wav").c_str(), nullptr, SND_ASYNC);
+            PlaySound(storage_system::get().get_sound_path("fight.wav").c_str(), nullptr, SND_ASYNC);
             frmChapt->Hide();
             frmFight->Show();
             return;
@@ -265,7 +273,7 @@ void __fastcall TfrmChapt::Button1Click(TObject* /*Sender*/)
 
             // Выходим из режима теста и переключаемся на сюжет игры
             this->is_test_mode = false;
-
+            this->initialize_starting_inventory();
             this->Menu = this->MainMenu1;
 
             // Загружаем основной файл сюжета и сбрасываем флаг dirty-состояния
@@ -371,13 +379,13 @@ void __fastcall TfrmChapt::SaveClick(TObject* /*Sender*/)
     }
 }
 
-void __fastcall TfrmChapt::InvClick(TObject* /*Sender*/)
+void __fastcall TfrmChapt::menuInventoryClick(TObject* /*Sender*/)
 {
     auto inventory_dialog = std::make_unique<TDualListDlg>(this);
     inventory_dialog->ShowModal();
 }
 
-void __fastcall TfrmChapt::ustype1Click(TObject* /*Sender*/)
+void __fastcall TfrmChapt::menuCharacterStatsClick(TObject* /*Sender*/)
 {
     auto stats_form = std::make_unique<TfrmUType>(this);
     stats_form->ShowModal();
@@ -389,7 +397,6 @@ void __fastcall TfrmChapt::FormResize(TObject* /*Sender*/)
 }
 
 void __fastcall TfrmChapt::FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
-
 {
     if (frmFirst != nullptr && frmFirst->ActionList1 != nullptr)
     {
@@ -404,6 +411,22 @@ void __fastcall TfrmChapt::FormKeyDown(TObject* Sender, WORD& Key, TShiftState S
             this->SaveClick(Sender);
             Key = 0;
             return;
+        }
+
+        if (Shift == TShiftState{} && !this->is_test_mode)
+        {
+            if (Key == 'I')
+            {
+                Key = 0;
+                this->menuInventoryClick(Sender);
+                return;
+            }
+            if (Key == 'C')
+            {
+                Key = 0;
+                this->menuCharacterStatsClick(Sender);
+                return;
+            }
         }
 
         TWMKey msg;
@@ -423,12 +446,53 @@ void TfrmChapt::start_character_test()
     this->is_test_mode = true;
     this->test_qptr = 0;
     this->hasUnsavedChanges = false;
-
     this->Menu = nullptr;
 
-    // Загружаем файл вступительного теста вместо основного сюжета
-    chapter->LoadFromFile(ExePath + L"data\\test.txt", TEncoding::UTF8);
+    GameResourceData res = storage_system::get().load_test_file();
+    if (res.is_loaded) {
+        chapter->Clear();
+        for (const auto& line : res.lines) {
+            chapter->Add(line.c_str());
+        }
+    }
 
-    // Запускаем итерацию парсинга теста
     this->LoadNext(0);
+}
+
+void TfrmChapt::initialize_starting_inventory()
+{
+    if (User == nullptr || User->UserItems == nullptr)
+    {
+        return;
+    }
+
+    User->UserItems->Clear();
+    GameResourceData res = storage_system::get().load_inventory_file();
+
+    if (res.is_loaded)
+    {
+        for (const auto& raw_line : res.lines)
+        {
+            String currentLine = String(raw_line.c_str()).Trim();
+
+            if (currentLine.IsEmpty())
+            {
+                continue;
+            }
+
+            int lastSpace = currentLine.LastDelimiter(L" ");
+            if (lastSpace > 0)
+            {
+                String itemName = currentLine.SubString(1, lastSpace - 1).Trim();
+                String itemWeightStr = currentLine.SubString(lastSpace + 1, currentLine.Length() - lastSpace).Trim();
+                int itemWeight = StrToIntDef(itemWeightStr, 1);
+
+                User->UserItems->AddObject(itemName, reinterpret_cast<TObject*>(static_cast<intptr_t>(itemWeight)));
+            }
+        }
+    }
+    else
+    {
+        User->UserItems->AddObject(L"Старый кухонный нож", reinterpret_cast<TObject*>(static_cast<intptr_t>(2)));
+    }
 }

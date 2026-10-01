@@ -24,20 +24,21 @@ __published:
     void __fastcall ExcludeBtnClick(TObject* Sender);
     void __fastcall IncAllBtnClick(TObject* Sender);
     void __fastcall ExcAllBtnClick(TObject* Sender);
-    void __fastcall MoveSelected(TCustomListBox* List, TStrings* Items);
-    void __fastcall SetItem(TListBox* List, int Index);
-    auto __fastcall GetFirstSelection(TCustomListBox* List) -> int;
-    void __fastcall SetButtons();
     void __fastcall FormShow(TObject* Sender);
     void __fastcall OKBtnClick(TObject* Sender);
+	void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
 
 private:
+    void __fastcall MoveSelected(TCustomListBox* List, TStrings* Items);
+    void __fastcall SetItem(TListBox* List, int Index);
+    void __fastcall SetButtons();
     void update_weight_display();
 
-public:
-    explicit __fastcall TDualListDlg(TComponent* owner) override;
+    auto __fastcall GetFirstSelection(TCustomListBox* List) -> int;
 
-    __fastcall ~TDualListDlg() override = default;
+public:
+    explicit __fastcall TDualListDlg(TComponent* AOwner) override;
+    virtual __fastcall ~TDualListDlg() = default;
 };
 
 #endif

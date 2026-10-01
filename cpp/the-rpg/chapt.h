@@ -19,12 +19,12 @@ __published:
     TMemo* Memo1;
     TListBox* ListBox1;
     TButton* Button1;
-    TMenuItem* ustype1;
+    TMenuItem* menuCharacterStats;
     TMenuItem* About;
     TMenuItem* Load;
     TSaveDialog* SaveDialog1;
     TOpenDialog* OpenDialog1;
-    TMenuItem* N1;
+    TMenuItem* menuInventory;
 
     void __fastcall FormCreate(TObject* Sender);
     void __fastcall ExitClick(TObject* Sender);
@@ -35,8 +35,8 @@ __published:
     void __fastcall frmChaptCloseQuery(TObject* Sender, bool& CanClose);
     void __fastcall LoadClick(TObject* Sender);
     void __fastcall SaveClick(TObject* Sender);
-    void __fastcall InvClick(TObject* Sender);
-    void __fastcall ustype1Click(TObject* Sender);
+    void __fastcall menuInventoryClick(TObject* Sender);
+    void __fastcall menuCharacterStatsClick(TObject* Sender);
     void __fastcall ListBox1DblClick(TObject* Sender);
     void __fastcall FormResize(TObject* Sender);
     void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
@@ -48,6 +48,8 @@ private:
     int currentQid;
     bool is_test_mode = false;
     int test_qptr = 0;
+
+    void initialize_starting_inventory();
 
 public:
     __fastcall TfrmChapt(TComponent* Owner) override;
