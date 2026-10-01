@@ -42,3 +42,14 @@ void TfrmUType::update_stamina_display()
         lblStamina->Font->Color = clWindowText;
     }
 }
+void __fastcall TfrmUType::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+{
+    if (Shift == TShiftState{})
+    {
+        if (Key == 'C' || Key == VK_ESCAPE)
+        {
+            Key = 0;
+            this->ModalResult = mrOk;
+        }
+    }
+}

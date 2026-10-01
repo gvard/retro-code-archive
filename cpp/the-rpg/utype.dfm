@@ -7,8 +7,10 @@ object frmUType: TfrmUType
   ClientWidth = 217
   Color = clBtnFace
   ParentFont = True
+  KeyPreview = True
   OldCreateOrder = True
   Position = poScreenCenter
+  OnKeyDown = FormKeyDown
   OnShow = frmShow
   PixelsPerInch = 116
   TextHeight = 13

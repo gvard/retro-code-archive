@@ -23,6 +23,7 @@ __published:
 
     void __fastcall frmShow(TObject* Sender);
     void __fastcall OKBtnClick(TObject* Sender);
+    void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
 
 private:
     void update_stamina_display();
