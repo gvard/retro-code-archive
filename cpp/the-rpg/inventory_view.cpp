@@ -8,12 +8,12 @@
 
 extern bool isFirstInventoryLaunch;
 
-__fastcall TDualListDlg::TDualListDlg(TComponent* AOwner)
+__fastcall TfrmInventory::TfrmInventory(TComponent* AOwner)
     : TForm(AOwner)
 {
 }
 
-void TDualListDlg::update_weight_display()
+void TfrmInventory::update_weight_display()
 {
     int total_weight = 0;
 
@@ -43,7 +43,7 @@ void TDualListDlg::update_weight_display()
     OutputDebugString(weight_log);
 }
 
-void __fastcall TDualListDlg::IncludeBtnClick(TObject* /*Sender*/)
+void __fastcall TfrmInventory::IncludeBtnClick(TObject* /*Sender*/)
 {
     const int index = GetFirstSelection(SrcList);
     MoveSelected(SrcList, DstList->Items);
@@ -52,7 +52,7 @@ void __fastcall TDualListDlg::IncludeBtnClick(TObject* /*Sender*/)
     this->update_weight_display();
 }
 
-void __fastcall TDualListDlg::ExcludeBtnClick(TObject* /*Sender*/)
+void __fastcall TfrmInventory::ExcludeBtnClick(TObject* /*Sender*/)
 {
     int Index = GetFirstSelection(DstList);
     MoveSelected(DstList, SrcList->Items);
@@ -60,7 +60,7 @@ void __fastcall TDualListDlg::ExcludeBtnClick(TObject* /*Sender*/)
     update_weight_display();
 }
 
-void __fastcall TDualListDlg::IncAllBtnClick(TObject* /*Sender*/)
+void __fastcall TfrmInventory::IncAllBtnClick(TObject* /*Sender*/)
 {
     DstList->Items->AddStrings(SrcList->Items);
     SrcList->Items->Clear();
@@ -68,7 +68,7 @@ void __fastcall TDualListDlg::IncAllBtnClick(TObject* /*Sender*/)
     update_weight_display();
 }
 
-void __fastcall TDualListDlg::ExcAllBtnClick(TObject* /*Sender*/)
+void __fastcall TfrmInventory::ExcAllBtnClick(TObject* /*Sender*/)
 {
     SrcList->Items->AddStrings(DstList->Items);
     DstList->Items->Clear();
@@ -76,7 +76,7 @@ void __fastcall TDualListDlg::ExcAllBtnClick(TObject* /*Sender*/)
     update_weight_display();
 }
 
-void __fastcall TDualListDlg::MoveSelected(TCustomListBox* List, TStrings* Items)
+void __fastcall TfrmInventory::MoveSelected(TCustomListBox* List, TStrings* Items)
 {
     for (int i = List->Items->Count - 1; i >= 0; --i)
     {
@@ -88,7 +88,7 @@ void __fastcall TDualListDlg::MoveSelected(TCustomListBox* List, TStrings* Items
     }
 }
 
-void __fastcall TDualListDlg::SetButtons()
+void __fastcall TfrmInventory::SetButtons()
 {
     bool SrcEmpty = (SrcList->Items->Count == 0);
     bool DstEmpty = (DstList->Items->Count == 0);
@@ -99,7 +99,7 @@ void __fastcall TDualListDlg::SetButtons()
     ExAllBtn->Enabled = (!DstEmpty);
 }
 
-auto __fastcall TDualListDlg::GetFirstSelection(TCustomListBox* List) -> int
+auto __fastcall TfrmInventory::GetFirstSelection(TCustomListBox* List) -> int
 {
     for (int i = 0; i < List->Items->Count; ++i)
     {
@@ -111,7 +111,7 @@ auto __fastcall TDualListDlg::GetFirstSelection(TCustomListBox* List) -> int
     return LB_ERR;
 }
 
-void __fastcall TDualListDlg::SetItem(TListBox* List, int Index)
+void __fastcall TfrmInventory::SetItem(TListBox* List, int Index)
 {
     int MaxIndex = List->Items->Count - 1;
     List->SetFocus();
@@ -132,7 +132,7 @@ void __fastcall TDualListDlg::SetItem(TListBox* List, int Index)
     SetButtons();
 }
 
-void __fastcall TDualListDlg::FormShow(TObject* /*Sender*/)
+void __fastcall TfrmInventory::FormShow(TObject* /*Sender*/)
 {
     SrcList->Items->Clear();
     DstList->Items->Clear();
@@ -160,7 +160,7 @@ void __fastcall TDualListDlg::FormShow(TObject* /*Sender*/)
     SetButtons();
 }
 
-void __fastcall TDualListDlg::OKBtnClick(TObject* /*Sender*/)
+void __fastcall TfrmInventory::OKBtnClick(TObject* /*Sender*/)
 {
     User->UserItems->Clear();
     for (int i = 0; i < SrcList->Items->Count; ++i)
@@ -177,7 +177,7 @@ void __fastcall TDualListDlg::OKBtnClick(TObject* /*Sender*/)
     ModalResult = mrOk;
 }
 
-void __fastcall TDualListDlg::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+void __fastcall TfrmInventory::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
 {
     if (Shift == TShiftState{})
     {

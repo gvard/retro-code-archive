@@ -5,7 +5,7 @@
 #include <Vcl.StdCtrls.hpp>
 #include <Vcl.Buttons.hpp>
 
-class TDualListDlg : public TForm
+class TfrmInventory : public TForm
 {
 __published:
     TButton* OKBtn;
@@ -37,8 +37,8 @@ private:
     auto __fastcall GetFirstSelection(TCustomListBox* List) -> int;
 
 public:
-    explicit __fastcall TDualListDlg(TComponent* AOwner) override;
-    virtual __fastcall ~TDualListDlg() = default;
+    explicit __fastcall TfrmInventory(TComponent* AOwner) override;
+    virtual __fastcall ~TfrmInventory() = default;
 };
 
 #endif

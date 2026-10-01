@@ -7,7 +7,7 @@
 #include <Vcl.StdCtrls.hpp>
 #include <Vcl.ExtCtrls.hpp>
 
-class TAboutBox : public TForm
+class TfrmAbout : public TForm
 {
 __published:
     TPanel* Panel1;
@@ -25,8 +25,8 @@ __published:
 private:
 
 public:
-    __fastcall TAboutBox(TComponent* AOwner) override;
-    __fastcall ~TAboutBox() = default;
+    __fastcall TfrmAbout(TComponent* AOwner) override;
+    __fastcall ~TfrmAbout() = default;
 };
 
 #endif

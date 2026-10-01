@@ -3,13 +3,13 @@
 
 #pragma resource "*.dfm"
 
-__fastcall TAboutBox::TAboutBox(TComponent* AOwner)
+__fastcall TfrmAbout::TfrmAbout(TComponent* AOwner)
     : TForm(AOwner)
 {
     Version->Caption = L"Version " + APP_VERSION;
 }
 
-void __fastcall TAboutBox::OKButtonClick(TObject* /*Sender*/)
+void __fastcall TfrmAbout::OKButtonClick(TObject* /*Sender*/)
 {
     ModalResult = mrOk;
 }

@@ -1,4 +1,4 @@
-object AboutBox: TAboutBox
+object frmAbout: TfrmAbout
   Left = 489
   Top = 345
   BorderStyle = bsDialog

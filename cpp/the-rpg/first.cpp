@@ -3,10 +3,10 @@
 #include <memory>
 
 #include "first.h"
-#include "about.h"
+#include "about_view.h"
 #include "chargen_view.h"
 #include "chapt.h"
-#include "invent.h"
+#include "inventory_view.h"
 #include "character_view.h"
 #include "fight.h"
 #include "storage_manager.h"
@@ -354,6 +354,6 @@ void __fastcall TfrmFirst::ExitClick(TObject* /*Sender*/)
 
 void __fastcall TfrmFirst::AboutClick(TObject* /*Sender*/)
 {
-    auto temporaryAbout = std::make_unique<TAboutBox>(nullptr);
+    auto temporaryAbout = std::make_unique<TfrmAbout>(nullptr);
     temporaryAbout->ShowModal();
 }

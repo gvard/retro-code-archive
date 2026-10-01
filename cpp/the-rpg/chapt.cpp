@@ -6,10 +6,10 @@
 
 #include "chapt.h"
 #include "first.h"
-#include "about.h"
+#include "about_view.h"
 #include "fight.h"
 #include "character_view.h"
-#include "invent.h"
+#include "inventory_view.h"
 #include "storage_manager.h"
 
 #pragma resource "*.dfm"
@@ -305,7 +305,7 @@ void __fastcall TfrmChapt::Help1Click(TObject* /*Sender*/)
 
 void __fastcall TfrmChapt::AboutClick(TObject* /*Sender*/)
 {
-    auto temporaryAbout = std::make_unique<TAboutBox>(nullptr);
+    auto temporaryAbout = std::make_unique<TfrmAbout>(nullptr);
     temporaryAbout->ShowModal();
 }
 
@@ -381,7 +381,7 @@ void __fastcall TfrmChapt::SaveClick(TObject* /*Sender*/)
 
 void __fastcall TfrmChapt::menuInventoryClick(TObject* /*Sender*/)
 {
-    auto inventory_dialog = std::make_unique<TDualListDlg>(this);
+    auto inventory_dialog = std::make_unique<TfrmInventory>(this);
     inventory_dialog->ShowModal();
 }
 

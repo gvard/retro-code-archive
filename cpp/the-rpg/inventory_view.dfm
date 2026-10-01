@@ -1,4 +1,4 @@
-object DualListDlg: TDualListDlg
+object frmInventory: TfrmInventory
   Left = 250
   Top = 108
   BorderStyle = bsDialog
