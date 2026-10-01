@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <Winapi.Windows.hpp>
 
-#include "invent.h"
+#include "inventory_view.h"
 #include "first.h"
 
 #pragma resource "*.dfm"

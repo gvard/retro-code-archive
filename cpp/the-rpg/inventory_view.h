@@ -1,5 +1,5 @@
-#ifndef inventH
-#define inventH
+#ifndef inventory_viewH
+#define inventory_viewH
 
 #include <Vcl.Forms.hpp>
 #include <Vcl.StdCtrls.hpp>
