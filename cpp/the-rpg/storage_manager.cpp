@@ -74,6 +74,11 @@ public:
         return read_file_internal(data_path / "crt.txt");
     }
 
+    GameResourceData load_weapon_file() override
+    {
+        return read_file_internal(data_path / "weap.txt");
+    }
+
     bool save_game_file(const std::string& save_name, const GameResourceData& data) override {
         try {
             auto file_saver = std::make_unique<TStringList>();

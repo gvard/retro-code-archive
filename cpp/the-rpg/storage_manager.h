@@ -21,6 +21,7 @@ public:
     virtual GameResourceData load_test_file() = 0;
     virtual GameResourceData load_inventory_file() = 0;
     virtual GameResourceData load_race_file() = 0;
+    virtual GameResourceData load_weapon_file() = 0;
 
     virtual bool save_game_file(const std::string& save_name, const GameResourceData& data) = 0;
     virtual GameResourceData load_save_file(const std::string& save_name) = 0;

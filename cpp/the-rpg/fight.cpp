@@ -9,6 +9,7 @@
 #include "fight.h"
 #include "first.h"
 #include "chapt.h"
+#include "storage_manager.h"
 
 #pragma resource "*.dfm"
 
@@ -21,10 +22,6 @@ __fastcall TfrmFight::TfrmFight(TComponent* Owner)
 
 void __fastcall TfrmFight::FormCreate(TObject* /*Sender*/)
 {
-    int hit, mana;
-    auto* lWeapon = new TStringList;
-    lWeapon->LoadFromFile(ExePath + L"data\\weap.txt", TEncoding::UTF8);
-
     grEnemy->Cells[1][0] = "Вид противника";
     grEnemy->Cells[2][0] = "Имя";
     grEnemy->Cells[3][0] = "Жизнь";
@@ -34,19 +31,28 @@ void __fastcall TfrmFight::FormCreate(TObject* /*Sender*/)
     grWeapon->Cells[3][0] = "Мана";
     grWeapon->Cells[4][0] = "ActPts";
 
-    const int weapon_count = static_cast<int>(lWeapon->Count);
-    grWeapon->RowCount = std::max(2, weapon_count / 2 + 1);
-    for (int idx = 0; idx < weapon_count; idx += 2)
+    const auto res = storage_system::get().load_weapon_file();
+    if (res.is_loaded && !res.lines.empty())
     {
-        swscanf(lWeapon->Strings[idx].c_str(), L"%d%d%d", &hit, &mana, &apt);
+        const int weapon_count = static_cast<int>(res.lines.size());
+        grWeapon->RowCount = std::max(2, weapon_count / 2 + 1);
 
-        grWeapon->Cells[1][idx / 2 + 1] = lWeapon->Strings[idx + 1];
-        grWeapon->Cells[2][idx / 2 + 1] = IntToStr(hit);
-        grWeapon->Cells[3][idx / 2 + 1] = IntToStr(mana);
-        grWeapon->Cells[4][idx / 2 + 1] = IntToStr(apt);
+        for (int idx = 0; idx < weapon_count; idx += 2)
+        {
+            int hit = 0, mana = 0, weapon_apt = 0;
+            std::string line_str;
+
+            for (wchar_t ch : res.lines[idx])
+                line_str.push_back(static_cast<char>(ch));
+
+            std::sscanf(line_str.c_str(), "%d %d %d", &hit, &mana, &weapon_apt);
+
+            grWeapon->Cells[1][idx / 2 + 1] = res.lines[idx + 1].c_str();
+            grWeapon->Cells[2][idx / 2 + 1] = IntToStr(hit);
+            grWeapon->Cells[3][idx / 2 + 1] = IntToStr(mana);
+            grWeapon->Cells[4][idx / 2 + 1] = IntToStr(weapon_apt);
+        }
     }
-
-    delete lWeapon;
 }
 
 void __fastcall TfrmFight::FormShow(TObject* /*Sender*/)
@@ -132,9 +138,9 @@ void __fastcall TfrmFight::FormShow(TObject* /*Sender*/)
 void TfrmFight::updateApt()
 {
     apt = User->dex * User->s / 100;
-    if (apt <= 0)
+    if (apt < 0)
     {
-        opponentAttack();
+        apt = 0;
     }
 }
 
@@ -165,6 +171,7 @@ void TfrmFight::opponentAttack()
         return;
     }
 
+    // Считаем суммарный урон от всех живых врагов
     hit = 0;
     for (i = 1; i < grEnemy->RowCount; ++i)
     {
@@ -174,25 +181,41 @@ void TfrmFight::opponentAttack()
         }
     }
 
+    // Применяем урон к игроку
+    User->hlth -= hit;
+    User->s -= hit;
+    User->Refresh();
+
+    // Рассчитываем Action Points для игрока на основе его новой выносливости
+    updateApt();
+
+    // Отображаем изменения параметров на форме
+    this->update();
+    this->Repaint();
+
     swprintf(buf, 256, L"противник нанес вам удар: %d", hit);
     Application->MessageBox(buf, frmFight->Caption.c_str(), MB_OK);
 
-    User->hlth -= hit;
-    User->s -= hit;
-
-    User->Refresh();
-
+    // Проверяем, не наступила ли смерть игрока
     if (check())
     {
         return;
     }
 
-    updateApt();
-    this->update();
+    // Защита от зависания: если у игрока всё еще 0 очков, враг ходит снова
+    if (apt <= 0)
+    {
+        opponentAttack();
+    }
 }
 
 auto TfrmFight::check() -> bool
 {
+    if (!frmFight->Visible)
+    {
+        return true;
+    }
+
     int i;
     bool endFight = true;
 
@@ -223,10 +246,10 @@ auto TfrmFight::check() -> bool
     if (User->hlth <= 0)
     {
         Application->MessageBox(L"Вы потерпели поражение в бою!", frmFight->Caption.c_str(), MB_OK | MB_ICONHAND);
-        PlaySound((ExePath + L"sound\\death.wav").c_str(), nullptr, SND_ASYNC);
+        PlaySound(storage_system::get().get_sound_path("death.wav").c_str(), nullptr, SND_ASYNC);
 
         frmFight->Hide();
-        frmFirst->Show();
+        frmMainMenu->Show();
         return true;
     }
 
@@ -245,9 +268,13 @@ auto TfrmFight::check() -> bool
 
 void __fastcall TfrmFight::btnAttackClick(TObject* /*Sender*/)
 {
-    grEnemy->Cells[3][selEnemy + 1] = grEnemy->Cells[3][selEnemy + 1].ToInt() - grWeapon->Cells[2][selWeapon + 1].ToInt();
+    // Наносим урон врагу и тратим ресурсы
+    grEnemy->Cells[3][selEnemy + 1] = IntToStr(grEnemy->Cells[3][selEnemy + 1].ToInt() - grWeapon->Cells[2][selWeapon + 1].ToInt());
     User->man -= grWeapon->Cells[3][selWeapon + 1].ToInt();
     apt -= grWeapon->Cells[4][selWeapon + 1].ToInt();
+
+    this->update();
+    this->Repaint();
 
     if (apt <= 0)
     {
@@ -255,7 +282,6 @@ void __fastcall TfrmFight::btnAttackClick(TObject* /*Sender*/)
     }
     else
     {
-        this->update();
         check();
     }
 
@@ -307,7 +333,7 @@ void __fastcall TfrmFight::grWeaponKeyDown(TObject* /*Sender*/, WORD& Key, TShif
 
 void __fastcall TfrmFight::FormClose(TObject* /*Sender*/, TCloseAction& Action)
 {
-    frmFirst->Show();
+    frmMainMenu->Show();
 }
 void __fastcall TfrmFight::FormResize(TObject* /*Sender*/)
 {
@@ -316,14 +342,14 @@ void __fastcall TfrmFight::FormResize(TObject* /*Sender*/)
 
 void __fastcall TfrmFight::FormKeyDown(TObject* /*Sender*/, WORD& Key, TShiftState /*Shift*/)
 {
-    if (frmFirst != nullptr && frmFirst->ActionList1 != nullptr)
+    if (frmMainMenu != nullptr && frmMainMenu->ActionList1 != nullptr)
     {
         TWMKey msg;
         msg.Msg = WM_KEYDOWN;
         msg.CharCode = Key;
         msg.KeyData = 0;
 
-        if (frmFirst->ActionList1->IsShortCut(msg))
+        if (frmMainMenu->ActionList1->IsShortCut(msg))
         {
             Key = 0;
         }
