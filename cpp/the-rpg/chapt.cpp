@@ -8,7 +8,7 @@
 #include "first.h"
 #include "about_view.h"
 #include "fight.h"
-#include "character_view.h"
+#include "charstats_view.h"
 #include "inventory_view.h"
 #include "storage_manager.h"
 
@@ -157,7 +157,7 @@ void TfrmChapt::LoadNext(int target_qid)
     {
         Application->MessageBox(L"Вопрос не найден!", L"The RPG", MB_ICONEXCLAMATION | MB_OK);
         frmChapt->Hide();
-        frmFirst->Show();
+        frmMainMenu->Show();
         return;
     }
 
@@ -207,7 +207,7 @@ void TfrmChapt::LoadNext(int target_qid)
         case L'e':
             Application->MessageBox(L"Игра окончена!", L"The RPG", MB_OK);
             frmChapt->Hide();
-            frmFirst->Show();
+            frmMainMenu->Show();
             return;
     }
 
@@ -268,7 +268,7 @@ void __fastcall TfrmChapt::Button1Click(TObject* /*Sender*/)
             User->s = User->GetMaxStamina();
 
             // Показываем модальное окно характеристик
-            auto stats_form = std::make_unique<TfrmUType>(this);
+            auto stats_form = std::make_unique<TfrmCharStats>(this);
             stats_form->ShowModal();
 
             // Выходим из режима теста и переключаемся на сюжет игры
@@ -321,9 +321,9 @@ void __fastcall TfrmChapt::frmChaptCloseQuery(TObject* /*Sender*/, bool& CanClos
 {
     if (!this->hasUnsavedChanges)
     {
-        if (frmFirst)
+        if (frmMainMenu)
         {
-            frmFirst->Show();
+            frmMainMenu->Show();
         }
         this->Hide();
         CanClose = true;
@@ -339,9 +339,9 @@ void __fastcall TfrmChapt::frmChaptCloseQuery(TObject* /*Sender*/, bool& CanClos
 
     if (result == IDOK)
     {
-        if (frmFirst)
+        if (frmMainMenu)
         {
-            frmFirst->Show();
+            frmMainMenu->Show();
         }
         this->Hide();
         CanClose = true;
@@ -387,7 +387,7 @@ void __fastcall TfrmChapt::menuInventoryClick(TObject* /*Sender*/)
 
 void __fastcall TfrmChapt::menuCharacterStatsClick(TObject* /*Sender*/)
 {
-    auto stats_form = std::make_unique<TfrmUType>(this);
+    auto stats_form = std::make_unique<TfrmCharStats>(this);
     stats_form->ShowModal();
 }
 
@@ -398,7 +398,7 @@ void __fastcall TfrmChapt::FormResize(TObject* /*Sender*/)
 
 void __fastcall TfrmChapt::FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
 {
-    if (frmFirst != nullptr && frmFirst->ActionList1 != nullptr)
+    if (frmMainMenu != nullptr && frmMainMenu->ActionList1 != nullptr)
     {
         if (Key == 'L' && Shift.Contains(ssCtrl))
         {
@@ -434,7 +434,7 @@ void __fastcall TfrmChapt::FormKeyDown(TObject* Sender, WORD& Key, TShiftState S
         msg.CharCode = Key;
         msg.KeyData = 0;
 
-        if (frmFirst->ActionList1->IsShortCut(msg))
+        if (frmMainMenu->ActionList1->IsShortCut(msg))
         {
             Key = 0;
         }

@@ -1,4 +1,4 @@
-object frmUInfo: TfrmUInfo
+object frmCharGen: TfrmCharGen
   Left = 312
   Top = 196
   ActiveControl = Edit1
@@ -64,7 +64,7 @@ object frmUInfo: TfrmUInfo
     Text = #1040#1088#1093#1077#1085
     OnKeyDown = Edit1KeyDown
   end
-  object ComboBox2: TComboBox
+  object cbGender: TComboBox
     Left = 128
     Top = 69
     Width = 169
@@ -90,7 +90,7 @@ object frmUInfo: TfrmUInfo
     Text = '23'
     OnKeyDown = Edit2KeyDown
   end
-  object ComboBox1: TComboBox
+  object cbRace: TComboBox
     Left = 128
     Top = 39
     Width = 169

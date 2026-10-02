@@ -1,11 +1,11 @@
-#ifndef character_viewH
-#define character_viewH
+#ifndef charstats_viewH
+#define charstats_viewH
 
 #include <Vcl.Forms.hpp>
 #include <Vcl.StdCtrls.hpp>
 #include <Vcl.ExtCtrls.hpp>
 
-class TfrmUType : public TForm
+class TfrmCharStats : public TForm
 {
 __published:
     TButton *OKBtn;
@@ -29,8 +29,8 @@ private:
     void update_stamina_display();
 
 public:
-    explicit __fastcall TfrmUType(TComponent* AOwner) override;
-    __fastcall ~TfrmUType() override = default;
+    explicit __fastcall TfrmCharStats(TComponent* AOwner) override;
+    __fastcall ~TfrmCharStats() override = default;
 };
 
 #endif

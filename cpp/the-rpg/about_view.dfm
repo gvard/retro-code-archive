@@ -55,7 +55,7 @@ object frmAbout: TfrmAbout
     DesignSize = (
       325
       93)
-    object Ico: TImage
+    object imgLogoSquare: TImage
       Left = 16
       Top = 20
       Width = 52

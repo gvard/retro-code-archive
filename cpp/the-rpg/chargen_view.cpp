@@ -38,12 +38,12 @@ static auto parse_race_line(const String& ALine) -> race_data
     return data;
 }
 
-__fastcall TfrmUInfo::TfrmUInfo(TComponent* Owner)
+__fastcall TfrmCharGen::TfrmCharGen(TComponent* Owner)
     : TForm(Owner)
 {
 }
 
-void __fastcall TfrmUInfo::Button1Click(TObject* /*Sender*/)
+void __fastcall TfrmCharGen::Button1Click(TObject* /*Sender*/)
 {
     using namespace std::string_view_literals;
     constexpr auto title = L"The RPG"sv;
@@ -110,8 +110,8 @@ void __fastcall TfrmUInfo::Button1Click(TObject* /*Sender*/)
 
     User->age = parsed_age;
     User->Name = user_name;
-    User->CrType = ComboBox1->Text;
-    User->SexType = ComboBox2->Text;
+    User->CrType = cbRace->Text;
+    User->SexType = cbGender->Text;
 
     // Чтение модификаторов расы из хранилища ресурсов
     const auto res = storage_system::get().load_race_file();
@@ -141,15 +141,15 @@ void __fastcall TfrmUInfo::Button1Click(TObject* /*Sender*/)
     this->ModalResult = mrOk;
 }
 
-void __fastcall TfrmUInfo::Edit1KeyDown(TObject* /*Sender*/, WORD& Key, TShiftState /*Shift*/)
+void __fastcall TfrmCharGen::Edit1KeyDown(TObject* /*Sender*/, WORD& Key, TShiftState /*Shift*/)
 {
     if (Key == VK_RETURN)
     {
-        ComboBox1->SetFocus();
+        cbRace->SetFocus();
     }
 }
 
-void __fastcall TfrmUInfo::Edit2KeyDown(TObject* /*Sender*/, WORD& Key, TShiftState /*Shift*/)
+void __fastcall TfrmCharGen::Edit2KeyDown(TObject* /*Sender*/, WORD& Key, TShiftState /*Shift*/)
 {
     if (Key == VK_RETURN)
     {
@@ -157,9 +157,9 @@ void __fastcall TfrmUInfo::Edit2KeyDown(TObject* /*Sender*/, WORD& Key, TShiftSt
     }
 }
 
-void __fastcall TfrmUInfo::FormShow(TObject* /*Sender*/)
+void __fastcall TfrmCharGen::FormShow(TObject* /*Sender*/)
 {
-    ComboBox1->Items->Clear();
+    cbRace->Items->Clear();
 
     // Загрузка через лаконичный и безопасный storage_manager
     const auto res = storage_system::get().load_race_file();
@@ -171,17 +171,17 @@ void __fastcall TfrmUInfo::FormShow(TObject* /*Sender*/)
             const race_data race = parse_race_line(String(raw_line.c_str()));
             if (!race.name.IsEmpty())
             {
-                ComboBox1->Items->Add(race.name);
+                cbRace->Items->Add(race.name);
             }
         }
     }
 
     // Дефолтный фоллбек, если файл пуст или отсутствует
-    if (ComboBox1->Items->Count == 0)
+    if (cbRace->Items->Count == 0)
     {
-        ComboBox1->Items->Add(L"Человек");
-        ComboBox1->Items->Add(L"Эльф");
+        cbRace->Items->Add(L"Человек");
+        cbRace->Items->Add(L"Эльф");
     }
 
-    ComboBox1->ItemIndex = 0;
+    cbRace->ItemIndex = 0;
 }

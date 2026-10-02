@@ -7,13 +7,13 @@
 #include "chargen_view.h"
 #include "chapt.h"
 #include "inventory_view.h"
-#include "character_view.h"
+#include "charstats_view.h"
 #include "fight.h"
 #include "storage_manager.h"
 
 #pragma resource "*.dfm"
 
-TfrmFirst* frmFirst;
+TfrmMainMenu* frmMainMenu;
 TUser* User;
 String ExePath;
 
@@ -267,7 +267,7 @@ auto TUser::SaveGame(const String& AFileName, int ACurrentQid) -> bool
     return success;
 }
 
-__fastcall TfrmFirst::TfrmFirst(TComponent* Owner)
+__fastcall TfrmMainMenu::TfrmMainMenu(TComponent* Owner)
     : TForm(Owner)
 {
     storage_system::initialize();
@@ -292,7 +292,7 @@ __fastcall TfrmFirst::TfrmFirst(TComponent* Owner)
     ExePath = ExtractFilePath(Application->ExeName);
 }
 
-__fastcall TfrmFirst::~TfrmFirst()
+__fastcall TfrmMainMenu::~TfrmMainMenu()
 {
     if (User != nullptr)
     {
@@ -304,12 +304,12 @@ __fastcall TfrmFirst::~TfrmFirst()
     delete User;
 }
 
-void __fastcall TfrmFirst::NewClick(TObject* /*Sender*/)
+void __fastcall TfrmMainMenu::NewClick(TObject* /*Sender*/)
 {
     User->Clear();
     this->Hide();
 
-    auto info_form = std::make_unique<TfrmUInfo>(this);
+    auto info_form = std::make_unique<TfrmCharGen>(this);
 
     if (info_form->ShowModal() == mrOk)
     {
@@ -327,7 +327,7 @@ void __fastcall TfrmFirst::NewClick(TObject* /*Sender*/)
     }
 }
 
-void __fastcall TfrmFirst::LoadClick(TObject* /*Sender*/)
+void __fastcall TfrmMainMenu::LoadClick(TObject* /*Sender*/)
 {
     OpenDialog1->FileName = L"";
     OpenDialog1->InitialDir = ExePath;
@@ -336,23 +336,23 @@ void __fastcall TfrmFirst::LoadClick(TObject* /*Sender*/)
     {
         if (User->LoadGame(OpenDialog1->FileName))
         {
-            frmFirst->Hide();
+            frmMainMenu->Hide();
             frmChapt->Show();
         }
     }
 }
 
-void __fastcall TfrmFirst::frmFirstCreate(TObject* /*Sender*/)
+void __fastcall TfrmMainMenu::frmMainMenuCreate(TObject* /*Sender*/)
 {
     Label2->Caption = L"Version " + APP_VERSION;
 }
 
-void __fastcall TfrmFirst::ExitClick(TObject* /*Sender*/)
+void __fastcall TfrmMainMenu::ExitClick(TObject* /*Sender*/)
 {
     this->Close();
 }
 
-void __fastcall TfrmFirst::AboutClick(TObject* /*Sender*/)
+void __fastcall TfrmMainMenu::AboutClick(TObject* /*Sender*/)
 {
     auto temporaryAbout = std::make_unique<TfrmAbout>(nullptr);
     temporaryAbout->ShowModal();

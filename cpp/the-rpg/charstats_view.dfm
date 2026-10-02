@@ -1,4 +1,4 @@
-object frmUType: TfrmUType
+object frmCharStats: TfrmCharStats
   Left = 456
   Top = 313
   BorderStyle = bsDialog

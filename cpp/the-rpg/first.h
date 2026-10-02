@@ -12,7 +12,7 @@
 
 const String APP_VERSION = L"0.1.5";
 
-class TfrmFirst : public TForm
+class TfrmMainMenu : public TForm
 {
 __published:
     TMainMenu* MainMenu1;
@@ -24,7 +24,7 @@ __published:
     TMenuItem* Exit;
     TLabel* Label1;
     TLabel* Label2;
-    TImage* Image1;
+    TImage* imgLogoFull;
     TOpenDialog* OpenDialog1;
     TActionList* ActionList1;
     TAction* actNewGame;
@@ -34,15 +34,15 @@ __published:
     void __fastcall NewClick(TObject* Sender);
     void __fastcall ExitClick(TObject* Sender);
     void __fastcall AboutClick(TObject* Sender);
-    void __fastcall frmFirstCreate(TObject* Sender);
+    void __fastcall frmMainMenuCreate(TObject* Sender);
     void __fastcall LoadClick(TObject* Sender);
 
 private:
     TStringList* save;
 
 public:
-    __fastcall TfrmFirst(TComponent* Owner) override;
-    __fastcall ~TfrmFirst();
+    __fastcall TfrmMainMenu(TComponent* Owner) override;
+    __fastcall ~TfrmMainMenu();
 };
 
 class TUser
@@ -76,6 +76,6 @@ public:
 
 extern String ExePath;
 extern TUser* User;
-extern PACKAGE TfrmFirst* frmFirst;
+extern PACKAGE TfrmMainMenu* frmMainMenu;
 
 #endif

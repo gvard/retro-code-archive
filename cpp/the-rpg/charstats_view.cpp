@@ -1,14 +1,14 @@
 #include "first.h"
-#include "character_view.h"
+#include "charstats_view.h"
 
 #pragma resource "*.dfm"
 
-__fastcall TfrmUType::TfrmUType(TComponent* AOwner)
+__fastcall TfrmCharStats::TfrmCharStats(TComponent* AOwner)
     : TForm(AOwner)
 {
 }
 
-void __fastcall TfrmUType::frmShow(TObject* /*Sender*/)
+void __fastcall TfrmCharStats::frmShow(TObject* /*Sender*/)
 {
     Lbl1->Caption = L"Имя: " + User->Name;
     Lbl2->Caption = L"Раса: " + User->CrType;
@@ -23,12 +23,12 @@ void __fastcall TfrmUType::frmShow(TObject* /*Sender*/)
     this->update_stamina_display();
 }
 
-void __fastcall TfrmUType::OKBtnClick(TObject* /*Sender*/)
+void __fastcall TfrmCharStats::OKBtnClick(TObject* /*Sender*/)
 {
     this->ModalResult = mrOk;
 }
 
-void TfrmUType::update_stamina_display()
+void TfrmCharStats::update_stamina_display()
 {
     const int max_stamina = User->GetMaxStamina();
     lblStamina->Caption = L"Выносливость: " + IntToStr(User->s) + L" / " + IntToStr(max_stamina);
@@ -42,7 +42,7 @@ void TfrmUType::update_stamina_display()
         lblStamina->Font->Color = clWindowText;
     }
 }
-void __fastcall TfrmUType::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+void __fastcall TfrmCharStats::FormKeyDown(TObject* /*Sender*/, WORD& Key, TShiftState Shift)
 {
     if (Shift == TShiftState{})
     {

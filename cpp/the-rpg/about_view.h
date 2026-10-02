@@ -1,5 +1,4 @@
-#ifndef about_viewH
-#define about_viewH
+#pragma once
 
 #include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>
@@ -11,7 +10,7 @@ class TfrmAbout : public TForm
 {
 __published:
     TPanel* Panel1;
-    TImage* Ico;
+    TImage* imgLogoSquare;
     TLabel* ProductName;
     TLabel* Version;
     TLabel* Copyright;
@@ -28,5 +27,3 @@ public:
     __fastcall TfrmAbout(TComponent* AOwner) override;
     __fastcall ~TfrmAbout() = default;
 };
-
-#endif

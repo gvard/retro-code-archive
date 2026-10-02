@@ -10,13 +10,13 @@ struct race_data
     int modifier;
 };
 
-class TfrmUInfo : public TForm
+class TfrmCharGen : public TForm
 {
 __published:
     TButton* Button1;
     TEdit* Edit1;
-    TComboBox* ComboBox1;
-    TComboBox* ComboBox2;
+    TComboBox* cbRace;
+    TComboBox* cbGender;
     TEdit* Edit2;
     TLabel* Label1;
     TLabel* Label2;
@@ -29,8 +29,8 @@ __published:
     void __fastcall FormShow(TObject* Sender);
 
 public:
-    explicit __fastcall TfrmUInfo(TComponent* Owner) override;
-    __fastcall ~TfrmUInfo() override = default;
+    explicit __fastcall TfrmCharGen(TComponent* Owner) override;
+    __fastcall ~TfrmCharGen() override = default;
 };
 
 #endif

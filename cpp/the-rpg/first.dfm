@@ -1,4 +1,4 @@
-object frmFirst: TfrmFirst
+object frmMainMenu: TfrmMainMenu
   Left = 351
   Top = 337
   Align = alCustom
@@ -16,7 +16,7 @@ object frmFirst: TfrmFirst
   Menu = MainMenu1
   OldCreateOrder = False
   Position = poScreenCenter
-  OnCreate = frmFirstCreate
+  OnCreate = frmMainMenuCreate
   DesignSize = (
     432
     110)
@@ -50,7 +50,7 @@ object frmFirst: TfrmFirst
     Anchors = [akRight, akBottom]
     Caption = 'Version 0.1'
   end
-  object Image1: TImage
+  object imgLogoFull: TImage
     Left = 0
     Top = 17
     Width = 432
@@ -607,15 +607,18 @@ object frmFirst: TfrmFirst
   object ActionList1: TActionList
     Left = 64
     object actNewGame: TAction
+      Category = 'MenuActions'
       Caption = 'actNewGame'
       ShortCut = 16462
       OnExecute = NewClick
     end
     object actSaveGame: TAction
+      Category = 'MenuActions'
       Caption = 'actSaveGame'
       ShortCut = 16467
     end
     object actLoadGame: TAction
+      Category = 'MenuActions'
       Caption = 'actLoadGame'
       ShortCut = 16460
       OnExecute = LoadClick
