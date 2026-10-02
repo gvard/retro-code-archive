@@ -197,11 +197,81 @@ void TfrmChapt::LoadNext(int target_qid)
             break;
 
         case L'f':
-            Application->CreateForm(__classid(TfrmFight), &frmFight);
-            frmFight->qptr = qptr;
-            PlaySound(storage_system::get().get_sound_path("fight.wav").c_str(), nullptr, SND_ASYNC);
-            frmChapt->Hide();
-            frmFight->Show();
+            {
+                using namespace std::string_view_literals;
+                const int current_battle_qid = this->currentQid;
+                AnsiString fight_str = chapter->Strings[qptr++];
+                fight_str.Trim();
+
+                char buf[256];
+                std::strcpy(buf, fight_str.c_str());
+
+                int qid = 0, target_jump = 0;
+                char ch = 0;
+                std::sscanf(buf, "%d%c %d", &qid, &ch, &target_jump);
+
+                char* caption_ptr = nullptr;
+                for (size_t i = 0, j = 0; i < std::strlen(buf); ++i) {
+                    if (buf[i] == ' ') {
+                        j++;
+                        if (j >= 2) { caption_ptr = &buf[i + 1]; break; }
+                    }
+                }
+
+                auto fight_form = std::make_unique<TfrmFight>(this);
+                fight_form->battle_caption = caption_ptr;
+
+                // Кэшируем расы из подсистемы хранения, чтобы передать в окно боя
+                const auto race_res = storage_system::get().load_race_file();
+                if (race_res.is_loaded) {
+                    for (const auto& line : race_res.lines) {
+                        fight_form->raw_race_types.push_back(line);
+                    }
+                }
+
+                while (qptr < chapter->Count) {
+                    String line_data = chapter->Strings[qptr];
+                    if (line_data.Length() <= 0) break;
+
+                    char enemy_buf[256];
+                    std::strcpy(enemy_buf, AnsiString(line_data).c_str());
+
+                    int enemy_type = 0, enemy_hits = 0;
+                    std::sscanf(enemy_buf, "%d %d", &enemy_type, &enemy_hits);
+
+                    char* enemy_name_ptr = nullptr;
+                    for (size_t i = 0, j = 0; i < std::strlen(enemy_buf); ++i) {
+                        if (enemy_buf[i] == ' ') {
+                            j++;
+                            if (j >= 2) { enemy_name_ptr = &enemy_buf[i + 1]; break; }
+                        }
+                    }
+
+                    fight_form->raw_enemies.push_back({enemy_type, enemy_hits, enemy_name_ptr});
+                    qptr++;
+                }
+
+                this->Hide();
+                PlaySound(storage_system::get().get_sound_path("fight.wav").c_str(), nullptr, SND_ASYNC);
+                const int battle_result = fight_form->ShowModal();
+                this->Show();
+
+                if (battle_result == mrOk)
+                {
+                    this->LoadNext(target_jump);
+                }
+                else
+                {
+                    User->hlth = 15;
+                    User->s = 10;
+
+                    this->LoadNext(this->previousTextQid);
+
+                    constexpr auto title = L"The RPG"sv;
+                    constexpr auto msg = L"Вы потерпели поражение и убежали от врагов."sv;
+                    ::MessageBoxW(this->Handle, msg.data(), title.data(), MB_OK | MB_ICONWARNING);
+                }
+            }
             return;
 
         case L'e':
@@ -293,6 +363,7 @@ void __fastcall TfrmChapt::Button1Click(TObject* /*Sender*/)
     // Режим 2: стандартный игровой процесс
     int jump = 0;
     swscanf(chapter->Strings[aptr + selected_index].c_str(), L"%d ", &jump);
+    this->previousTextQid = this->currentQid;
     User->Refresh();
     this->hasUnsavedChanges = true;
     this->LoadNext(jump);

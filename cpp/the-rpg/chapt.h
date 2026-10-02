@@ -46,6 +46,7 @@ private:
     TStringList* save;
     int aptr;
     int currentQid;
+    int previousTextQid = 1;
     bool is_test_mode = false;
     int test_qptr = 0;
 

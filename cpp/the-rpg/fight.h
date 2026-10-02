@@ -1,10 +1,19 @@
-#ifndef fightH
-#define fightH
+# pragma once
 
-#include <Vcl.Forms.hpp>
-#include <Vcl.StdCtrls.hpp>
-#include <Vcl.Grids.hpp>
 #include <Vcl.ComCtrls.hpp>
+#include <Vcl.Grids.hpp>
+#include <Vcl.StdCtrls.hpp>
+#include <Vcl.Forms.hpp>
+
+#include <vector>
+#include <string>
+
+
+struct EnemyInitData {
+    int race_type_idx;
+    int base_hit;
+    String custom_name;
+};
 
 class TfrmFight : public TForm
 {
@@ -14,7 +23,6 @@ __published:
     TStatusBar* sbBar;
     TButton* btnAttack;
 
-    void __fastcall FormClose(TObject* Sender, TCloseAction& Action);
     void __fastcall FormCreate(TObject* Sender);
     void __fastcall FormShow(TObject* Sender);
     void __fastcall btnAttackClick(TObject* Sender);
@@ -26,23 +34,26 @@ __published:
     void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
 
 private:
-    int apt;
-    int jump;
-    int selWeapon;
-    int selEnemy;
+    int apt = 0;
+    int selWeapon = 0;
+    int selEnemy = 0;
 
     void updateApt();
-    void update();
+    void update_display();
     void opponentAttack();
-    auto check() -> bool;
+    auto check_battle_state() -> bool;
 
 public:
-    int qptr;
+    String battle_caption;
+    std::vector<EnemyInitData> raw_enemies;
+    std::vector<std::wstring> raw_race_types;
 
-    __fastcall TfrmFight(TComponent* Owner) override;
+    explicit __fastcall TfrmFight(TComponent* Owner) override;
     __fastcall ~TfrmFight() = default;
+
+protected:
+    void __fastcall CreateParams(TCreateParams& Params) override;
+
 };
 
 extern PACKAGE TfrmFight* frmFight;
-
-#endif

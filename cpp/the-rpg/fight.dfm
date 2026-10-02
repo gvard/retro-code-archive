@@ -18,7 +18,6 @@ object frmFight: TfrmFight
   KeyPreview = True
   OldCreateOrder = False
   Position = poScreenCenter
-  OnClose = FormClose
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   OnResize = FormResize
