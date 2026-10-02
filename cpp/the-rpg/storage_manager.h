@@ -3,12 +3,20 @@
 #include <vector>
 #include <string>
 
-struct GameResourceData {
+struct race_data
+{
+    std::wstring name;
+    int modifier = 0;
+};
+
+struct GameResourceData
+{
     std::vector<std::wstring> lines;
     bool is_loaded = false;
 };
 
-class IStorageService {
+class IStorageService
+{
 public:
     virtual ~IStorageService() = default;
 
@@ -16,6 +24,7 @@ public:
 
     virtual std::filesystem::path get_sound_path(const std::string& sound_name) const = 0;
     virtual std::filesystem::path get_save_path(const std::string& save_name) const = 0;
+    virtual const std::vector<race_data>& get_races() = 0;
 
     virtual GameResourceData load_chapter_file() = 0;
     virtual GameResourceData load_test_file() = 0;
@@ -27,7 +36,8 @@ public:
     virtual GameResourceData load_save_file(const std::string& save_name) = 0;
 };
 
-namespace storage_system {
+namespace storage_system
+{
     void initialize();
     IStorageService& get();
 }

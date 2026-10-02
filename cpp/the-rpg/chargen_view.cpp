@@ -5,38 +5,11 @@
 
 #include <Winapi.Windows.hpp>
 
+#include "storage_manager.h"
 #include "chargen_view.h"
 #include "first.h"
-#include "storage_manager.h"
 
 #pragma resource "*.dfm"
-
-static auto parse_race_line(const String& ALine) -> race_data
-{
-    race_data data{.name = L"", .modifier = 0};
-
-    String currentLine = ALine.Trim();
-    if (currentLine.IsEmpty())
-        return data;
-
-    int lastSpace = currentLine.LastDelimiter(L" ");
-    if (lastSpace > 0)
-    {
-        data.name = currentLine.SubString(1, lastSpace - 1).Trim();
-        String modStr = currentLine.SubString(lastSpace + 1, currentLine.Length() - lastSpace).Trim();
-
-        if (modStr.Pos(L"+") == 1)
-        {
-            modStr = modStr.SubString(2, modStr.Length() - 1);
-        }
-        data.modifier = StrToIntDef(modStr, 0);
-    }
-    else
-    {
-        data.name = currentLine;
-    }
-    return data;
-}
 
 __fastcall TfrmCharGen::TfrmCharGen(TComponent* Owner)
     : TForm(Owner)
@@ -114,30 +87,18 @@ void __fastcall TfrmCharGen::Button1Click(TObject* /*Sender*/)
     User->SexType = cbGender->Text;
 
     // Чтение модификаторов расы из хранилища ресурсов
-    const auto res = storage_system::get().load_race_file();
-    if (res.is_loaded)
+    const auto& races = storage_system::get().get_races();
+
+    for (const auto& race : races)
     {
-        const String user_race_lower = User->CrType.LowerCase();
-
-        for (const auto& raw_line : res.lines)
+        // Превращаем std::wstring из файла в VCL String и сравниваем без учета регистра и пробелов
+        if (AnsiSameText(String(race.name.c_str()).Trim(), User->CrType.Trim()))
         {
-            const String file_line = String(raw_line.c_str());
-
-            if (file_line.LowerCase().Pos(user_race_lower) > 0)
-            {
-                const race_data race = parse_race_line(file_line);
-                User->str += race.modifier;
-
-                const String log_msg = L"[ОТЛАДКА uinfo] Раса: " + User->CrType +
-                                       L" | Модификатор: " + IntToStr(race.modifier) +
-                                       L" | Итоговая сила: " + IntToStr(User->str);
-                OutputDebugString(log_msg.c_str());
-                break;
-            }
+            User->str += race.modifier;
+            break;
         }
     }
 
-    // Проверки пройдены успешно — только ТЕПЕРЬ закрываем модальное окно
     this->ModalResult = mrOk;
 }
 
@@ -162,18 +123,10 @@ void __fastcall TfrmCharGen::FormShow(TObject* /*Sender*/)
     cbRace->Items->Clear();
 
     // Загрузка через лаконичный и безопасный storage_manager
-    const auto res = storage_system::get().load_race_file();
-
-    if (res.is_loaded)
+    const auto& races = storage_system::get().get_races();
+    for (const auto& race : races)
     {
-        for (const auto& raw_line : res.lines)
-        {
-            const race_data race = parse_race_line(String(raw_line.c_str()));
-            if (!race.name.IsEmpty())
-            {
-                cbRace->Items->Add(race.name);
-            }
-        }
+        cbRace->Items->Add(race.name.c_str());
     }
 
     // Дефолтный фоллбек, если файл пуст или отсутствует

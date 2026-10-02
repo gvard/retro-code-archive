@@ -80,9 +80,16 @@ void __fastcall TfrmFight::FormShow(TObject* /*Sender*/)
     {
         grEnemy->Cells[0][count + 1] = " ";
 
-        if (enemy.race_type_idx - 1 >= 0 && enemy.race_type_idx - 1 < static_cast<int>(raw_race_types.size())) {
-            grEnemy->Cells[1][count + 1] = raw_race_types[enemy.race_type_idx - 1].c_str();
-        } else {
+        const auto& parsed_races = storage_system::get().get_races();
+        const int target_idx = enemy.race_type_idx - 1;
+
+        if (target_idx >= 0 && target_idx < static_cast<int>(parsed_races.size()))
+        {
+            // Выводим только имя расы, так как парсер уже отрезал модификатор
+            grEnemy->Cells[1][count + 1] = parsed_races[target_idx].name.c_str();
+        }
+        else
+        {
             grEnemy->Cells[1][count + 1] = L"Неизвестно";
         }
 
@@ -224,7 +231,8 @@ void __fastcall TfrmFight::btnAttackClick(TObject* /*Sender*/)
 
 void __fastcall TfrmFight::grEnemySelectCell(TObject* /*Sender*/, int /*ACol*/, int Row, bool& /*CanSelect*/)
 {
-    for (int i = 0; i < grEnemy->RowCount; ++i) grEnemy->Cells[0][i] = "";
+    for (int i = 0; i < grEnemy->RowCount; ++i)
+        grEnemy->Cells[0][i] = "";
     grEnemy->Cells[0][Row] = ">";
     selEnemy = Row - 1;
     check_battle_state();
@@ -232,7 +240,8 @@ void __fastcall TfrmFight::grEnemySelectCell(TObject* /*Sender*/, int /*ACol*/, 
 
 void __fastcall TfrmFight::grWeaponSelectCell(TObject* /*Sender*/, int /*ACol*/, int Row, bool& /*CanSelect*/)
 {
-    for (int i = 0; i < grWeapon->RowCount; ++i) grWeapon->Cells[0][i] = "";
+    for (int i = 0; i < grWeapon->RowCount; ++i)
+        grWeapon->Cells[0][i] = "";
     grWeapon->Cells[0][Row] = ">";
     selWeapon = Row - 1;
     check_battle_state();
@@ -240,12 +249,14 @@ void __fastcall TfrmFight::grWeaponSelectCell(TObject* /*Sender*/, int /*ACol*/,
 
 void __fastcall TfrmFight::grEnemyKeyDown(TObject* /*Sender*/, WORD& Key, TShiftState /*Shift*/)
 {
-    if (Key == VK_RETURN) grWeapon->SetFocus();
+    if (Key == VK_RETURN)
+        grWeapon->SetFocus();
 }
 
 void __fastcall TfrmFight::grWeaponKeyDown(TObject* /*Sender*/, WORD& Key, TShiftState /*Shift*/)
 {
-    if (Key == VK_RETURN) btnAttack->SetFocus();
+    if (Key == VK_RETURN)
+        btnAttack->SetFocus();
 }
 
 void __fastcall TfrmFight::FormResize(TObject* /*Sender*/)

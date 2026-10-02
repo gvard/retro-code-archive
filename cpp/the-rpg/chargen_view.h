@@ -4,12 +4,6 @@
 #include <Vcl.Forms.hpp>
 #include <Vcl.StdCtrls.hpp>
 
-struct race_data
-{
-    String name;
-    int modifier;
-};
-
 class TfrmCharGen : public TForm
 {
 __published:
