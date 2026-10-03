@@ -22,8 +22,8 @@ __published:
     TMenuItem* New;
     TMenuItem* Load;
     TMenuItem* Exit;
-    TLabel* Label1;
-    TLabel* Label2;
+	TLabel *lblGreeting;
+	TLabel *lblVersion;
     TImage* imgLogoFull;
     TOpenDialog* OpenDialog1;
     TActionList* ActionList1;
@@ -65,12 +65,12 @@ public:
     String SexType;
 
     int age;
-    int str;
+    int strength;
     int dex;
     int mag;
     int hlth;
-    int man;
-    int s;
+    int mana;
+    int stamina;
     int maxWeight;
 };
 

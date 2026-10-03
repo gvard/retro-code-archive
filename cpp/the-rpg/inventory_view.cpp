@@ -37,7 +37,7 @@ void TfrmInventory::update_weight_display()
         total_weight,
         User->maxWeight,
         is_overloaded ? L"ПЕРЕГРУЗ!" : L"Норма",
-        User->s,
+        User->stamina,
         User->GetMaxStamina()
     );
     OutputDebugString(weight_log);

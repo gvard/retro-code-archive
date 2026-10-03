@@ -106,7 +106,7 @@ void __fastcall TfrmFight::FormShow(TObject* /*Sender*/)
 
 void TfrmFight::updateApt()
 {
-    apt = (User->dex * User->s) / 100;
+    apt = (User->dex * User->stamina) / 100;
     if (apt < 0)
     {
         apt = 0;
@@ -116,8 +116,8 @@ void TfrmFight::updateApt()
 void TfrmFight::update_display()
 {
     sbBar->Panels->Items[0]->Text = L"Health: " + IntToStr(User->hlth);
-    sbBar->Panels->Items[1]->Text = L"Мана: " + IntToStr(User->man);
-    sbBar->Panels->Items[2]->Text = L"Stam: " + IntToStr(User->s);
+    sbBar->Panels->Items[1]->Text = L"Мана: " + IntToStr(User->mana);
+    sbBar->Panels->Items[2]->Text = L"Stam: " + IntToStr(User->stamina);
     sbBar->Panels->Items[3]->Text = L"Action points: " + IntToStr(apt);
 }
 
@@ -136,7 +136,7 @@ void TfrmFight::opponentAttack()
     }
 
     User->hlth -= total_hit;
-    User->s -= total_hit;
+    User->stamina -= total_hit;
     User->Refresh();
 
     updateApt();
@@ -168,7 +168,7 @@ auto TfrmFight::check_battle_state() -> bool
     }
 
     btnAttack->Enabled = !(grEnemy->Cells[3][selEnemy + 1].ToInt() <= 0 ||
-                           grWeapon->Cells[3][selWeapon + 1].ToInt() > User->man ||
+                           grWeapon->Cells[3][selWeapon + 1].ToInt() > User->mana ||
                            grWeapon->Cells[4][selWeapon + 1].ToInt() > apt);
 
     bool all_enemies_dead = true;
@@ -203,7 +203,7 @@ auto TfrmFight::check_battle_state() -> bool
 void __fastcall TfrmFight::btnAttackClick(TObject* /*Sender*/)
 {
     grEnemy->Cells[3][selEnemy + 1] = IntToStr(grEnemy->Cells[3][selEnemy + 1].ToInt() - grWeapon->Cells[2][selWeapon + 1].ToInt());
-    User->man -= grWeapon->Cells[3][selWeapon + 1].ToInt();
+    User->mana -= grWeapon->Cells[3][selWeapon + 1].ToInt();
     apt -= grWeapon->Cells[4][selWeapon + 1].ToInt();
 
     this->update_display();

@@ -14,11 +14,11 @@ void __fastcall TfrmCharStats::frmShow(TObject* /*Sender*/)
     Lbl2->Caption = L"Раса: " + User->CrType;
     Lbl3->Caption = L"Пол: " + User->SexType;
     Lbl4->Caption = L"Возраст: " + IntToStr(User->age);
-    Lbl5->Caption = L"Сила: " + IntToStr(User->str);
+    Lbl5->Caption = L"Сила: " + IntToStr(User->strength);
     Lbl6->Caption = L"Ловкость: " + IntToStr(User->dex);
     Lbl7->Caption = L"Магия: " + IntToStr(User->mag);
     Lbl8->Caption = L"Здоровье: " + IntToStr(User->hlth);
-    Lbl9->Caption = L"Мана: " + IntToStr(User->man);
+    Lbl9->Caption = L"Мана: " + IntToStr(User->mana);
 
     this->update_stamina_display();
 }
@@ -31,9 +31,9 @@ void __fastcall TfrmCharStats::OKBtnClick(TObject* /*Sender*/)
 void TfrmCharStats::update_stamina_display()
 {
     const int max_stamina = User->GetMaxStamina();
-    lblStamina->Caption = L"Выносливость: " + IntToStr(User->s) + L" / " + IntToStr(max_stamina);
+    lblStamina->Caption = L"Выносливость: " + IntToStr(User->stamina) + L" / " + IntToStr(max_stamina);
 
-    if (User->s < max_stamina)
+    if (User->stamina < max_stamina)
     {
         lblStamina->Font->Color = clRed;
     }

@@ -263,7 +263,7 @@ void TfrmChapt::LoadNext(int target_qid)
                 else
                 {
                     User->hlth = 15;
-                    User->s = 10;
+                    User->stamina = 10;
 
                     this->LoadNext(this->previousTextQid);
 
@@ -326,7 +326,7 @@ void __fastcall TfrmChapt::Button1Click(TObject* /*Sender*/)
 
         // Читаем модификаторы параметров из оригинальной строки
         swscanf(chapter->Strings[aptr + selected_index].c_str(), L"%d %d %d", &istr, &idex, &imag);
-        User->str += istr;
+        User->strength += istr;
         User->dex += idex;
         User->mag += imag;
 
@@ -334,8 +334,8 @@ void __fastcall TfrmChapt::Button1Click(TObject* /*Sender*/)
         if (aptr + ListBox1->Items->Count >= chapter->Count)
         {
             // Тест завершен, фиксируем производные характеристики персонажа
-            User->maxWeight = static_cast<int>(std::lround(User->str * 7.5));
-            User->s = User->GetMaxStamina();
+            User->maxWeight = static_cast<int>(std::lround(User->strength * 7.5));
+            User->stamina = User->GetMaxStamina();
 
             // Показываем модальное окно характеристик
             auto stats_form = std::make_unique<TfrmCharStats>(this);

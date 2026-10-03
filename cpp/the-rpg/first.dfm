@@ -22,7 +22,7 @@ object frmMainMenu: TfrmMainMenu
     110)
   PixelsPerInch = 96
   TextHeight = 13
-  object Label1: TLabel
+  object lblGreeting: TLabel
     Left = 0
     Top = 0
     Width = 432
@@ -41,7 +41,7 @@ object frmMainMenu: TfrmMainMenu
     ExplicitTop = 2
     ExplicitWidth = 146
   end
-  object Label2: TLabel
+  object lblVersion: TLabel
     Left = 374
     Top = 96
     Width = 53

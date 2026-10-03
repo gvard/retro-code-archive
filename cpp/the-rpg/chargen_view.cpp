@@ -94,7 +94,7 @@ void __fastcall TfrmCharGen::Button1Click(TObject* /*Sender*/)
         // Превращаем std::wstring из файла в VCL String и сравниваем без учета регистра и пробелов
         if (AnsiSameText(String(race.name.c_str()).Trim(), User->CrType.Trim()))
         {
-            User->str += race.modifier;
+            User->strength += race.modifier;
             break;
         }
     }

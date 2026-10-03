@@ -35,11 +35,11 @@ void TUser::Clear()
     CrType = L"";
     SexType = L"";
     age = 0;
-    str = 5;
+    strength = 5;
     dex = 5;
     mag = 5;
     hlth = 100;
-    man = 100;
+    mana = 100;
     maxWeight = 0;
 
     // Безопасное выделение памяти под списки предметов, если они еще не созданы
@@ -54,29 +54,29 @@ void TUser::Clear()
     // Запись стартового маркера инициализации
     UserItems->Add(L"__INIT_NEW_GAME__");
 
-    s = GetMaxStamina();
+    stamina = GetMaxStamina();
 }
 
 void TUser::Refresh()
 {
     hlth += 5;
-    man += 5;
-    s += 5;
+    mana += 5;
+    stamina += 5;
 
     if (hlth > 100)
         hlth = 100;
-    if (man > 100)
-        man = 100;
+    if (mana > 100)
+        mana = 100;
 
     int maxStamina = GetMaxStamina();
-    if (s > maxStamina)
-        s = maxStamina;
+    if (stamina > maxStamina)
+        stamina = maxStamina;
 }
 
 auto TUser::GetMaxStamina() -> int
 {
     // [Core Mechanic] Returns maximum stamina based on Strength and Dexterity
-    return 50 + (str * 4) + (dex * 2);
+    return 50 + (strength * 4) + (dex * 2);
 }
 
 void TUser::RecalculateStamina(int totalWeight)
@@ -85,11 +85,11 @@ void TUser::RecalculateStamina(int totalWeight)
 
     if (totalWeight > maxWeight)
     {
-        s = maxStamina - 20; // Штраф -20 единиц при перегрузе
+        stamina = maxStamina - 20; // Штраф -20 единиц при перегрузе
     }
     else
     {
-        s = maxStamina;
+        stamina = maxStamina;
     }
 }
 
@@ -112,13 +112,13 @@ auto TUser::LoadGame(const String& AFileName) -> bool
             CrType = saveList->Strings[1];
             SexType = saveList->Strings[2];
             age = StrToInt(saveList->Strings[3]);
-            str = StrToInt(saveList->Strings[4]);
+            strength = StrToInt(saveList->Strings[4]);
             dex = StrToInt(saveList->Strings[5]);
             mag = StrToInt(saveList->Strings[6]);
             hlth = StrToInt(saveList->Strings[7]);
-            man = StrToInt(saveList->Strings[8]);
-            s = StrToInt(saveList->Strings[9]);
-            maxWeight = static_cast<int>(std::lround(str * 7.5));
+            mana = StrToInt(saveList->Strings[8]);
+            stamina = StrToInt(saveList->Strings[9]);
+            maxWeight = static_cast<int>(std::lround(strength * 7.5));
 
             int nextChapter = StrToInt(saveList->Strings[10]);
 
@@ -233,12 +233,12 @@ auto TUser::SaveGame(const String& AFileName, int ACurrentQid) -> bool
         saveList->Add(CrType);
         saveList->Add(SexType);
         saveList->Add(IntToStr(age));
-        saveList->Add(IntToStr(str));
+        saveList->Add(IntToStr(strength));
         saveList->Add(IntToStr(dex));
         saveList->Add(IntToStr(mag));
         saveList->Add(IntToStr(hlth));
-        saveList->Add(IntToStr(man));
-        saveList->Add(IntToStr(s));
+        saveList->Add(IntToStr(mana));
+        saveList->Add(IntToStr(stamina));
         saveList->Add(IntToStr(ACurrentQid));
 
         saveList->Add(L"[INVENTORY]");
