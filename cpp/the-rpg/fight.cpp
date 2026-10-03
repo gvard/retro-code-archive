@@ -42,26 +42,21 @@ void __fastcall TfrmFight::FormCreate(TObject* /*Sender*/)
     grWeapon->Cells[3][0] = "Мана";
     grWeapon->Cells[4][0] = "ActPts";
 
-    const auto res = storage_system::get().load_weapon_file();
-    if (res.is_loaded && !res.lines.empty())
+    const auto& weapons = storage_system::get().get_weapons();
+
+    if (!weapons.empty())
     {
-        const int weapon_count = static_cast<int>(res.lines.size());
-        grWeapon->RowCount = std::max(2, weapon_count / 2 + 1);
+        // Устанавливаем количество строк в таблице оружия (+1 для заголовка)
+        grWeapon->RowCount = static_cast<int>(weapons.size()) + 1;
 
-        for (int idx = 0; idx < weapon_count; idx += 2)
+        int row_idx = 1;
+        for (const auto& weapon : weapons)
         {
-            int hit = 0, mana = 0, weapon_apt = 0;
-            std::string line_str;
-
-            for (wchar_t ch : res.lines[idx])
-                line_str.push_back(static_cast<char>(ch));
-
-            std::sscanf(line_str.c_str(), "%d %d %d", &hit, &mana, &weapon_apt);
-
-            grWeapon->Cells[1][idx / 2 + 1] = res.lines[idx + 1].c_str();
-            grWeapon->Cells[2][idx / 2 + 1] = IntToStr(hit);
-            grWeapon->Cells[3][idx / 2 + 1] = IntToStr(mana);
-            grWeapon->Cells[4][idx / 2 + 1] = IntToStr(weapon_apt);
+            grWeapon->Cells[1][row_idx] = UTF8String(weapon.name.c_str());
+            grWeapon->Cells[2][row_idx] = IntToStr(weapon.hp);
+            grWeapon->Cells[3][row_idx] = IntToStr(weapon.mana);
+            grWeapon->Cells[4][row_idx] = IntToStr(weapon.ap);
+            row_idx++;
         }
     }
 }

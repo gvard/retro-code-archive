@@ -1,6 +1,9 @@
 #include "storage_manager.h"
 #include <Vcl.Forms.hpp>
 #include <memory>
+#include <fstream>
+
+#include "nlohmann/json.hpp"
 
 class storage_service_vcl_impl : public IStorageService
 {
@@ -10,6 +13,7 @@ private:
     std::filesystem::path sound_path;
     std::filesystem::path saves_path;
     std::vector<race_data> cached_races;
+    std::vector<weapon_data> cached_weapons;
 
     // Внутренний хелпер загрузки, инкапсулирующий TStringList
     GameResourceData read_file_internal(const std::filesystem::path& full_path)
@@ -80,6 +84,49 @@ public:
         return cached_races;
     }
 
+    const std::vector<weapon_data>& storage_service_vcl_impl::get_weapons() override
+    {
+        if (cached_weapons.empty())
+        {
+            std::filesystem::path weapon_file_path = data_path / "weapons.json";
+            if (std::filesystem::exists(weapon_file_path))
+            {
+                std::ifstream file(weapon_file_path);
+                if (file.is_open())
+                {
+                    try
+                    {
+                        nlohmann::json json_data;
+                        file >> json_data;
+
+                        for (const auto& item : json_data)
+                        {
+                            weapon_data weapon;
+
+                            weapon.name = item.value("name", "");
+                            weapon.hp = item.value("hp", 0);
+                            weapon.mana = item.value("mana", 0);
+                            weapon.ap = item.value("ap", 0);
+
+                            cached_weapons.push_back(std::move(weapon));
+                        }
+                    }
+                    catch (...)
+                    {
+                        cached_weapons.clear();
+                    }
+                }
+            }
+
+            // Дефолтный фоллбек, если файл пуст или отсутствует
+            if (cached_weapons.empty())
+            {
+                cached_weapons.push_back({ "Кулак", 5, 0, 1 });
+            }
+        }
+        return cached_weapons;
+    }
+
     bool validate_required_resources() override
     {
         if (!std::filesystem::is_directory(data_path))
@@ -121,11 +168,6 @@ public:
     GameResourceData load_race_file() override
     {
         return read_file_internal(data_path / "crt.txt");
-    }
-
-    GameResourceData load_weapon_file() override
-    {
-        return read_file_internal(data_path / "weap.txt");
     }
 
     bool save_game_file(const std::string& save_name, const GameResourceData& data) override
