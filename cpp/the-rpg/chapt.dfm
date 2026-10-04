@@ -64,7 +64,7 @@ object frmChapt: TfrmChapt
     OnDblClick = ListBox1DblClick
     OnKeyDown = ListBox1KeyDown
   end
-  object Button1: TButton
+  object btnConfirmChoice: TButton
     Left = 172
     Top = 268
     Width = 97
@@ -72,7 +72,7 @@ object frmChapt: TfrmChapt
     Anchors = [akBottom]
     Caption = 'OK'
     TabOrder = 1
-    OnClick = Button1Click
+    OnClick = ConfirmChoiceClick
   end
   object MainMenu1: TMainMenu
     Left = 8

@@ -18,7 +18,7 @@ __published:
     TMenuItem* Save;
     TMemo* Memo1;
     TListBox* ListBox1;
-    TButton* Button1;
+    TButton* btnConfirmChoice;
     TMenuItem* menuCharacterStats;
     TMenuItem* About;
     TMenuItem* Load;
@@ -28,7 +28,7 @@ __published:
 
     void __fastcall FormCreate(TObject* Sender);
     void __fastcall ExitClick(TObject* Sender);
-    void __fastcall Button1Click(TObject* Sender);
+    void __fastcall ConfirmChoiceClick(TObject* Sender);
     void __fastcall Help1Click(TObject* Sender);
     void __fastcall AboutClick(TObject* Sender);
     void __fastcall ListBox1KeyDown(TObject* Sender, WORD& Key, TShiftState Shift);

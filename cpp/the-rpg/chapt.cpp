@@ -49,7 +49,7 @@ void __fastcall TfrmChapt::ExitClick(TObject* /*Sender*/)
 
 void __fastcall TfrmChapt::ListBox1DblClick(TObject* Sender)
 {
-    Button1Click(Sender);
+    ConfirmChoiceClick(Sender);
 }
 
 void TfrmChapt::LoadNext(int target_qid)
@@ -124,7 +124,7 @@ void TfrmChapt::LoadNext(int target_qid)
     ListBox1->Items->Clear();
 
     // Поиск нужного ID вопроса
-    for (int i = 0; i < chapter->Count; i++)
+    for (int i = 0; i < chapter->Count; ++i)
     {
         ch = 0;
         q = -1;
@@ -211,10 +211,14 @@ void TfrmChapt::LoadNext(int target_qid)
                 std::sscanf(buf, "%d%c %d", &qid, &ch, &target_jump);
 
                 char* caption_ptr = nullptr;
-                for (size_t i = 0, j = 0; i < std::strlen(buf); ++i) {
+                for (size_t i = 0, j = 0; i < std::strlen(buf); ++i)
+                {
                     if (buf[i] == ' ') {
                         j++;
-                        if (j >= 2) { caption_ptr = &buf[i + 1]; break; }
+                        if (j >= 2) {
+                            caption_ptr = &buf[i + 1];
+                            break;
+                        }
                     }
                 }
 
@@ -304,7 +308,7 @@ void TfrmChapt::LoadNext(int target_qid)
     }
 }
 
-void __fastcall TfrmChapt::Button1Click(TObject* /*Sender*/)
+void __fastcall TfrmChapt::ConfirmChoiceClick(TObject* /*Sender*/)
 {
     int selected_index = -1;
     for (int i = 0; i < ListBox1->Items->Count; ++i)
@@ -384,7 +388,7 @@ void __fastcall TfrmChapt::ListBox1KeyDown(TObject* Sender, WORD& Key, TShiftSta
 {
     if (Key == VK_RETURN)
     {
-        Button1Click(Sender);
+        ConfirmChoiceClick(Sender);
     }
 }
 
@@ -464,7 +468,7 @@ void __fastcall TfrmChapt::menuCharacterStatsClick(TObject* /*Sender*/)
 
 void __fastcall TfrmChapt::FormResize(TObject* /*Sender*/)
 {
-    Button1->Left = (ClientWidth - Button1->Width) / 2;
+    btnConfirmChoice->Left = (ClientWidth - btnConfirmChoice->Width) / 2;
 }
 
 void __fastcall TfrmChapt::FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)

@@ -72,6 +72,7 @@ public:
     int mana;
     int stamina;
     int maxWeight;
+    int gold;
 };
 
 extern String ExePath;

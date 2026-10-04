@@ -41,6 +41,7 @@ void TUser::Clear()
     hlth = 100;
     mana = 100;
     maxWeight = 0;
+    gold = 0;
 
     // Безопасное выделение памяти под списки предметов, если они еще не созданы
     if (UserItems == nullptr)
@@ -124,7 +125,7 @@ auto TUser::LoadGame(const String& AFileName) -> bool
 
             TStringList* currentTargetList = nullptr;
 
-            for (int i = 11; i < saveList->Count; i++)
+            for (int i = 11; i < saveList->Count; ++i)
             {
                 String currentLine = saveList->Strings[i].Trim();
                 if (currentLine.IsEmpty())
@@ -242,14 +243,14 @@ auto TUser::SaveGame(const String& AFileName, int ACurrentQid) -> bool
         saveList->Add(IntToStr(ACurrentQid));
 
         saveList->Add(L"[INVENTORY]");
-        for (int i = 0; i < UserItems->Count; i++)
+        for (int i = 0; i < UserItems->Count; ++i)
         {
             int itemWeight = reinterpret_cast<intptr_t>(UserItems->Objects[i]);
             saveList->Add(UserItems->Strings[i] + L" " + IntToStr(itemWeight));
         }
 
         saveList->Add(L"[ENVIRONMENT]");
-        for (int i = 0; i < EnvironmentItems->Count; i++)
+        for (int i = 0; i < EnvironmentItems->Count; ++i)
         {
             int envWeight = reinterpret_cast<intptr_t>(EnvironmentItems->Objects[i]);
             saveList->Add(EnvironmentItems->Strings[i] + L" " + IntToStr(envWeight));
@@ -344,7 +345,7 @@ void __fastcall TfrmMainMenu::LoadClick(TObject* /*Sender*/)
 
 void __fastcall TfrmMainMenu::frmMainMenuCreate(TObject* /*Sender*/)
 {
-    Label2->Caption = L"Version " + APP_VERSION;
+    lblVersion->Caption = L"Version " + APP_VERSION;
 }
 
 void __fastcall TfrmMainMenu::ExitClick(TObject* /*Sender*/)
