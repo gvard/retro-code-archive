@@ -4,10 +4,10 @@ object frmFight: TfrmFight
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'The RPG - fight'
   ClientHeight = 410
-  ClientWidth = 400
+  ClientWidth = 406
   Color = clBtnFace
   Constraints.MaxHeight = 760
-  Constraints.MaxWidth = 1250
+  Constraints.MaxWidth = 1200
   Constraints.MinHeight = 390
   Constraints.MinWidth = 390
   Font.Charset = DEFAULT_CHARSET
@@ -23,14 +23,14 @@ object frmFight: TfrmFight
   OnResize = FormResize
   OnShow = FormShow
   DesignSize = (
-    400
+    406
     410)
   PixelsPerInch = 96
   TextHeight = 13
   object grEnemy: TStringGrid
     Left = 8
     Top = 8
-    Width = 391
+    Width = 397
     Height = 177
     Anchors = [akLeft, akTop, akRight]
     DefaultRowHeight = 17
@@ -40,6 +40,7 @@ object frmFight: TfrmFight
     TabOrder = 0
     OnKeyDown = grEnemyKeyDown
     OnSelectCell = grEnemySelectCell
+    ExplicitWidth = 401
     ColWidths = (
       20
       108
@@ -50,7 +51,7 @@ object frmFight: TfrmFight
   object grWeapon: TStringGrid
     Left = 8
     Top = 191
-    Width = 391
+    Width = 397
     Height = 161
     Anchors = [akLeft, akTop, akRight, akBottom]
     DefaultRowHeight = 17
@@ -60,6 +61,7 @@ object frmFight: TfrmFight
     TabOrder = 1
     OnKeyDown = grWeaponKeyDown
     OnSelectCell = grWeaponSelectCell
+    ExplicitWidth = 401
     ColWidths = (
       20
       191
@@ -70,28 +72,29 @@ object frmFight: TfrmFight
   object sbBar: TStatusBar
     Left = 0
     Top = 391
-    Width = 400
+    Width = 406
     Height = 19
     Panels = <
       item
-        Text = 'Health: '
+        Text = #1047#1076#1086#1088#1086#1074#1100#1077': '
         Width = 86
       end
       item
         Text = #1052#1072#1085#1072': '
-        Width = 86
+        Width = 79
       end
       item
-        Text = 'Stam: '
-        Width = 86
+        Text = #1042#1099#1085#1086#1089#1083#1080#1074#1086#1089#1090#1100': '
+        Width = 117
       end
       item
-        Text = 'Action points: '
-        Width = 96
+        Text = #1054#1095#1082#1080' '#1076#1077#1081#1089#1090#1074#1080#1103': '
+        Width = 102
       end>
+    ExplicitWidth = 410
   end
   object btnAttack: TButton
-    Left = 171
+    Left = 174
     Top = 363
     Width = 74
     Height = 25
@@ -99,5 +102,6 @@ object frmFight: TfrmFight
     Caption = #1040#1090#1072#1082#1086#1074#1072#1090#1100'!'
     TabOrder = 2
     OnClick = btnAttackClick
+    ExplicitLeft = 176
   end
 end

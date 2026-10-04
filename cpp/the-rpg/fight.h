@@ -9,9 +9,10 @@
 #include <string>
 
 
-struct EnemyInitData {
+struct enemy_specs {
     int race_type_idx;
-    int base_hit;
+    int hp;
+    int damage;
     String custom_name;
 };
 
@@ -45,7 +46,7 @@ private:
 
 public:
     String battle_caption;
-    std::vector<EnemyInitData> raw_enemies;
+    std::vector<enemy_specs> raw_enemies;
     std::vector<std::wstring> raw_race_types;
 
     explicit __fastcall TfrmFight(TComponent* Owner) override;

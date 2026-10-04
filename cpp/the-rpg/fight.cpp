@@ -36,11 +36,11 @@ void __fastcall TfrmFight::FormCreate(TObject* /*Sender*/)
     grEnemy->Cells[1][0] = "Вид противника";
     grEnemy->Cells[2][0] = "Имя";
     grEnemy->Cells[3][0] = "Жизнь";
-    grEnemy->Cells[4][0] = "Хиты";
+    grEnemy->Cells[4][0] = "Урон";
     grWeapon->Cells[1][0] = "Оружие";
-    grWeapon->Cells[2][0] = "Хиты";
+    grWeapon->Cells[2][0] = "Урон";
     grWeapon->Cells[3][0] = "Мана";
-    grWeapon->Cells[4][0] = "ActPts";
+    grWeapon->Cells[4][0] = "ОД";
 
     const auto& weapons = storage_system::get().get_weapons();
 
@@ -89,8 +89,8 @@ void __fastcall TfrmFight::FormShow(TObject* /*Sender*/)
         }
 
         grEnemy->Cells[2][count + 1] = enemy.custom_name;
-        grEnemy->Cells[3][count + 1] = L"100";
-        grEnemy->Cells[4][count + 1] = IntToStr(enemy.base_hit);
+        grEnemy->Cells[3][count + 1] = IntToStr(enemy.hp);
+        grEnemy->Cells[4][count + 1] = IntToStr(enemy.damage);
         count++;
     }
 
@@ -115,10 +115,10 @@ void TfrmFight::updateApt()
 
 void TfrmFight::update_display()
 {
-    sbBar->Panels->Items[0]->Text = L"Health: " + IntToStr(User->hlth);
+    sbBar->Panels->Items[0]->Text = L"Здоровье: " + IntToStr(User->hlth);
     sbBar->Panels->Items[1]->Text = L"Мана: " + IntToStr(User->mana);
-    sbBar->Panels->Items[2]->Text = L"Stam: " + IntToStr(User->stamina);
-    sbBar->Panels->Items[3]->Text = L"Action points: " + IntToStr(apt);
+    sbBar->Panels->Items[2]->Text = L"Выносливость: " + IntToStr(User->stamina);
+    sbBar->Panels->Items[3]->Text = L"Очки действия: " + IntToStr(apt);
 }
 
 void TfrmFight::opponentAttack()
@@ -137,7 +137,6 @@ void TfrmFight::opponentAttack()
 
     User->hlth -= total_hit;
     User->stamina -= total_hit;
-    User->Refresh();
 
     updateApt();
     this->update_display();
@@ -154,6 +153,7 @@ void TfrmFight::opponentAttack()
 
     if (apt <= 0)
     {
+        User->Refresh();
         opponentAttack();
     }
 }
@@ -212,6 +212,12 @@ void __fastcall TfrmFight::btnAttackClick(TObject* /*Sender*/)
     if (apt <= 0)
     {
         opponentAttack();
+        if (User->hlth > 0)
+        {
+            User->Refresh();
+            updateApt();
+            this->update_display();
+        }
     }
     else
     {
