@@ -1,4 +1,5 @@
 #include <Winapi.MMSystem.hpp>
+#include "nlohmann/json.hpp"
 #include <string_view>
 #include <memory>
 #include <cstdio>
@@ -33,13 +34,6 @@ __fastcall TfrmChapt::~TfrmChapt()
 
 void __fastcall TfrmChapt::FormCreate(TObject* /*Sender*/)
 {
-    GameResourceData res = storage_system::get().load_chapter_file();
-    if (res.is_loaded) {
-        chapter->Clear();
-        for (const auto& line : res.lines) {
-            chapter->Add(line.c_str());
-        }
-    }
 }
 
 void __fastcall TfrmChapt::ExitClick(TObject* /*Sender*/)
@@ -108,7 +102,6 @@ void TfrmChapt::LoadNext(int target_qid)
         return;
     }
 
-    // Глава изменилась — сбрасываем состояние вещей на земле
     if (this->currentQid != target_qid && User->EnvironmentItems != nullptr)
     {
         User->EnvironmentItems->Clear();
@@ -116,195 +109,144 @@ void TfrmChapt::LoadNext(int target_qid)
 
     this->currentQid = target_qid;
 
-    wchar_t ch = 0;
-    int q = 0;
-    int qptr = -1;
-
     Memo1->Lines->Clear();
     ListBox1->Items->Clear();
 
-    // Поиск нужного ID вопроса
-    for (int i = 0; i < chapter->Count; ++i)
+    try
     {
-        ch = 0;
-        q = -1;
 
-        swscanf(chapter->Strings[i].c_str(), L"%d%c", &q, &ch);
+        const nlohmann::json& current_node = storage_system::get().get_chapter_json(target_qid);
 
-        if (q == target_qid)
+        if (current_node.empty())
         {
-            qptr = i;
-            break;
-        }
-
-        if (ch == L'{')
-        {
-            while (++i < chapter->Count)
-            {
-                if (!chapter->Strings[i].IsEmpty())
-                {
-                    if (chapter->Strings[i][1] == L'}')
-                    {
-                        break;
-                    }
-                }
-            }
-        }
-        while ((++i < chapter->Count) && (!chapter->Strings[i].IsEmpty()));
-    }
-
-    if (qptr < 0)
-    {
-        Application->MessageBox(L"Вопрос не найден!", L"The RPG", MB_ICONEXCLAMATION | MB_OK);
-        frmChapt->Hide();
-        frmMainMenu->Show();
-        return;
-    }
-
-    // Чтение заголовка и типа вопроса
-    ch = 0;
-    swscanf(chapter->Strings[qptr].c_str(), L"%d%c", &q, &ch);
-
-    switch (ch)
-    {
-        case L'{':
-            while (++qptr < chapter->Count)
-            {
-                if (!chapter->Strings[qptr].IsEmpty())
-                {
-                    if (chapter->Strings[qptr][1] == L'}')
-                    {
-                        break;
-                    }
-                }
-                Memo1->Lines->Add(chapter->Strings[qptr]);
-            }
-            break;
-
-        case L' ':
-            {
-                String str = chapter->Strings[qptr].Trim();
-                int lastSpace = str.LastDelimiter(L" ");
-                if (lastSpace > 0)
-                {
-                    Memo1->Lines->Add(str.SubString(lastSpace + 1, str.Length() - lastSpace));
-                }
-                else
-                {
-                    Memo1->Lines->Add(str);
-                }
-            }
-            break;
-
-        case L'f':
-            {
-                using namespace std::string_view_literals;
-                const int current_battle_qid = this->currentQid;
-                AnsiString fight_str = chapter->Strings[qptr++];
-                fight_str.Trim();
-
-                char buf[256];
-                std::strcpy(buf, fight_str.c_str());
-
-                int qid = 0, target_jump = 0;
-                char ch = 0;
-                std::sscanf(buf, "%d%c %d", &qid, &ch, &target_jump);
-
-                char* caption_ptr = nullptr;
-                for (size_t i = 0, j = 0; i < std::strlen(buf); ++i)
-                {
-                    if (buf[i] == ' ') {
-                        j++;
-                        if (j >= 2) {
-                            caption_ptr = &buf[i + 1];
-                            break;
-                        }
-                    }
-                }
-
-                auto fight_form = std::make_unique<TfrmFight>(this);
-                fight_form->battle_caption = caption_ptr;
-
-                // Кэшируем расы из подсистемы хранения, чтобы передать в окно боя
-                const auto race_res = storage_system::get().load_race_file();
-                if (race_res.is_loaded) {
-                    for (const auto& line : race_res.lines) {
-                        fight_form->raw_race_types.push_back(line);
-                    }
-                }
-
-                while (qptr < chapter->Count) {
-                    String line_data = chapter->Strings[qptr];
-                    if (line_data.Length() <= 0) break;
-
-                    char enemy_buf[256];
-                    std::strcpy(enemy_buf, AnsiString(line_data).c_str());
-
-                    int enemy_type = 0, enemy_hits = 0;
-                    std::sscanf(enemy_buf, "%d %d", &enemy_type, &enemy_hits);
-
-                    char* enemy_name_ptr = nullptr;
-                    for (size_t i = 0, j = 0; i < std::strlen(enemy_buf); ++i) {
-                        if (enemy_buf[i] == ' ') {
-                            j++;
-                            if (j >= 2) { enemy_name_ptr = &enemy_buf[i + 1]; break; }
-                        }
-                    }
-
-                    fight_form->raw_enemies.push_back({enemy_type, enemy_hits, enemy_name_ptr});
-                    qptr++;
-                }
-
-                this->Hide();
-                PlaySound(storage_system::get().get_sound_path("fight.wav").c_str(), nullptr, SND_ASYNC);
-                const int battle_result = fight_form->ShowModal();
-                this->Show();
-
-                if (battle_result == mrOk)
-                {
-                    this->LoadNext(target_jump);
-                }
-                else
-                {
-                    User->hlth = 15;
-                    User->stamina = 10;
-
-                    this->LoadNext(this->previousTextQid);
-
-                    constexpr auto title = L"The RPG"sv;
-                    constexpr auto msg = L"Вы потерпели поражение и убежали от врагов."sv;
-                    ::MessageBoxW(this->Handle, msg.data(), title.data(), MB_OK | MB_ICONWARNING);
-                }
-            }
-            return;
-
-        case L'e':
-            Application->MessageBox(L"Игра окончена!", L"The RPG", MB_OK);
+            Application->MessageBox(L"Глава не найдена в JSON!", L"The RPG", MB_ICONEXCLAMATION | MB_OK);
             frmChapt->Hide();
             frmMainMenu->Show();
             return;
+        }
+
+        std::string type = current_node.value("type", "story");
+
+        if (type == "fight")
+        {
+            using namespace std::string_view_literals;
+            auto fight_form = std::make_unique<TfrmFight>(this);
+
+            // Название битвы
+            std::string event_name = current_node.value("name", "Битва");
+            fight_form->battle_caption = UTF8String(const_cast<char*>(event_name.c_str()));
+
+            if (current_node.contains("enemies") && current_node["enemies"].is_array())
+            {
+                const auto& creatures_root = storage_system::get().get_creatures_json();
+
+                for (const auto& enemy : current_node["enemies"])
+                {
+                    std::string race_key = enemy.value("race", "goblin");
+                    std::string profile_key = enemy.value("profile", "thug");
+                    std::string enemy_name = enemy.value("name", "Враг");
+
+                    // Значения по умолчанию
+                    String race_title = L"Неизвестно";
+                    int final_hp = 30;
+                    int final_dmg = 3;
+
+                    // Находим расу и её профиль в creatures.json
+                    if (creatures_root.contains(race_key))
+                    {
+                        const auto& race_node = creatures_root[race_key];
+                        std::string race_dname = race_node.value("display_name", "");
+                        race_title = UTF8String(race_dname.c_str());
+
+                        if (race_node.contains("combat_profiles") && race_node["combat_profiles"].contains(profile_key))
+                        {
+                            const auto& profile_node = race_node["combat_profiles"][profile_key];
+                            final_hp = profile_node.value("hp", final_hp);
+                            final_dmg = profile_node.value("dmg", final_dmg);
+                        }
+                    }
+
+                    fight_form->raw_enemies.push_back({
+                        race_title,
+                        UTF8String(enemy_name.c_str()),
+                        final_hp,
+                        final_dmg
+                    });
+                }
+            }
+
+            // Маршруты победы и поражения берутся из объекта "routes"
+            int target_jump = target_qid + 1;
+            if (current_node.contains("routes")) {
+                target_jump = current_node["routes"].value("victory", target_qid + 1);
+            }
+
+            this->Hide();
+            PlaySound(storage_system::get().get_sound_path("fight.wav").c_str(), nullptr, SND_ASYNC);
+            const int battle_result = fight_form->ShowModal();
+            this->Show();
+
+            if (battle_result == mrOk)
+            {
+                this->LoadNext(target_jump);
+            }
+            else
+            {
+                User->hlth = 15;
+                User->stamina = 10;
+
+                int defeat_jump = this->previousTextQid;
+                if (current_node.contains("routes")) {
+                    defeat_jump = current_node["routes"].value("defeat", this->previousTextQid);
+                }
+                this->LoadNext(defeat_jump);
+
+                constexpr auto title = L"The RPG"sv;
+                constexpr auto msg = L"Вы потерпели поражение и убежали от врагов."sv;
+                ::MessageBoxW(this->Handle, msg.data(), title.data(), MB_OK | MB_ICONWARNING);
+            }
+            return;
+        }
+
+        // if (type == "story")
+        if (current_node.contains("text") && current_node["text"].is_array())
+        {
+            for (const auto& paragraph : current_node["text"])
+            {
+                std::string p_utf8 = paragraph.get<std::string>();
+                String vcl_line = UTF8String(p_utf8.c_str());
+                // String vcl_line = UnicodeString(p_utf8.c_str());
+                Memo1->Lines->Add(vcl_line);
+            }
+        }
+
+        // Наполнение вещей на земле (EnvironmentItems) из json свойств локации
+        if (current_node.contains("location") && current_node["location"].contains("items"))
+        {
+            for (const auto& item : current_node["location"]["items"])
+            {
+                std::string item_name = item.value("name", "Неизвестный предмет");
+                int item_weight = item.value("weight", 1);
+
+                String vcl_name = UnicodeString(UTF8String(item_name.c_str()));
+                User->EnvironmentItems->AddObject(vcl_name, reinterpret_cast<TObject*>(static_cast<intptr_t>(item_weight)));
+            }
+        }
+
+        // Заполнение вариантов ответов
+        if (current_node.contains("choices") && current_node["choices"].is_array())
+        {
+            for (const auto& choice : current_node["choices"])
+            {
+                std::string choice_text = choice.value("text", "...");
+                String vcl_choice = UTF8String(choice_text.c_str());
+                ListBox1->Items->Add(vcl_choice);
+            }
+        }
     }
-
-    // Заполнение вариантов ответов
-    aptr = qptr + 1;
-    while ((++qptr < chapter->Count) && (!chapter->Strings[qptr].IsEmpty()))
+    catch (...)
     {
-        String str = chapter->Strings[qptr];
-        int jump = 0;
-
-        swscanf(str.c_str(), L"%d", &jump);
-        str = str.Trim();
-
-        int firstSpace = str.Pos(L" ");
-        if (firstSpace > 0)
-        {
-            String tmp = str.SubString(firstSpace + 1, str.Length() - firstSpace).Trim();
-            ListBox1->Items->Add(tmp);
-        }
-        else
-        {
-            ListBox1->Items->Add(str);
-        }
+        Application->MessageBox(L"Критическая ошибка синтаксиса файла story.json!", L"Ошибка", MB_ICONERROR | MB_OK);
     }
 }
 
@@ -350,8 +292,6 @@ void __fastcall TfrmChapt::ConfirmChoiceClick(TObject* /*Sender*/)
             this->initialize_starting_inventory();
             this->Menu = this->MainMenu1;
 
-            // Загружаем основной файл сюжета и сбрасываем флаг dirty-состояния
-            chapter->LoadFromFile(ExePath + L"data\\chapt.txt", TEncoding::UTF8);
             this->ResetUnsavedChanges();
 
             // Переходим к Главе 1 сюжета
@@ -366,7 +306,30 @@ void __fastcall TfrmChapt::ConfirmChoiceClick(TObject* /*Sender*/)
 
     // Режим 2: стандартный игровой процесс
     int jump = 0;
-    swscanf(chapter->Strings[aptr + selected_index].c_str(), L"%d ", &jump);
+
+    const nlohmann::json& current_node = storage_system::get().get_chapter_json(this->currentQid);
+
+    if (!current_node.empty())
+    {
+        if (current_node.contains("choices") && current_node["choices"].is_array() && selected_index < current_node["choices"].size())
+        {
+            auto choice_obj = current_node["choices"][selected_index];
+            jump = choice_obj.value("target_id", 1);
+
+            if (choice_obj.contains("effects") && choice_obj["effects"].is_array())
+            {
+                for (const auto& effect : choice_obj["effects"])
+                {
+                    std::string action = effect.value("action", "");
+                    if (action == "change_gold")
+                    {
+                        User->gold += effect.value("value", 0);
+                    }
+                }
+            }
+        }
+    }
+
     this->previousTextQid = this->currentQid;
     User->Refresh();
     this->hasUnsavedChanges = true;

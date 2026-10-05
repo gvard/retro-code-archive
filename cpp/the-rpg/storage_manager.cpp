@@ -14,6 +14,7 @@ private:
     std::vector<weapon_data> cached_weapons;
     nlohmann::json cached_story_json;
     nlohmann::json cached_creatures_json;
+    std::unordered_map<int, nlohmann::json> indexed_story;
 
     // Внутренний хелпер загрузки, инкапсулирующий TStringList
     GameResourceData read_file_internal(const std::filesystem::path& full_path)
@@ -80,16 +81,29 @@ public:
 
         std::string raw_json = load_story_json_raw();
         try {
-            cached_story_json = nlohmann::json::parse(raw_json);
+            nlohmann::json root = nlohmann::json::parse(raw_json);
+            if (root.is_array()) {
+                for (const auto& node : root) {
+                    int id = node.value("id", -1);
+                    if (id != -1) {
+                        indexed_story[id] = node; // Индексируем по ID главы
+                    }
+                }
+            }
         }
         catch (...) {
-            cached_story_json = nlohmann::json::array(); // Фоллбек на пустой массив
+            indexed_story.clear();
         }
     }
 
-    const nlohmann::json& get_story_json() override
+    const nlohmann::json& get_chapter_json(int id) override
     {
-        return cached_story_json;
+        static const nlohmann::json empty_node = nlohmann::json::object();
+        auto it = indexed_story.find(id);
+        if (it != indexed_story.end()) {
+            return it->second; // Мгновенный возврат по индексу O(1)
+        }
+        return empty_node;
     }
 
     std::string load_story_json_raw() override

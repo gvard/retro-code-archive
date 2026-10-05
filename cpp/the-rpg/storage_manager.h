@@ -40,7 +40,7 @@ public:
     virtual const nlohmann::json& get_creatures_json() = 0;
 
     virtual void preload_story_json() = 0;
-    virtual const nlohmann::json& get_story_json() = 0;
+    virtual const nlohmann::json& get_chapter_json(int id) = 0;
 
     virtual GameResourceData load_test_file() = 0;
     virtual GameResourceData load_inventory_file() = 0;
