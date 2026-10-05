@@ -273,6 +273,9 @@ __fastcall TfrmMainMenu::TfrmMainMenu(TComponent* Owner)
 {
     storage_system::initialize();
 
+    storage_system::get().preload_creatures_json();
+    storage_system::get().preload_story_json();
+
     if (!storage_system::get().validate_required_resources())
     {
         Application->MessageBox(

@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+#include "nlohmann/json.hpp"
+
 struct race_data
 {
     std::wstring name;
@@ -31,13 +33,17 @@ public:
 
     virtual std::filesystem::path get_sound_path(const std::string& sound_name) const = 0;
     virtual std::filesystem::path get_save_path(const std::string& save_name) const = 0;
-    virtual const std::vector<race_data>& get_races() = 0;
     virtual const std::vector<weapon_data>& get_weapons() = 0;
+    virtual std::string load_story_json_raw() = 0;
 
-    virtual GameResourceData load_chapter_file() = 0;
+    virtual void preload_creatures_json() = 0;
+    virtual const nlohmann::json& get_creatures_json() = 0;
+
+    virtual void preload_story_json() = 0;
+    virtual const nlohmann::json& get_story_json() = 0;
+
     virtual GameResourceData load_test_file() = 0;
     virtual GameResourceData load_inventory_file() = 0;
-    virtual GameResourceData load_race_file() = 0;
 
     virtual bool save_game_file(const std::string& save_name, const GameResourceData& data) = 0;
     virtual GameResourceData load_save_file(const std::string& save_name) = 0;

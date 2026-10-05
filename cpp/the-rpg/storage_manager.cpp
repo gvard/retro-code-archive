@@ -3,8 +3,6 @@
 #include <memory>
 #include <fstream>
 
-#include "nlohmann/json.hpp"
-
 class storage_service_vcl_impl : public IStorageService
 {
 private:
@@ -14,6 +12,8 @@ private:
     std::filesystem::path saves_path;
     std::vector<race_data> cached_races;
     std::vector<weapon_data> cached_weapons;
+    nlohmann::json cached_story_json;
+    nlohmann::json cached_creatures_json;
 
     // Внутренний хелпер загрузки, инкапсулирующий TStringList
     GameResourceData read_file_internal(const std::filesystem::path& full_path)
@@ -45,43 +45,67 @@ public:
         std::filesystem::create_directories(saves_path);
     }
 
-    const std::vector<race_data>& get_races() override
+    void preload_creatures_json() override
     {
-        if (cached_races.empty())
+        // Если кэш уже заполнен, ничего не делаем
+        if (!cached_creatures_json.empty())
+            return;
+
+        std::filesystem::path json_path = data_path / "creatures.json";
+        if (std::filesystem::exists(json_path))
         {
-            auto raw_data = load_race_file();
-            for (const auto& raw_line : raw_data.lines)
+            std::ifstream file(json_path);
+            if (file.is_open())
             {
-                std::wstring line = raw_line;
-
-                // Очистка строки от пробелов и управляющих символов (\r, \n, \t) на концах
-                size_t start = line.find_first_not_of(L" \t\r\n");
-                if (start == std::wstring::npos)
-                    continue;
-
-                line = line.substr(start, line.find_last_not_of(L" \t\r\n") - start + 1);
-
-                // Выделение имени и модификатора по знакам модификатора
-                if (size_t sign_pos = line.find_first_of(L"+-"); sign_pos != std::wstring::npos)
-                {
-                    race_data race;
-                    size_t name_end = line.find_last_not_of(L" \t", sign_pos - 1);
-                    race.name = line.substr(0, name_end + 1);
-
-                    try
-                    {
-                        race.modifier = std::stoi(line.substr(sign_pos));
-                    }
-                    catch (...)
-                    {
-                        race.modifier = 0;
-                    }
-
-                    cached_races.push_back(std::move(race));
+                try {
+                    file >> cached_creatures_json;
+                }
+                catch (...) {
+                    cached_creatures_json = nlohmann::json::object();
                 }
             }
         }
-        return cached_races;
+    }
+
+    const nlohmann::json& get_creatures_json() override
+    {
+        return cached_creatures_json;
+    }
+
+    void preload_story_json() override
+    {
+        // Если кэш уже заполнен, ничего не делаем
+        if (!cached_story_json.empty())
+            return;
+
+        std::string raw_json = load_story_json_raw();
+        try {
+            cached_story_json = nlohmann::json::parse(raw_json);
+        }
+        catch (...) {
+            cached_story_json = nlohmann::json::array(); // Фоллбек на пустой массив
+        }
+    }
+
+    const nlohmann::json& get_story_json() override
+    {
+        return cached_story_json;
+    }
+
+    std::string load_story_json_raw() override
+    {
+        std::filesystem::path json_path = data_path / "story.json";
+        if (std::filesystem::exists(json_path))
+        {
+            std::ifstream file(json_path);
+            if (file.is_open())
+            {
+                // Считываем весь файл в строку UTF-8
+                return std::string((std::istreambuf_iterator<char>(file)),
+                                    std::istreambuf_iterator<char>());
+            }
+        }
+        return "[]";
     }
 
     const std::vector<weapon_data>& storage_service_vcl_impl::get_weapons() override
@@ -133,9 +157,12 @@ public:
         {
             return false;
         }
-        if (!std::filesystem::exists(data_path / "chapt.txt") ||
-            !std::filesystem::exists(data_path / "invent.txt") ||
+        if (!std::filesystem::exists(data_path / "invent.txt") ||
             !std::filesystem::exists(data_path / "test.txt"))
+        {
+            return false;
+        }
+        if (!std::filesystem::exists(data_path / "story.json"))
         {
             return false;
         }
@@ -152,10 +179,6 @@ public:
         return saves_path / save_name;
     }
 
-    GameResourceData load_chapter_file() override
-    {
-        return read_file_internal(data_path / "chapt.txt");
-    }
     GameResourceData load_test_file() override
     {
         return read_file_internal(data_path / "test.txt");
@@ -163,11 +186,6 @@ public:
     GameResourceData load_inventory_file() override
     {
         return read_file_internal(data_path / "invent.txt");
-    }
-
-    GameResourceData load_race_file() override
-    {
-        return read_file_internal(data_path / "crt.txt");
     }
 
     bool save_game_file(const std::string& save_name, const GameResourceData& data) override

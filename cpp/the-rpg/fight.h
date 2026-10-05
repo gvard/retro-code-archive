@@ -10,10 +10,10 @@
 
 
 struct enemy_specs {
-    int race_type_idx;
+    String race_title;
+    String custom_name;
     int hp;
     int damage;
-    String custom_name;
 };
 
 class TfrmFight : public TForm

@@ -4,6 +4,7 @@
 #include <system_error>
 
 #include <Winapi.Windows.hpp>
+#include "nlohmann/json.hpp"
 
 #include "storage_manager.h"
 #include "chargen_view.h"
@@ -86,15 +87,21 @@ void __fastcall TfrmCharGen::Button1Click(TObject* /*Sender*/)
     User->CrType = cbRace->Text;
     User->SexType = cbGender->Text;
 
-    // Чтение модификаторов расы из хранилища ресурсов
-    const auto& races = storage_system::get().get_races();
-
-    for (const auto& race : races)
+    const auto& creatures_root = storage_system::get().get_creatures_json();
+    for (auto it = creatures_root.begin(); it != creatures_root.end(); ++it)
     {
-        // Превращаем std::wstring из файла в VCL String и сравниваем без учета регистра и пробелов
-        if (AnsiSameText(String(race.name.c_str()).Trim(), User->CrType.Trim()))
+        const auto& race_node = it.value();
+        std::string d_name = race_node.value("display_name", "");
+
+        // Сравниваем выбранную в интерфейсе строку с display_name из JSON
+        if (AnsiSameText(UTF8String(d_name.c_str()).Trim(), User->CrType.Trim()))
         {
-            User->strength += race.modifier;
+            if (race_node.contains("ability_modifiers"))
+            {
+                // Считываем "str" из объекта "ability_modifiers"
+                int str_mod = race_node["ability_modifiers"].value("str", 0);
+                User->strength += str_mod;
+            }
             break;
         }
     }
@@ -122,11 +129,18 @@ void __fastcall TfrmCharGen::FormShow(TObject* /*Sender*/)
 {
     cbRace->Items->Clear();
 
-    // Загрузка через лаконичный и безопасный storage_manager
-    const auto& races = storage_system::get().get_races();
-    for (const auto& race : races)
+    // creatures.json загружен в память менеджера ресурсов
+    const auto& creatures_root = storage_system::get().get_creatures_json();
+
+    // Парсим только игровые расы ("playable": true)
+    for (auto it = creatures_root.begin(); it != creatures_root.end(); ++it)
     {
-        cbRace->Items->Add(race.name.c_str());
+        const auto& race_node = it.value();
+        if (race_node.value("playable", false))
+        {
+            std::string d_name = race_node.value("display_name", "Раса");
+            cbRace->Items->Add(UTF8String(d_name.c_str()));
+        }
     }
 
     // Дефолтный фоллбек, если файл пуст или отсутствует

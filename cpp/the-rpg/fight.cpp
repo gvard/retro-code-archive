@@ -75,19 +75,7 @@ void __fastcall TfrmFight::FormShow(TObject* /*Sender*/)
     {
         grEnemy->Cells[0][count + 1] = " ";
 
-        const auto& parsed_races = storage_system::get().get_races();
-        const int target_idx = enemy.race_type_idx - 1;
-
-        if (target_idx >= 0 && target_idx < static_cast<int>(parsed_races.size()))
-        {
-            // Выводим только имя расы, так как парсер уже отрезал модификатор
-            grEnemy->Cells[1][count + 1] = parsed_races[target_idx].name.c_str();
-        }
-        else
-        {
-            grEnemy->Cells[1][count + 1] = L"Неизвестно";
-        }
-
+        grEnemy->Cells[1][count + 1] = enemy.race_title;
         grEnemy->Cells[2][count + 1] = enemy.custom_name;
         grEnemy->Cells[3][count + 1] = IntToStr(enemy.hp);
         grEnemy->Cells[4][count + 1] = IntToStr(enemy.damage);
@@ -202,9 +190,27 @@ auto TfrmFight::check_battle_state() -> bool
 
 void __fastcall TfrmFight::btnAttackClick(TObject* /*Sender*/)
 {
-    grEnemy->Cells[3][selEnemy + 1] = IntToStr(grEnemy->Cells[3][selEnemy + 1].ToInt() - grWeapon->Cells[2][selWeapon + 1].ToInt());
-    User->mana -= grWeapon->Cells[3][selWeapon + 1].ToInt();
-    apt -= grWeapon->Cells[4][selWeapon + 1].ToInt();
+    int base_dmg = grWeapon->Cells[2][selWeapon + 1].ToInt();
+    int weapon_mana_cost = grWeapon->Cells[3][selWeapon + 1].ToInt();
+    int weapon_ap_cost = grWeapon->Cells[4][selWeapon + 1].ToInt();
+    int final_dmg = base_dmg;
+
+    if (weapon_mana_cost > 0)
+    {
+        // Магическое оружие: +1 урона за каждое очко Магии
+        final_dmg += (User->mag);
+    }
+    else
+    {
+        // Физическое оружие: +1 урона за каждое очко Силы
+        final_dmg += (User->strength);
+    }
+
+    int current_enemy_hp = grEnemy->Cells[3][selEnemy + 1].ToInt();
+    grEnemy->Cells[3][selEnemy + 1] = IntToStr(current_enemy_hp - final_dmg);
+
+    User->mana -= weapon_mana_cost;
+    apt -= weapon_ap_cost;
 
     this->update_display();
     this->Repaint();
