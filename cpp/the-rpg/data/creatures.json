@@ -1,0 +1,114 @@
+{
+"human": {
+  "id": 0,
+  "race": "human",
+  "display_name": "Человек",
+  "playable": true,
+  "ability_modifiers": {
+    "str": 1,
+    "dex": 1,
+    "con": 1,
+    "int": 1,
+    "wis": 1,
+    "cha": 1
+  },
+  "languages": ["common", "human"]
+},
+"elf": {
+  "id": 1,
+  "race": "elf",
+  "display_name": "Эльф",
+  "playable": true,
+  "ability_modifiers": {
+    "str": 0,
+    "dex": 2,
+    "con": 0,
+    "int": 1,
+    "wis": 0,
+    "cha": 0
+  },
+  "languages": ["common", "sindarin"]
+},
+"dwarf": {
+  "id": 2,
+  "race": "dwarf",
+  "display_name": "Гном",
+  "playable": true,
+  "ability_modifiers": {
+    "str": 0,
+    "dex": 0,
+    "con": 2,
+    "int": 1,
+    "wis": 0,
+    "cha": 0
+  },
+  "languages": ["common", "dwarf"]
+},
+"hobbit": {
+  "id": 3,
+  "race": "hobbit",
+  "display_name": "Хоббит",
+  "playable": true,
+  "ability_modifiers": {
+    "str": 0,
+    "dex": 2,
+    "con": 0,
+    "int": 0,
+    "wis": 0,
+    "cha": 1
+  },
+  "languages": ["common", "hobbit"]
+},
+"orc": {
+  "id": 4,
+  "race": "orc",
+  "display_name": "Орк",
+  "playable": true,
+  "ability_modifiers": {
+    "str": 2,
+    "dex": 0,
+    "con": 1,
+    "int": -1,
+    "wis": 0,
+    "cha": 0
+  },
+  "languages": ["common", "orc"]
+},
+"goblin": {
+  "id": 5,
+  "race": "goblin",
+  "display_name": "Гоблин",
+  "playable": false,
+  "ability_modifiers": {
+    "str": -1,
+    "dex": 2,
+    "con": 0,
+    "int": 0,
+    "wis": -1,
+    "cha": -1
+  },
+  "languages": ["common", "goblin"],
+  "combat_profiles": {
+    "commoner": {
+      "hp": 30,
+      "dmg": 3,
+      "faction": "neutral"
+    },
+    "thug": {
+      "hp": 70,
+      "dmg": 5,
+      "faction": "hostile"
+    },
+    "enforcer": {
+      "hp": 130,
+      "dmg": 12,
+      "faction": "hostile"
+    },
+    "sharpshooter": {
+      "hp": 60,
+      "dmg": 8,
+      "faction": "hostile"
+    }
+  }
+}
+}
