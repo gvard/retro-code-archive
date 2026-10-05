@@ -22,13 +22,13 @@ void TfrmInventory::update_weight_display()
         total_weight += static_cast<int>(reinterpret_cast<intptr_t>(SrcList->Items->Objects[i]));
     }
 
-    Label1->Caption = L"Вес: " + IntToStr(total_weight);
-    Label2->Caption = L"Из возможных: " + IntToStr(User->maxWeight);
+    lblWeight->Caption = L"Вес: " + IntToStr(total_weight);
+    lblMaxWeight->Caption = L"Из возможных: " + IntToStr(User->maxWeight);
 
     User->RecalculateStamina(total_weight);
 
     const bool is_overloaded = total_weight > User->maxWeight;
-    Label1->Font->Color = is_overloaded ? clRed : clWindowText;
+    lblWeight->Font->Color = is_overloaded ? clRed : clWindowText;
 
     wchar_t weight_log[512];
     std::swprintf(weight_log, 512,
@@ -136,6 +136,8 @@ void __fastcall TfrmInventory::FormShow(TObject* /*Sender*/)
 {
     SrcList->Items->Clear();
     DstList->Items->Clear();
+
+    SrcLabel->Caption = L"В рюкзаке (" + IntToStr(User->gold) + L" золота):";
 
     if (User != nullptr)
     {

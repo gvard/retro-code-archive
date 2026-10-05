@@ -17,8 +17,8 @@ __published:
     TSpeedButton* IncAllBtn;
     TSpeedButton* ExcludeBtn;
     TSpeedButton* ExAllBtn;
-    TLabel* Label1;
-    TLabel* Label2;
+    TLabel *lblWeight;
+    TLabel *lblMaxWeight;
 
     void __fastcall IncludeBtnClick(TObject* Sender);
     void __fastcall ExcludeBtnClick(TObject* Sender);
@@ -26,7 +26,7 @@ __published:
     void __fastcall ExcAllBtnClick(TObject* Sender);
     void __fastcall FormShow(TObject* Sender);
     void __fastcall OKBtnClick(TObject* Sender);
-	void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
+    void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
 
 private:
     void __fastcall MoveSelected(TCustomListBox* List, TStrings* Items);

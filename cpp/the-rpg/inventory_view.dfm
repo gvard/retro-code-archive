@@ -15,17 +15,17 @@ object frmInventory: TfrmInventory
   PixelsPerInch = 116
   TextHeight = 13
   object SrcLabel: TLabel
-    Left = 60
+    Left = 13
     Top = 10
-    Width = 71
+    Width = 140
     Height = 20
     AutoSize = False
     Caption = #1042' '#1088#1102#1082#1079#1072#1082#1077':'
   end
   object DstLabel: TLabel
-    Left = 291
+    Left = 241
     Top = 10
-    Width = 70
+    Width = 140
     Height = 20
     AutoSize = False
     Caption = #1053#1072' '#1079#1077#1084#1083#1077':'
@@ -64,7 +64,7 @@ object frmInventory: TfrmInventory
     Enabled = False
     OnClick = ExcAllBtnClick
   end
-  object Label1: TLabel
+  object lblWeight: TLabel
     Left = 8
     Top = 275
     Width = 32
@@ -77,7 +77,7 @@ object frmInventory: TfrmInventory
     Font.Style = [fsBold]
     ParentFont = False
   end
-  object Label2: TLabel
+  object lblMaxWeight: TLabel
     Left = 156
     Top = 275
     Width = 111
@@ -104,7 +104,7 @@ object frmInventory: TfrmInventory
   object SrcList: TListBox
     Left = 10
     Top = 30
-    Width = 177
+    Width = 178
     Height = 227
     ItemHeight = 13
     Items.Strings = (
