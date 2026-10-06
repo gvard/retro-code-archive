@@ -1,0 +1,65 @@
+{
+"weapon_knife_steel": {
+  "type": "weapon",
+  "name": "Стальной нож",
+  "description": "Простой рабочий инструмент. Потертая деревянная рукоять хранит запах жира и старой крови.",
+  "weight": 0.4,
+  "grade": 1,
+  "damage": 10,
+  "price": 2,
+  "slot": "main_hand"
+},
+"weapon_knife_steel_long": {
+  "type": "weapon",
+  "name": "Длинный острый нож",
+  "description": "Его лезвие опасно блестит в полумраке. Баланс идеален для быстрого удара исподтишка.",
+  "weight": 0.6,
+  "grade": 2,
+  "damage": 14,
+  "price": 10,
+  "slot": "main_hand"
+},
+"junk_tankard_wooden": {
+  "type": "junk",
+  "name": "Старая деревянная кружка",
+  "description": "Из этой деревянной кружки пило не одно поколение бедных студентов местного Университета Магии. Пахнет кислым пивом.",
+  "salable": false,
+  "weight": 0.3
+},
+"food_beer_cheap": {
+  "type": "consumable",
+  "name": "Бутылка дешевого эля",
+  "description": "«Хмельное, пенное, будет жизнь отменная!» Ценится за то, как быстро бьет по голове.",
+  "charges": 1,
+  "effects": [
+    {
+      "type": "stat_modifier",
+      "duration": 180,
+      "params": { "str": 1, "dex": -1, "int": -1, "wis": -1, "cha": -1 }
+    }
+  ],
+  "price": 1,
+  "weight": 0.9
+},
+"tool_corkscrew_old": {
+  "type": "tool",
+  "name": "Пробкодер",
+  "description": "Памятная вещь, привезенная откуда-то издалека",
+  "price": 1,
+  "weight": 0.1
+},
+"junk_brick": {
+  "type": "junk",
+  "name": "Кирпич",
+  "description": "Глиняный кирпич",
+  "salable": false,
+  "weight": 3.5
+},
+"tome_wizardry_basic": {
+  "type": "tome",
+  "name": "Основы магии 1-го уровня",
+  "description": "Потрепанный фолиант в жестком переплете. На форзаце отчетливо видна крупная печать библиотеки Университета Магии.",
+  "salable": false,
+  "weight": 2
+}
+}
