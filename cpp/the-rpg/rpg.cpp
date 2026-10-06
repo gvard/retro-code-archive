@@ -5,8 +5,8 @@ USEFORM("charstats_view.cpp", frmCharStats)
 USEFORM("about_view.cpp", frmAbout)
 USEFORM("inventory_view.cpp", frmInventory)
 USEFORM("first.cpp", frmMainMenu)
-USEFORM("chapt.cpp", frmChapt)
-USEFORM("fight.cpp", frmFight)
+USEFORM("chapt_view.cpp", frmChapt)
+USEFORM("fight_view.cpp", frmFight)
 
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {

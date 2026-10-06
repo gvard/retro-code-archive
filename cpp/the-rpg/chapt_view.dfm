@@ -17,7 +17,6 @@ object frmChapt: TfrmChapt
   OldCreateOrder = False
   Position = poScreenCenter
   OnCloseQuery = frmChaptCloseQuery
-  OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   OnResize = FormResize
   DesignSize = (

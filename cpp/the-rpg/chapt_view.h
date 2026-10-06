@@ -1,5 +1,5 @@
-#ifndef chaptH
-#define chaptH
+#ifndef chapt_viewH
+#define chapt_viewH
 
 #include <Vcl.Forms.hpp>
 #include <Vcl.StdCtrls.hpp>
@@ -25,8 +25,6 @@ __published:
     TSaveDialog* SaveDialog1;
     TOpenDialog* OpenDialog1;
     TMenuItem* menuInventory;
-
-    void __fastcall FormCreate(TObject* Sender);
     void __fastcall ExitClick(TObject* Sender);
     void __fastcall ConfirmChoiceClick(TObject* Sender);
     void __fastcall Help1Click(TObject* Sender);

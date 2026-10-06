@@ -6,7 +6,7 @@
 #include <Winapi.MMSystem.hpp>
 #include <Winapi.Messages.hpp>
 
-#include "fight.h"
+#include "fight_view.h"
 #include "first.h"
 #include "storage_manager.h"
 

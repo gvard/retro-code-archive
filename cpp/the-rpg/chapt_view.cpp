@@ -5,10 +5,10 @@
 #include <cstdio>
 #include <filesystem>
 
-#include "chapt.h"
+#include "chapt_view.h"
 #include "first.h"
 #include "about_view.h"
-#include "fight.h"
+#include "fight_view.h"
 #include "charstats_view.h"
 #include "inventory_view.h"
 #include "storage_manager.h"
@@ -31,11 +31,6 @@ __fastcall TfrmChapt::~TfrmChapt()
     delete save;
     delete chapter;
 }
-
-void __fastcall TfrmChapt::FormCreate(TObject* /*Sender*/)
-{
-}
-
 void __fastcall TfrmChapt::ExitClick(TObject* /*Sender*/)
 {
     frmChapt->Close();
