@@ -204,6 +204,17 @@ void TfrmChapt::LoadNext(int target_qid)
         }
 
         // if (type == "story")
+        if (current_node.contains("location") && current_node["location"].contains("name"))
+        {
+            std::string loc_name = current_node["location"].value("name", "Неизвестная локация");
+            this->Caption = L"The RPG: " + UTF8String(loc_name.c_str());
+        }
+        else
+        {
+            // Фоллбек, если у главы нет конкретного имени локации
+            this->Caption = L"The RPG: Приключение";
+        }
+
         if (current_node.contains("text") && current_node["text"].is_array())
         {
             for (const auto& paragraph : current_node["text"])

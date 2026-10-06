@@ -5,10 +5,10 @@
 #include "first.h"
 #include "about_view.h"
 #include "chargen_view.h"
-#include "chapt.h"
+#include "chapt_view.h"
 #include "inventory_view.h"
 #include "charstats_view.h"
-#include "fight.h"
+#include "fight_view.h"
 #include "storage_manager.h"
 
 #pragma resource "*.dfm"
