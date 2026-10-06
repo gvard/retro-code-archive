@@ -36,7 +36,7 @@ void __fastcall TfrmChapt::ExitClick(TObject* /*Sender*/)
     frmChapt->Close();
 }
 
-void __fastcall TfrmChapt::ListBox1DblClick(TObject* Sender)
+void __fastcall TfrmChapt::lbChoicesDblClick(TObject* Sender)
 {
     ConfirmChoiceClick(Sender);
 }
@@ -46,7 +46,7 @@ void TfrmChapt::LoadNext(int target_qid)
     if (this->is_test_mode)
     {
         Memo1->Lines->Clear();
-        ListBox1->Items->Clear();
+        lbChoices->Items->Clear();
 
         if (!((test_qptr < chapter->Count) && (chapter->Strings[test_qptr].Length() > 0)))
         {
@@ -91,7 +91,7 @@ void TfrmChapt::LoadNext(int target_qid)
                     j++;
                 }
             }
-            ListBox1->Items->Add(tmp);
+            lbChoices->Items->Add(tmp);
         }
         test_qptr++;
         return;
@@ -105,7 +105,7 @@ void TfrmChapt::LoadNext(int target_qid)
     this->currentQid = target_qid;
 
     Memo1->Lines->Clear();
-    ListBox1->Items->Clear();
+    lbChoices->Items->Clear();
 
     try
     {
@@ -222,7 +222,7 @@ void TfrmChapt::LoadNext(int target_qid)
                 std::string p_utf8 = paragraph.get<std::string>();
                 String vcl_line = UTF8String(p_utf8.c_str());
                 // String vcl_line = UnicodeString(p_utf8.c_str());
-                Memo1->Lines->Add(vcl_line);
+                Memo1->Lines->Add(L"      " + vcl_line);
             }
         }
 
@@ -246,7 +246,7 @@ void TfrmChapt::LoadNext(int target_qid)
             {
                 std::string choice_text = choice.value("text", "...");
                 String vcl_choice = UTF8String(choice_text.c_str());
-                ListBox1->Items->Add(vcl_choice);
+                lbChoices->Items->Add(vcl_choice);
             }
         }
     }
@@ -259,9 +259,9 @@ void TfrmChapt::LoadNext(int target_qid)
 void __fastcall TfrmChapt::ConfirmChoiceClick(TObject* /*Sender*/)
 {
     int selected_index = -1;
-    for (int i = 0; i < ListBox1->Items->Count; ++i)
+    for (int i = 0; i < lbChoices->Items->Count; ++i)
     {
-        if (ListBox1->Selected[i])
+        if (lbChoices->Selected[i])
         {
             selected_index = i;
             break;
@@ -283,7 +283,7 @@ void __fastcall TfrmChapt::ConfirmChoiceClick(TObject* /*Sender*/)
         User->mag += imag;
 
         // Проверяем: закончился ли файл теста?
-        if (aptr + ListBox1->Items->Count >= chapter->Count)
+        if (aptr + lbChoices->Items->Count >= chapter->Count)
         {
             // Тест завершен, фиксируем производные характеристики персонажа
             User->maxWeight = static_cast<int>(std::lround(User->strength * 7.5));
@@ -353,7 +353,7 @@ void __fastcall TfrmChapt::AboutClick(TObject* /*Sender*/)
     temporaryAbout->ShowModal();
 }
 
-void __fastcall TfrmChapt::ListBox1KeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
+void __fastcall TfrmChapt::lbChoicesKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
 {
     if (Key == VK_RETURN)
     {
@@ -539,4 +539,30 @@ void TfrmChapt::initialize_starting_inventory()
     {
         User->UserItems->AddObject(L"Старый кухонный нож", reinterpret_cast<TObject*>(static_cast<intptr_t>(2)));
     }
+}
+
+void __fastcall TfrmChapt::lbChoicesMeasureItem(TWinControl *Control, int Index, int &Height)
+{
+    Height = lbChoices->Canvas->TextHeight("Wg") + 2;
+}
+
+void __fastcall TfrmChapt::lbChoicesDrawItem(TWinControl *Control, int Index, TRect &Rect, TOwnerDrawState State)
+{
+    TListBox* pListBox = dynamic_cast<TListBox*>(Control);
+    if (!pListBox)
+        return;
+
+    TCanvas* pCanvas = pListBox->Canvas;
+
+    // Очищаем фон (обрабатывает в том числе выделение строки)
+    pCanvas->FillRect(Rect);
+
+    // Берем текст текущей строки
+    String text = pListBox->Items->Strings[Index];
+
+    // Вычисляем вертикальную координату для центрирования текста внутри Rect
+    int textHeight = pCanvas->TextHeight(text);
+    int yOffset = Rect.Top + ((Rect.Height() - textHeight) / 2);
+
+    pCanvas->TextOut(Rect.Left + 4, yOffset, text);
 }

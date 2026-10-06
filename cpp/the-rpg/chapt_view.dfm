@@ -2,8 +2,8 @@ object frmChapt: TfrmChapt
   Left = 230
   Top = 285
   Caption = 'The RPG - Chapter'
-  ClientHeight = 296
-  ClientWidth = 438
+  ClientHeight = 330
+  ClientWidth = 450
   Color = clBtnFace
   Constraints.MinHeight = 260
   Constraints.MinWidth = 390
@@ -20,15 +20,15 @@ object frmChapt: TfrmChapt
   OnKeyDown = FormKeyDown
   OnResize = FormResize
   DesignSize = (
-    438
-    296)
+    450
+    330)
   PixelsPerInch = 96
   TextHeight = 13
   object Memo1: TMemo
     Left = 6
     Top = 0
-    Width = 427
-    Height = 182
+    Width = 439
+    Height = 205
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -46,11 +46,12 @@ object frmChapt: TfrmChapt
     TabOrder = 2
     WantReturns = False
   end
-  object ListBox1: TListBox
+  object lbChoices: TListBox
     Left = 6
-    Top = 188
-    Width = 427
-    Height = 74
+    Top = 212
+    Width = 439
+    Height = 84
+    Style = lbOwnerDrawVariable
     Align = alCustom
     Anchors = [akLeft, akRight, akBottom]
     Font.Charset = DEFAULT_CHARSET
@@ -60,12 +61,14 @@ object frmChapt: TfrmChapt
     Font.Style = []
     ParentFont = False
     TabOrder = 0
-    OnDblClick = ListBox1DblClick
-    OnKeyDown = ListBox1KeyDown
+    OnDblClick = lbChoicesDblClick
+    OnDrawItem = lbChoicesDrawItem
+    OnKeyDown = lbChoicesKeyDown
+    OnMeasureItem = lbChoicesMeasureItem
   end
   object btnConfirmChoice: TButton
-    Left = 172
-    Top = 268
+    Left = 178
+    Top = 302
     Width = 97
     Height = 25
     Anchors = [akBottom]

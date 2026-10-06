@@ -17,7 +17,7 @@ __published:
     TMenuItem* Help1;
     TMenuItem* Save;
     TMemo* Memo1;
-    TListBox* ListBox1;
+    TListBox* lbChoices;
     TButton* btnConfirmChoice;
     TMenuItem* menuCharacterStats;
     TMenuItem* About;
@@ -29,15 +29,17 @@ __published:
     void __fastcall ConfirmChoiceClick(TObject* Sender);
     void __fastcall Help1Click(TObject* Sender);
     void __fastcall AboutClick(TObject* Sender);
-    void __fastcall ListBox1KeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
+    void __fastcall lbChoicesKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
     void __fastcall frmChaptCloseQuery(TObject* Sender, bool& CanClose);
     void __fastcall LoadClick(TObject* Sender);
     void __fastcall SaveClick(TObject* Sender);
     void __fastcall menuInventoryClick(TObject* Sender);
     void __fastcall menuCharacterStatsClick(TObject* Sender);
-    void __fastcall ListBox1DblClick(TObject* Sender);
+    void __fastcall lbChoicesDblClick(TObject* Sender);
     void __fastcall FormResize(TObject* Sender);
     void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
+    void __fastcall lbChoicesMeasureItem(TWinControl* Control, int Index, int& Height);
+    void __fastcall lbChoicesDrawItem(TWinControl* Control, int Index, TRect& Rect, TOwnerDrawState State);
 
 private:
     TStringList* chapter;
