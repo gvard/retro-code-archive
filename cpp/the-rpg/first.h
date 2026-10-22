@@ -22,8 +22,8 @@ __published:
     TMenuItem* New;
     TMenuItem* Load;
     TMenuItem* Exit;
-	TLabel *lblGreeting;
-	TLabel *lblVersion;
+    TLabel* lblGreeting;
+    TLabel* lblVersion;
     TImage* imgLogoFull;
     TOpenDialog* OpenDialog1;
     TActionList* ActionList1;

@@ -106,6 +106,10 @@ object frmChapt: TfrmChapt
         Caption = #1048#1085#1074#1077#1085#1090#1072#1088#1100' (I)'
         OnClick = menuInventoryClick
       end
+      object menuLocation: TMenuItem
+        Caption = #1051#1086#1082#1072#1094#1080#1103' (M)'
+        OnClick = menuLocationInfoClick
+      end
     end
     object Help: TMenuItem
       Caption = '&?'

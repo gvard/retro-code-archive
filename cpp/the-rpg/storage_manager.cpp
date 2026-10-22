@@ -12,8 +12,11 @@ private:
     std::filesystem::path saves_path;
     std::vector<race_data> cached_races;
     std::vector<weapon_data> cached_weapons;
+
     nlohmann::json cached_story_json;
     nlohmann::json cached_creatures_json;
+    nlohmann::json cached_locations_json;
+
     std::unordered_map<int, nlohmann::json> indexed_story;
 
     // Внутренний хелпер загрузки, инкапсулирующий TStringList
@@ -46,6 +49,34 @@ public:
         std::filesystem::create_directories(saves_path);
     }
 
+    void preload_locations_json() override
+    {
+        if (!cached_locations_json.empty())
+            return;
+
+        std::filesystem::path json_path = data_path / "locations.json";
+        if (std::filesystem::exists(json_path))
+        {
+            std::ifstream file(json_path);
+            if (file.is_open())
+            {
+                try
+                {
+                    file >> cached_locations_json;
+                }
+                catch (...)
+                {
+                    cached_locations_json = nlohmann::json::object();
+                }
+            }
+        }
+    }
+
+    const nlohmann::json& get_locations_json() override
+    {
+        return cached_locations_json;
+    }
+
     void preload_creatures_json() override
     {
         // Если кэш уже заполнен, ничего не делаем
@@ -58,10 +89,12 @@ public:
             std::ifstream file(json_path);
             if (file.is_open())
             {
-                try {
+                try
+                {
                     file >> cached_creatures_json;
                 }
-                catch (...) {
+                catch (...)
+                {
                     cached_creatures_json = nlohmann::json::object();
                 }
             }
@@ -80,18 +113,23 @@ public:
             return;
 
         std::string raw_json = load_story_json_raw();
-        try {
+        try
+        {
             nlohmann::json root = nlohmann::json::parse(raw_json);
-            if (root.is_array()) {
-                for (const auto& node : root) {
+            if (root.is_array())
+            {
+                for (const auto& node : root)
+                {
                     int id = node.value("id", -1);
-                    if (id != -1) {
+                    if (id != -1)
+                    {
                         indexed_story[id] = node; // Индексируем по ID главы
                     }
                 }
             }
         }
-        catch (...) {
+        catch (...)
+        {
             indexed_story.clear();
         }
     }
@@ -100,7 +138,8 @@ public:
     {
         static const nlohmann::json empty_node = nlohmann::json::object();
         auto it = indexed_story.find(id);
-        if (it != indexed_story.end()) {
+        if (it != indexed_story.end())
+        {
             return it->second; // Мгновенный возврат по индексу O(1)
         }
         return empty_node;
@@ -171,12 +210,14 @@ public:
         {
             return false;
         }
-        if (!std::filesystem::exists(data_path / "invent.txt") ||
-            !std::filesystem::exists(data_path / "test.txt"))
+        if (!std::filesystem::exists(data_path / "test.txt"))
         {
             return false;
         }
-        if (!std::filesystem::exists(data_path / "story.json"))
+
+        if (!std::filesystem::exists(data_path / "story.json") ||
+            !std::filesystem::exists(data_path / "creatures.json") ||
+            !std::filesystem::exists(data_path / "locations.json"))
         {
             return false;
         }

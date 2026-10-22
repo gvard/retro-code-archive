@@ -109,7 +109,6 @@ void TfrmChapt::LoadNext(int target_qid)
 
     try
     {
-
         const nlohmann::json& current_node = storage_system::get().get_chapter_json(target_qid);
 
         if (current_node.empty())
@@ -172,7 +171,8 @@ void TfrmChapt::LoadNext(int target_qid)
 
             // Маршруты победы и поражения берутся из объекта "routes"
             int target_jump = target_qid + 1;
-            if (current_node.contains("routes")) {
+            if (current_node.contains("routes"))
+            {
                 target_jump = current_node["routes"].value("victory", target_qid + 1);
             }
 
@@ -191,7 +191,8 @@ void TfrmChapt::LoadNext(int target_qid)
                 User->stamina = 10;
 
                 int defeat_jump = this->previousTextQid;
-                if (current_node.contains("routes")) {
+                if (current_node.contains("routes"))
+                {
                     defeat_jump = current_node["routes"].value("defeat", this->previousTextQid);
                 }
                 this->LoadNext(defeat_jump);
@@ -213,6 +214,58 @@ void TfrmChapt::LoadNext(int target_qid)
         {
             // Фоллбек, если у главы нет конкретного имени локации
             this->Caption = L"The RPG: Приключение";
+        }
+
+        this->current_location_key = "";
+
+        if (current_node.contains("location") && current_node["location"].is_object())
+        {
+            const auto& loc_obj = current_node["location"];
+
+            if (loc_obj.contains("loc_id") && loc_obj["loc_id"].is_string())
+            {
+                this->current_location_key = loc_obj["loc_id"].get<std::string>();
+            }
+
+            // Если loc_id нет или он пуст, ищем по вложенному "name"
+            if (this->current_location_key.empty() && loc_obj.contains("name") && loc_obj["name"].is_string())
+            {
+                std::string target_name = loc_obj["name"].get<std::string>();
+                const auto& loc_database = storage_system::get().get_locations_json();
+
+                // Перебираем locations.json в поисках совпадения по display name
+                for (auto& [key, value] : loc_database.items())
+                {
+                    if (value.is_object() && value.value("name", "") == target_name)
+                    {
+                        this->current_location_key = key;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Устанавливаем заголовок окна по умолчанию
+        this->Caption = L"The RPG: Приключение";
+
+        if (!this->current_location_key.empty())
+        {
+            const auto& locations = storage_system::get().get_locations_json();
+            if (locations.contains(this->current_location_key))
+            {
+                std::string loc_name = locations[this->current_location_key].value("name", "");
+                if (!loc_name.empty())
+                {
+                    this->Caption = L"The RPG: " + UTF8String(loc_name.c_str());
+                }
+            }
+        }
+
+        // Если по ключу имя извлечь не удалось, используем "name" из ноды истории как фоллбек для Caption
+        if (this->Caption == L"The RPG: Приключение" && current_node.contains("location") && current_node["location"].is_object())
+        {
+            std::string fallback_name = current_node["location"].value("name", "Приключение");
+            this->Caption = L"The RPG: " + UTF8String(fallback_name.c_str());
         }
 
         if (current_node.contains("text") && current_node["text"].is_array())
@@ -435,6 +488,37 @@ void __fastcall TfrmChapt::menuCharacterStatsClick(TObject* /*Sender*/)
     stats_form->ShowModal();
 }
 
+void __fastcall TfrmChapt::menuLocationInfoClick(TObject* /*Sender*/)
+{
+    if (this->current_location_key.empty())
+    {
+        ::MessageBoxW(this->Handle, L"Вы находитесь в неопознанном месте.", L"Локация", MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+
+    const auto& locations = storage_system::get().get_locations_json();
+
+    if (locations.contains(this->current_location_key))
+    {
+        const auto& loc_node = locations[this->current_location_key];
+
+        std::string name_utf8 = loc_node.value("name", "Без названия");
+        std::string desc_utf8 = loc_node.value("description", "Описание отсутствует.");
+
+        // Конвертируем в строки VCL для вывода
+        String vcl_name = UTF8String(name_utf8.c_str());
+        String vcl_desc = UTF8String(desc_utf8.c_str());
+
+        String message_text = vcl_name + L"\n\n" + vcl_desc;
+
+        ::MessageBoxW(this->Handle, message_text.c_str(), L"Локация", MB_OK);
+    }
+    else
+    {
+        ::MessageBoxW(this->Handle, L"Информация о данной локации не найдена в базе данных.", L"Ошибка", MB_OK | MB_ICONWARNING);
+    }
+}
+
 void __fastcall TfrmChapt::FormResize(TObject* /*Sender*/)
 {
     btnConfirmChoice->Left = (ClientWidth - btnConfirmChoice->Width) / 2;
@@ -471,6 +555,12 @@ void __fastcall TfrmChapt::FormKeyDown(TObject* Sender, WORD& Key, TShiftState S
                 this->menuCharacterStatsClick(Sender);
                 return;
             }
+            if (Key == 'M')
+            {
+                Key = 0;
+                this->menuLocationInfoClick(Sender);
+                return;
+            }
         }
 
         TWMKey msg;
@@ -493,9 +583,11 @@ void TfrmChapt::start_character_test()
     this->Menu = nullptr;
 
     GameResourceData res = storage_system::get().load_test_file();
-    if (res.is_loaded) {
+    if (res.is_loaded)
+    {
         chapter->Clear();
-        for (const auto& line : res.lines) {
+        for (const auto& line : res.lines)
+        {
             chapter->Add(line.c_str());
         }
     }
@@ -541,12 +633,12 @@ void TfrmChapt::initialize_starting_inventory()
     }
 }
 
-void __fastcall TfrmChapt::lbChoicesMeasureItem(TWinControl *Control, int Index, int &Height)
+void __fastcall TfrmChapt::lbChoicesMeasureItem(TWinControl* Control, int Index, int& Height)
 {
     Height = lbChoices->Canvas->TextHeight("Wg") + 2;
 }
 
-void __fastcall TfrmChapt::lbChoicesDrawItem(TWinControl *Control, int Index, TRect &Rect, TOwnerDrawState State)
+void __fastcall TfrmChapt::lbChoicesDrawItem(TWinControl* Control, int Index, TRect& Rect, TOwnerDrawState State)
 {
     TListBox* pListBox = dynamic_cast<TListBox*>(Control);
     if (!pListBox)

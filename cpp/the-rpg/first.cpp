@@ -275,6 +275,7 @@ __fastcall TfrmMainMenu::TfrmMainMenu(TComponent* Owner)
 
     storage_system::get().preload_creatures_json();
     storage_system::get().preload_story_json();
+    storage_system::get().preload_locations_json();
 
     if (!storage_system::get().validate_required_resources())
     {

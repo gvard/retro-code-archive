@@ -25,6 +25,7 @@ __published:
     TSaveDialog* SaveDialog1;
     TOpenDialog* OpenDialog1;
     TMenuItem* menuInventory;
+	TMenuItem* menuLocation;
     void __fastcall ExitClick(TObject* Sender);
     void __fastcall ConfirmChoiceClick(TObject* Sender);
     void __fastcall Help1Click(TObject* Sender);
@@ -33,8 +34,11 @@ __published:
     void __fastcall frmChaptCloseQuery(TObject* Sender, bool& CanClose);
     void __fastcall LoadClick(TObject* Sender);
     void __fastcall SaveClick(TObject* Sender);
+
     void __fastcall menuInventoryClick(TObject* Sender);
     void __fastcall menuCharacterStatsClick(TObject* Sender);
+    void __fastcall menuLocationInfoClick(TObject* Sender);
+
     void __fastcall lbChoicesDblClick(TObject* Sender);
     void __fastcall FormResize(TObject* Sender);
     void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
@@ -49,6 +53,7 @@ private:
     int previousTextQid = 1;
     bool is_test_mode = false;
     int test_qptr = 0;
+    std::string current_location_key = "";
 
     void initialize_starting_inventory();
 

@@ -11,7 +11,8 @@ struct race_data
     int modifier = 0;
 };
 
-struct weapon_data {
+struct weapon_data
+{
     std::string name;
     int hp = 0;
     int mana = 0;
@@ -41,6 +42,9 @@ public:
 
     virtual void preload_story_json() = 0;
     virtual const nlohmann::json& get_chapter_json(int id) = 0;
+
+    virtual void preload_locations_json() = 0;
+    virtual const nlohmann::json& get_locations_json() = 0;
 
     virtual GameResourceData load_test_file() = 0;
     virtual GameResourceData load_inventory_file() = 0;
