@@ -1,0 +1,34 @@
+{
+"angard_merzlyanka_home": {
+  "name": "Комната на Малой Набережной",
+  "description": "Тесное помещение в доходном доме на Малой Набережной",
+  "items": {
+    "junk_tankard_wooden": 1,
+    "tome_wizardry_basic": 1,
+    "weapon_knife_steel": 1,
+    "food_beer_cheap": 1,
+    "tool_corkscrew_old": 1
+  }
+},
+"angard_merzlyanka_doorstep": {
+  "name": "На выходе из комнаты, вид на набережную Мерзлянки",
+  "description": "На выходе из комнаты, вид на набережную Мерзлянки"
+},
+"angard_merzlyanka_embarkment": {
+  "name": "Набережная Мерзлянки",
+  "description": "Набережная Мерзлянки после боя",
+  "items": {
+    "weapon_knife_steel_long": 1
+  }
+},
+"angard_merzlyanka_near_tavern": {
+  "name": "Набережная Мерзлянки возле корчмы",
+  "description": "Набережная Мерзлянки возле корчмы"
+},
+"angard_7magisters_square": {
+  "name": "Площадь Семи Магистров",
+  "description": "Площадь Семи Магистровё",
+  "items": {
+  }
+}
+}
