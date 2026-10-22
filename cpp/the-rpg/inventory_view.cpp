@@ -179,7 +179,7 @@ void __fastcall TfrmInventory::OKBtnClick(TObject* /*Sender*/)
     ModalResult = mrOk;
 }
 
-void __fastcall TfrmInventory::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+void __fastcall TfrmInventory::FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift)
 {
     if (Shift == TShiftState{})
     {

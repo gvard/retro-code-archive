@@ -17,8 +17,8 @@ __published:
     TSpeedButton* IncAllBtn;
     TSpeedButton* ExcludeBtn;
     TSpeedButton* ExAllBtn;
-    TLabel *lblWeight;
-    TLabel *lblMaxWeight;
+    TLabel* lblWeight;
+    TLabel* lblMaxWeight;
 
     void __fastcall IncludeBtnClick(TObject* Sender);
     void __fastcall ExcludeBtnClick(TObject* Sender);
