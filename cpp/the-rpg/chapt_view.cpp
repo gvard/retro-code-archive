@@ -20,17 +20,14 @@ TfrmChapt* frmChapt;
 __fastcall TfrmChapt::TfrmChapt(TComponent* Owner)
     : TForm(Owner)
 {
-    save = new TStringList;
-    chapter = new TStringList;
     hasUnsavedChanges = false;
     is_test_mode = false;
 }
 
 __fastcall TfrmChapt::~TfrmChapt()
 {
-    delete save;
-    delete chapter;
 }
+
 void __fastcall TfrmChapt::ExitClick(TObject* /*Sender*/)
 {
     frmChapt->Close();
@@ -41,59 +38,43 @@ void __fastcall TfrmChapt::lbChoicesDblClick(TObject* Sender)
     ConfirmChoiceClick(Sender);
 }
 
-void TfrmChapt::LoadNext(int target_qid)
+void TfrmChapt::LoadNext(const std::string& target_qid)
 {
     if (this->is_test_mode)
     {
+        this->currentQid = target_qid;
+
         Memo1->Lines->Clear();
         lbChoices->Items->Clear();
 
-        if (!((test_qptr < chapter->Count) && (chapter->Strings[test_qptr].Length() > 0)))
+        const auto& test_obj = storage_system::get().get_skill_test_json();
+
+        if (!test_obj.contains(target_qid))
         {
-            test_qptr++;
+            Application->MessageBox(L"Вопрос теста не найден в JSON!", L"Ошибка", MB_ICONERROR | MB_OK);
             return;
         }
 
-        wchar_t ch = chapter->Strings[test_qptr][1];
-        if (ch == L'{')
+        const auto& current_question = test_obj[target_qid];
+
+        if (current_question.contains("text") && current_question["text"].is_array())
         {
-            while ((++test_qptr < chapter->Count) && (chapter->Strings[test_qptr].Length() > 0))
+            for (const auto& paragraph : current_question["text"])
             {
-                if (chapter->Strings[test_qptr][1] == L'}')
-                {
-                    break;
-                }
-                Memo1->Lines->Add(chapter->Strings[test_qptr]);
+                std::string p_utf8 = paragraph.get<std::string>();
+                Memo1->Lines->Add(UTF8String(p_utf8.c_str()));
             }
         }
-        else
-        {
-            Memo1->Lines->Add(chapter->Strings[test_qptr]);
-        }
 
-        aptr = test_qptr + 1;
-        while ((++test_qptr < chapter->Count) && (chapter->Strings[test_qptr].Length() > 0))
+        // Наполняем варианты ответов в lbChoices
+        if (current_question.contains("choices") && current_question["choices"].is_array())
         {
-            String str = chapter->Strings[test_qptr];
-            int istr, idex, imag;
-            swscanf(str.c_str(), L"%d %d %d", &istr, &idex, &imag);
-            str = str.Trim();
-
-            // Выделяем текст ответа, идущий после трех чисел модификаторов
-            wchar_t buf[255];
-            wcscpy(buf, str.c_str());
-            wchar_t* tmp = nullptr;
-            for (size_t i = 0, j = 0; i < wcslen(buf); ++i)
+            for (const auto& choice : current_question["choices"])
             {
-                if ((buf[i] == L' ') && (j < 3))
-                {
-                    tmp = &buf[i + 1];
-                    j++;
-                }
+                std::string choice_text = choice.value("text", "...");
+                lbChoices->Items->Add(UTF8String(choice_text.c_str()));
             }
-            lbChoices->Items->Add(tmp);
         }
-        test_qptr++;
         return;
     }
 
@@ -124,11 +105,11 @@ void TfrmChapt::LoadNext(int target_qid)
         if (type == "fight")
         {
             using namespace std::string_view_literals;
-            auto fight_form = std::make_unique<TfrmFight>(this);
+            auto fight_form = std::make_unique<TfrmFight>(nullptr); // this
 
             // Название битвы
             std::string event_name = current_node.value("name", "Битва");
-            fight_form->battle_caption = UTF8String(const_cast<char*>(event_name.c_str()));
+            fight_form->battle_caption = UTF8String(event_name.c_str());
 
             if (current_node.contains("enemies") && current_node["enemies"].is_array())
             {
@@ -170,10 +151,10 @@ void TfrmChapt::LoadNext(int target_qid)
             }
 
             // Маршруты победы и поражения берутся из объекта "routes"
-            int target_jump = target_qid + 1;
+            std::string target_jump = "";
             if (current_node.contains("routes"))
             {
-                target_jump = current_node["routes"].value("victory", target_qid + 1);
+                target_jump = current_node["routes"].value("victory", "");
             }
 
             this->Hide();
@@ -184,13 +165,14 @@ void TfrmChapt::LoadNext(int target_qid)
             if (battle_result == mrOk)
             {
                 this->LoadNext(target_jump);
+                return;
             }
             else
             {
                 User->hlth = 15;
                 User->stamina = 10;
 
-                int defeat_jump = this->previousTextQid;
+                std::string defeat_jump = this->previousTextQid;
                 if (current_node.contains("routes"))
                 {
                     defeat_jump = current_node["routes"].value("defeat", this->previousTextQid);
@@ -200,6 +182,7 @@ void TfrmChapt::LoadNext(int target_qid)
                 constexpr auto title = L"The RPG"sv;
                 constexpr auto msg = L"Вы потерпели поражение и убежали от врагов."sv;
                 ::MessageBoxW(this->Handle, msg.data(), title.data(), MB_OK | MB_ICONWARNING);
+                return;
             }
             return;
         }
@@ -327,16 +310,31 @@ void __fastcall TfrmChapt::ConfirmChoiceClick(TObject* /*Sender*/)
     // Режим 1: обработка внутри теста создания персонажа
     if (this->is_test_mode)
     {
-        int istr = 0, idex = 0, imag = 0;
+        const auto& test_obj = storage_system::get().get_skill_test_json();
+        std::string jump = "";
 
-        // Читаем модификаторы параметров из оригинальной строки
-        swscanf(chapter->Strings[aptr + selected_index].c_str(), L"%d %d %d", &istr, &idex, &imag);
-        User->strength += istr;
-        User->dex += idex;
-        User->mag += imag;
+        if (test_obj.contains(this->currentQid))
+        {
+            const auto& current_question = test_obj[this->currentQid];
+            if (current_question.contains("choices") && selected_index < current_question["choices"].size())
+            {
+                const auto& choice_obj = current_question["choices"][selected_index];
 
-        // Проверяем: закончился ли файл теста?
-        if (aptr + lbChoices->Items->Count >= chapter->Count)
+                jump = choice_obj.value("target_id", "");
+
+                // Начисляем статы из ability_modifiers
+                if (choice_obj.contains("ability_modifiers") && choice_obj["ability_modifiers"].is_object())
+                {
+                    const auto& mods = choice_obj["ability_modifiers"];
+                    User->strength += mods.value("str", 0);
+                    User->dex += mods.value("dex", 0);
+                    User->mag += mods.value("mag", 0);
+                }
+            }
+        }
+
+        // Проверяем: это был последний вопрос теста?
+        if (jump == "END_TEST" || jump.empty())
         {
             // Тест завершен, фиксируем производные характеристики персонажа
             User->maxWeight = static_cast<int>(std::lround(User->strength * 7.5));
@@ -350,21 +348,20 @@ void __fastcall TfrmChapt::ConfirmChoiceClick(TObject* /*Sender*/)
             this->is_test_mode = false;
             this->initialize_starting_inventory();
             this->Menu = this->MainMenu1;
-
             this->ResetUnsavedChanges();
 
-            // Переходим к Главе 1 сюжета
-            this->LoadNext(1);
+            // Переходим к Главе "1" сюжета
+            this->LoadNext("1");
             return;
         }
 
-        // Если тест не кончился, парсим следующий вопрос
-        this->LoadNext(0);
+        // Если тест не закончился, загружаем следующий ID вопроса
+        this->LoadNext(jump);
         return;
     }
 
     // Режим 2: стандартный игровой процесс
-    int jump = 0;
+    std::string jump = "";
 
     const nlohmann::json& current_node = storage_system::get().get_chapter_json(this->currentQid);
 
@@ -373,7 +370,7 @@ void __fastcall TfrmChapt::ConfirmChoiceClick(TObject* /*Sender*/)
         if (current_node.contains("choices") && current_node["choices"].is_array() && selected_index < current_node["choices"].size())
         {
             auto choice_obj = current_node["choices"][selected_index];
-            jump = choice_obj.value("target_id", 1);
+            jump = choice_obj.value("target_id", "1");
 
             if (choice_obj.contains("effects") && choice_obj["effects"].is_array())
             {
@@ -578,21 +575,11 @@ void __fastcall TfrmChapt::FormKeyDown(TObject* Sender, WORD& Key, TShiftState S
 void TfrmChapt::start_character_test()
 {
     this->is_test_mode = true;
-    this->test_qptr = 0;
     this->hasUnsavedChanges = false;
     this->Menu = nullptr;
+    this->Caption = L"The RPG: skill test";
 
-    GameResourceData res = storage_system::get().load_test_file();
-    if (res.is_loaded)
-    {
-        chapter->Clear();
-        for (const auto& line : res.lines)
-        {
-            chapter->Add(line.c_str());
-        }
-    }
-
-    this->LoadNext(0);
+    this->LoadNext("1");
 }
 
 void TfrmChapt::initialize_starting_inventory()

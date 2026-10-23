@@ -46,13 +46,9 @@ __published:
     void __fastcall lbChoicesDrawItem(TWinControl* Control, int Index, TRect& Rect, TOwnerDrawState State);
 
 private:
-    TStringList* chapter;
-    TStringList* save;
-    int aptr;
-    int currentQid;
-    int previousTextQid = 1;
+    std::string currentQid = "1";
+    std::string previousTextQid = "1";
     bool is_test_mode = false;
-    int test_qptr = 0;
     std::string current_location_key = "";
 
     void initialize_starting_inventory();
@@ -61,7 +57,7 @@ public:
     __fastcall TfrmChapt(TComponent* Owner) override;
     __fastcall ~TfrmChapt();
 
-    void LoadNext(int target_qid);
+    void LoadNext(const std::string& target_qid);
     void start_character_test();
     bool hasUnsavedChanges = false;
     void ResetUnsavedChanges() { hasUnsavedChanges = false; }

@@ -121,7 +121,8 @@ auto TUser::LoadGame(const String& AFileName) -> bool
             stamina = StrToInt(saveList->Strings[9]);
             maxWeight = static_cast<int>(std::lround(strength * 7.5));
 
-            int nextChapter = StrToInt(saveList->Strings[10]);
+            UnicodeString vclNextChapter = saveList->Strings[10];
+            std::string nextChapter = AnsiString(vclNextChapter).c_str();
 
             TStringList* currentTargetList = nullptr;
 
@@ -223,7 +224,7 @@ auto TUser::LoadGame(const String& AFileName) -> bool
     return success;
 }
 
-auto TUser::SaveGame(const String& AFileName, int ACurrentQid) -> bool
+auto TUser::SaveGame(const String& AFileName, const std::string& ACurrentQid) -> bool
 {
     auto* saveList = new TStringList;
     bool success = false;
@@ -240,7 +241,7 @@ auto TUser::SaveGame(const String& AFileName, int ACurrentQid) -> bool
         saveList->Add(IntToStr(hlth));
         saveList->Add(IntToStr(mana));
         saveList->Add(IntToStr(stamina));
-        saveList->Add(IntToStr(ACurrentQid));
+        saveList->Add(String(ACurrentQid.c_str()));
 
         saveList->Add(L"[INVENTORY]");
         for (int i = 0; i < UserItems->Count; ++i)
@@ -276,6 +277,7 @@ __fastcall TfrmMainMenu::TfrmMainMenu(TComponent* Owner)
     storage_system::get().preload_creatures_json();
     storage_system::get().preload_story_json();
     storage_system::get().preload_locations_json();
+    storage_system::get().preload_skill_test_json();
 
     if (!storage_system::get().validate_required_resources())
     {
@@ -288,7 +290,6 @@ __fastcall TfrmMainMenu::TfrmMainMenu(TComponent* Owner)
         return;
     }
 
-    save = new TStringList;
     User = new TUser;
     User->UserItems = new TStringList;
     User->EnvironmentItems = new TStringList;
@@ -305,7 +306,6 @@ __fastcall TfrmMainMenu::~TfrmMainMenu()
         delete User->EnvironmentItems;
     }
 
-    delete save;
     delete User;
 }
 

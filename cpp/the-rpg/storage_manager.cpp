@@ -16,8 +16,7 @@ private:
     nlohmann::json cached_story_json;
     nlohmann::json cached_creatures_json;
     nlohmann::json cached_locations_json;
-
-    std::unordered_map<int, nlohmann::json> indexed_story;
+    nlohmann::json cached_skill_test_json;
 
     // Внутренний хелпер загрузки, инкапсулирующий TStringList
     GameResourceData read_file_internal(const std::filesystem::path& full_path)
@@ -106,41 +105,35 @@ public:
         return cached_creatures_json;
     }
 
-    void preload_story_json() override
+    void storage_service_vcl_impl::preload_story_json() override
     {
-        // Если кэш уже заполнен, ничего не делаем
         if (!cached_story_json.empty())
             return;
 
         std::string raw_json = load_story_json_raw();
         try
         {
-            nlohmann::json root = nlohmann::json::parse(raw_json);
-            if (root.is_array())
+            cached_story_json = nlohmann::json::parse(raw_json);
+
+            if (!cached_story_json.is_object())
             {
-                for (const auto& node : root)
-                {
-                    int id = node.value("id", -1);
-                    if (id != -1)
-                    {
-                        indexed_story[id] = node; // Индексируем по ID главы
-                    }
-                }
+                cached_story_json = nlohmann::json::object();
             }
         }
         catch (...)
         {
-            indexed_story.clear();
+            cached_story_json = nlohmann::json::object();
         }
     }
 
-    const nlohmann::json& get_chapter_json(int id) override
+    const nlohmann::json& storage_service_vcl_impl::get_chapter_json(const std::string& id) override
     {
         static const nlohmann::json empty_node = nlohmann::json::object();
-        auto it = indexed_story.find(id);
-        if (it != indexed_story.end())
+
+        auto it = cached_story_json.find(id);
+        if (it != cached_story_json.end())
         {
-            return it->second; // Мгновенный возврат по индексу O(1)
+            return it.value(); // Мгновенный возврат ноды из словаря за O(1)
         }
         return empty_node;
     }
@@ -158,10 +151,42 @@ public:
                                     std::istreambuf_iterator<char>());
             }
         }
-        return "[]";
+        return "{}";
     }
 
-    const std::vector<weapon_data>& storage_service_vcl_impl::get_weapons() override
+    void preload_skill_test_json() override
+    {
+        // Если кэш уже заполнен, повторно файл не читаем
+        if (!cached_skill_test_json.empty())
+            return;
+
+        std::filesystem::path json_path = data_path / "skill_test.json";
+        if (std::filesystem::exists(json_path))
+        {
+            std::ifstream file(json_path);
+            if (file.is_open())
+            {
+                try {
+                    file >> cached_skill_test_json;
+                } catch (...) {
+                    cached_skill_test_json = nlohmann::json::object();
+                }
+            }
+        }
+
+        if (!cached_skill_test_json.is_object())
+        {
+            cached_skill_test_json = nlohmann::json::object();
+        }
+    }
+
+    const nlohmann::json& get_skill_test_json() override
+    {
+        return cached_skill_test_json;
+    }
+
+    // const std::vector<weapon_data>& storage_service_vcl_impl::get_weapons() override
+    const std::vector<weapon_data>& get_weapons() override
     {
         if (cached_weapons.empty())
         {
@@ -210,12 +235,9 @@ public:
         {
             return false;
         }
-        if (!std::filesystem::exists(data_path / "test.txt"))
-        {
-            return false;
-        }
 
-        if (!std::filesystem::exists(data_path / "story.json") ||
+        if (!std::filesystem::exists(data_path / "skill_test.json") ||
+            !std::filesystem::exists(data_path / "story.json") ||
             !std::filesystem::exists(data_path / "creatures.json") ||
             !std::filesystem::exists(data_path / "locations.json"))
         {
@@ -234,10 +256,6 @@ public:
         return saves_path / save_name;
     }
 
-    GameResourceData load_test_file() override
-    {
-        return read_file_internal(data_path / "test.txt");
-    }
     GameResourceData load_inventory_file() override
     {
         return read_file_internal(data_path / "invent.txt");

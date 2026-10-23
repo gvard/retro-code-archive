@@ -41,12 +41,14 @@ public:
     virtual const nlohmann::json& get_creatures_json() = 0;
 
     virtual void preload_story_json() = 0;
-    virtual const nlohmann::json& get_chapter_json(int id) = 0;
+    virtual const nlohmann::json& get_chapter_json(const std::string& id) = 0;
 
     virtual void preload_locations_json() = 0;
     virtual const nlohmann::json& get_locations_json() = 0;
 
-    virtual GameResourceData load_test_file() = 0;
+    virtual void preload_skill_test_json() = 0;
+    virtual const nlohmann::json& get_skill_test_json() = 0;
+
     virtual GameResourceData load_inventory_file() = 0;
 
     virtual bool save_game_file(const std::string& save_name, const GameResourceData& data) = 0;

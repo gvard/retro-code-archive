@@ -38,7 +38,6 @@ __published:
     void __fastcall LoadClick(TObject* Sender);
 
 private:
-    TStringList* save;
 
 public:
     __fastcall TfrmMainMenu(TComponent* Owner) override;
@@ -51,7 +50,7 @@ public:
     void Clear();
     void Refresh();
     auto LoadGame(const String& AFileName) -> bool;
-    auto SaveGame(const String& AFileName, int ACurrentQid) -> bool;
+    auto SaveGame(const String& AFileName, const std::string& ACurrentQid) -> bool;
 
     auto GetMaxStamina() -> int;
     void RecalculateStamina(int totalWeight);
