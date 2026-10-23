@@ -6,7 +6,7 @@
 #include <filesystem>
 
 #include "chapt_view.h"
-#include "first.h"
+#include "main_menu_view.h"
 #include "about_view.h"
 #include "fight_view.h"
 #include "charstats_view.h"

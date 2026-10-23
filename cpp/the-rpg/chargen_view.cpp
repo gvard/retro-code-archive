@@ -8,7 +8,7 @@
 
 #include "storage_manager.h"
 #include "chargen_view.h"
-#include "first.h"
+#include "main_menu_view.h"
 
 #pragma resource "*.dfm"
 

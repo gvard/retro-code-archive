@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <memory>
 
-#include "first.h"
+#include "main_menu_view.h"
 #include "about_view.h"
 #include "chargen_view.h"
 #include "chapt_view.h"

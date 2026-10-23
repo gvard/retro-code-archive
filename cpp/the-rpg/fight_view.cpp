@@ -7,7 +7,7 @@
 #include <Winapi.Messages.hpp>
 
 #include "fight_view.h"
-#include "first.h"
+#include "main_menu_view.h"
 #include "storage_manager.h"
 
 #pragma resource "*.dfm"

@@ -1,5 +1,5 @@
 #include "about_view.h"
-#include "first.h"
+#include "main_menu_view.h"
 
 #pragma resource "*.dfm"
 

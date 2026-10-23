@@ -216,17 +216,17 @@
             <DependentOn>fight_view.h</DependentOn>
             <BuildOrder>5</BuildOrder>
         </CppCompile>
-        <CppCompile Include="first.cpp">
-            <Form>frmMainMenu</Form>
-            <FormType>dfm</FormType>
-            <DependentOn>first.h</DependentOn>
-            <BuildOrder>6</BuildOrder>
-        </CppCompile>
         <CppCompile Include="inventory_view.cpp">
             <Form>frmInventory</Form>
             <FormType>dfm</FormType>
             <DependentOn>inventory_view.h</DependentOn>
             <BuildOrder>7</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="main_menu_view.cpp">
+            <Form>frmMainMenu</Form>
+            <FormType>dfm</FormType>
+            <DependentOn>main_menu_view.h</DependentOn>
+            <BuildOrder>6</BuildOrder>
         </CppCompile>
         <CppCompile Include="rpg.cpp">
             <BuildOrder>0</BuildOrder>
@@ -238,7 +238,7 @@
         <CppCompile Include="storage_manager.cpp">
             <BuildOrder>9</BuildOrder>
         </CppCompile>
-        <FormResources Include="first.dfm"/>
+        <FormResources Include="main_menu_view.dfm"/>
         <FormResources Include="inventory_view.dfm"/>
         <FormResources Include="about_view.dfm"/>
         <FormResources Include="chapt_view.dfm"/>
@@ -282,7 +282,12 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32c270mt.dll" Class="DependencyModule">
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32c270.dll" Class="DependencyModule">
+                    <Platform Name="Win32">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32270.dll" Class="DependencyModule">
                     <Platform Name="Win32">
                         <Overwrite>true</Overwrite>
                     </Platform>
@@ -298,11 +303,6 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile Condition="'$(UsingDelphiRTL)'=='true'" LocalName="$(BDS)\bin\borlndmm.dll" Class="DependencyModule">
-                    <Platform Name="Win32">
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32270.dll" Class="DependencyModule">
                     <Platform Name="Win32">
                         <Overwrite>true</Overwrite>
                     </Platform>
@@ -346,13 +346,13 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true'" LocalName="$(BDS)\Redist\osx64\libcgcrtl.dylib" Class="DependencyModule">
-                    <Platform Name="OSX64">
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32c270mt.dll" Class="DependencyModule">
+                    <Platform Name="Win32">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32c270.dll" Class="DependencyModule">
-                    <Platform Name="Win32">
+                <DeployFile Condition="'$(DynamicRTL)'=='true'" LocalName="$(BDS)\Redist\osx64\libcgcrtl.dylib" Class="DependencyModule">
+                    <Platform Name="OSX64">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

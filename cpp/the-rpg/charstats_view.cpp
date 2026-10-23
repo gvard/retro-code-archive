@@ -1,4 +1,4 @@
-#include "first.h"
+#include "main_menu_view.h"
 #include "charstats_view.h"
 
 #pragma resource "*.dfm"

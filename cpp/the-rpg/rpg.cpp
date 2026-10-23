@@ -1,10 +1,10 @@
 #include <vcl.h>
 
+USEFORM("main_menu_view.cpp", frmMainMenu)
 USEFORM("chargen_view.cpp", frmCharGen)
 USEFORM("charstats_view.cpp", frmCharStats)
 USEFORM("about_view.cpp", frmAbout)
 USEFORM("inventory_view.cpp", frmInventory)
-USEFORM("first.cpp", frmMainMenu)
 USEFORM("chapt_view.cpp", frmChapt)
 USEFORM("fight_view.cpp", frmFight)
 

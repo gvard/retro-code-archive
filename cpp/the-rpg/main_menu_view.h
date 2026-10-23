@@ -1,5 +1,5 @@
-#ifndef firstH
-#define firstH
+#ifndef main_menu_viewH
+#define main_menu_viewH
 
 #include <System.hpp>
 #include <System.Classes.hpp>
