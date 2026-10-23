@@ -14,7 +14,7 @@
   "name": "На выходе из комнаты, вид на набережную Мерзлянки",
   "description": "На выходе из комнаты, вид на набережную Мерзлянки"
 },
-"angard_merzlyanka_embarkment": {
+"angard_merzlyanka_embankment": {
   "name": "Набережная Мерзлянки",
   "description": "Набережная Мерзлянки после боя",
   "items": {
@@ -27,7 +27,7 @@
 },
 "angard_7magisters_square": {
   "name": "Площадь Семи Магистров",
-  "description": "Площадь Семи Магистровё",
+  "description": "Площадь Семи Магистров",
   "items": {
   }
 }
