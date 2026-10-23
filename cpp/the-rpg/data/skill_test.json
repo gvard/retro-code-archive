@@ -1,0 +1,77 @@
+{
+"1": {
+  "text": ["Любите ли Вы играть в баскетбол?"],
+  "choices": [
+    {
+      "text": "Да, но я чаще попадаю по головам, чем по мячу",
+      "target_id": "2",
+      "ability_modifiers": {"str": 2, "dex": 1, "mag": 0}
+    },
+    {
+      "text": "Это моя любимая игра",
+      "target_id": "2",
+      "ability_modifiers": {"str": 1, "dex": 1, "mag": 1}
+    },
+    {
+      "text": "Нет, если нельзя использовать левитацию",
+      "target_id": "2",
+      "ability_modifiers": {"str": 0, "dex": 1, "mag": 2}
+    },
+    {
+      "text": "Смотря чем...",
+      "target_id": "2",
+      "ability_modifiers": {"str": 2, "dex": 0, "mag": 1}
+    }
+  ]
+},
+"2": {
+  "text": ["Если потух свет, значит..."],
+  "choices": [
+    {
+      "text": "Надо поменять лампочку",
+      "target_id": "3",
+      "ability_modifiers": {"str": 1, "dex": 1, "mag": 0}
+    },
+    {
+      "text": "Мана кончилась",
+      "target_id": "3",
+      "ability_modifiers": {"str": 0, "dex": 0, "mag": 2}
+    },
+    {
+      "text": "Пора разобратся с электриком",
+      "target_id": "3",
+      "ability_modifiers": {"str": 1, "dex": 0, "mag": 1}
+    },
+    {
+      "text": "Наступил конец света",
+      "target_id": "3",
+      "ability_modifiers": {"str": 0, "dex": 1, "mag": 1}
+    }
+  ]
+},
+"3": {
+  "text": ["Вы идёте по улице и, проходя мимо канализационного люка, слышите гоблинский шепот. Что Вы сделаете?"],
+  "choices": [
+    {
+      "text": "Пройду мимо",
+      "target_id": "END_TEST",
+      "ability_modifiers": {"str": 0, "dex": 1, "mag": 1}
+    },
+    {
+      "text": "Залезу внутрь и перебью этих гадов",
+      "target_id": "END_TEST",
+      "ability_modifiers": {"str": 2, "dex": 1, "mag": -1}
+    },
+    {
+      "text": "Отодвину крышку люка, кину внутрь гранату и убегу",
+      "target_id": "END_TEST",
+      "ability_modifiers": {"str": 0, "dex": 2, "mag": 0}
+    },
+    {
+      "text": "Настучу дядьке-милиционеру",
+      "target_id": "END_TEST",
+      "ability_modifiers": {"str": 1, "dex": 0, "mag": 1}
+    }
+  ]
+}
+}
