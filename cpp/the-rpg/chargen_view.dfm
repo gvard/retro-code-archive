@@ -4,7 +4,7 @@ object frmCharGen: TfrmCharGen
   ActiveControl = Edit1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'The RPG - new game'
+  Caption = 'The RPG: New game'
   ClientHeight = 174
   ClientWidth = 316
   Color = clBtnFace

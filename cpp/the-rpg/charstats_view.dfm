@@ -2,7 +2,7 @@ object frmCharStats: TfrmCharStats
   Left = 456
   Top = 313
   BorderStyle = bsDialog
-  Caption = 'The RPG - '#1051#1080#1095#1085#1099#1077' '#1076#1072#1085#1085#1099#1077
+  Caption = 'The RPG: '#1051#1080#1095#1085#1099#1077' '#1076#1072#1085#1085#1099#1077
   ClientHeight = 265
   ClientWidth = 217
   Color = clBtnFace

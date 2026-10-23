@@ -2,7 +2,7 @@ object frmAbout: TfrmAbout
   Left = 489
   Top = 345
   BorderStyle = bsDialog
-  Caption = 'The RPG - About'
+  Caption = 'The RPG: About'
   ClientHeight = 130
   ClientWidth = 351
   Color = clBtnFace

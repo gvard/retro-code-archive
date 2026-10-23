@@ -2,7 +2,7 @@ object frmFight: TfrmFight
   Left = 271
   Top = 150
   BorderIcons = [biSystemMenu, biMinimize]
-  Caption = 'The RPG - fight'
+  Caption = 'The RPG: Fight'
   ClientHeight = 410
   ClientWidth = 406
   Color = clBtnFace
@@ -40,7 +40,6 @@ object frmFight: TfrmFight
     TabOrder = 0
     OnKeyDown = grEnemyKeyDown
     OnSelectCell = grEnemySelectCell
-    ExplicitWidth = 401
     ColWidths = (
       20
       108
@@ -61,7 +60,6 @@ object frmFight: TfrmFight
     TabOrder = 1
     OnKeyDown = grWeaponKeyDown
     OnSelectCell = grWeaponSelectCell
-    ExplicitWidth = 401
     ColWidths = (
       20
       191
@@ -91,7 +89,6 @@ object frmFight: TfrmFight
         Text = #1054#1095#1082#1080' '#1076#1077#1081#1089#1090#1074#1080#1103': '
         Width = 102
       end>
-    ExplicitWidth = 410
   end
   object btnAttack: TButton
     Left = 174
@@ -102,6 +99,5 @@ object frmFight: TfrmFight
     Caption = #1040#1090#1072#1082#1086#1074#1072#1090#1100'!'
     TabOrder = 2
     OnClick = btnAttackClick
-    ExplicitLeft = 176
   end
 end

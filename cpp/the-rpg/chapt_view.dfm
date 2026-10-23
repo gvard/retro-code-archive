@@ -1,7 +1,7 @@
 object frmChapt: TfrmChapt
   Left = 230
   Top = 285
-  Caption = 'The RPG - Chapter'
+  Caption = 'The RPG: Chapter'
   ClientHeight = 330
   ClientWidth = 450
   Color = clBtnFace

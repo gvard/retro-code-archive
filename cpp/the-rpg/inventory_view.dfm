@@ -2,7 +2,7 @@ object frmInventory: TfrmInventory
   Left = 250
   Top = 108
   BorderStyle = bsDialog
-  Caption = 'The RPG - '#1048#1085#1074#1077#1085#1090#1072#1088#1100
+  Caption = 'The RPG: '#1048#1085#1074#1077#1085#1090#1072#1088#1100
   ClientHeight = 314
   ClientWidth = 425
   Color = clBtnFace
