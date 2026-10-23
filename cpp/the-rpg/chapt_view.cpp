@@ -1,4 +1,5 @@
 #include <Winapi.MMSystem.hpp>
+#include <Winapi.ShellAPI.hpp>
 #include "nlohmann/json.hpp"
 #include <string_view>
 #include <memory>
@@ -392,9 +393,22 @@ void __fastcall TfrmChapt::ConfirmChoiceClick(TObject* /*Sender*/)
     this->LoadNext(jump);
 }
 
-void __fastcall TfrmChapt::Help1Click(TObject* /*Sender*/)
+void __fastcall TfrmChapt::menuHelpDocClick(TObject* /*Sender*/)
 {
-    ShowMessage(L"Сами разберетесь!");
+    const std::string HELP_URL = "https://gvard.github.io/retro-code-archive/";
+    HINSTANCE result = ::ShellExecuteA(
+        this->Handle, "open", HELP_URL.c_str(),
+        nullptr, nullptr, SW_SHOWNORMAL
+    );
+
+    if (reinterpret_cast<intptr_t>(result) <= 32)
+    {
+        Application->MessageBox(
+            L"Не удалось запустить браузер для открытия руководства.",
+            L"Ошибка",
+            MB_OK | MB_ICONERROR
+        );
+    }
 }
 
 void __fastcall TfrmChapt::AboutClick(TObject* /*Sender*/)

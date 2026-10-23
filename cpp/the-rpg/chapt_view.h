@@ -14,7 +14,7 @@ __published:
     TMenuItem* Game;
     TMenuItem* Help;
     TMenuItem* Exit;
-    TMenuItem* Help1;
+    TMenuItem* menuHelpDoc;
     TMenuItem* Save;
     TMemo* Memo1;
     TListBox* lbChoices;
@@ -25,10 +25,10 @@ __published:
     TSaveDialog* SaveDialog1;
     TOpenDialog* OpenDialog1;
     TMenuItem* menuInventory;
-	TMenuItem* menuLocation;
+    TMenuItem* menuLocation;
     void __fastcall ExitClick(TObject* Sender);
     void __fastcall ConfirmChoiceClick(TObject* Sender);
-    void __fastcall Help1Click(TObject* Sender);
+    void __fastcall menuHelpDocClick(TObject* Sender);
     void __fastcall AboutClick(TObject* Sender);
     void __fastcall lbChoicesKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
     void __fastcall frmChaptCloseQuery(TObject* Sender, bool& CanClose);
